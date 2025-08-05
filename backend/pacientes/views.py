@@ -86,7 +86,10 @@ def buscar_paciente(request):
             form_error = True
 
     carnet = 1
-    paciente = {"nombre": "Hola", "carnet": carnet}
+    paciente = {
+        "Nombre": "Hola",
+        "Edad": 5,
+    }
 
     return render(
         request,
@@ -100,7 +103,13 @@ def buscar_paciente(request):
             "button_label": "Buscar",
             "carnet": carnet,
             "carnet_proporcionado": carnet_proporcionado,
-            "paciente": paciente,
+            "paciente": tuple(paciente.items()),
+            "tabla": (
+                ("Hola", "Hola"),
+                ("Hola", "Hola"),
+            ),
+            "tabla_titulo": "Hola",
+            "tabla_columnas": ("Hola", "Hola"),
         },
     )
 

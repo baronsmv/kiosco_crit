@@ -169,6 +169,25 @@ button:focus {
     color: #336633;
 }
 
+.dato table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+
+.dato table th,
+.dato table td {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.dato table th {
+    background-color: #f0f0f0;
+    color: #336633;
+    font-weight: 600;
+}
+
 button[style] {
     margin-top: 1.2rem;
     width: 100%;

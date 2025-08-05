@@ -48,12 +48,38 @@
     <div class="modal-content">
         <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal()">×</button>
         <h2 id="modal-title">Datos del Paciente</h2>
-        <div class="dato"><span>Nombre:</span> {{ paciente.nombre }}</div>
-        <div class="dato"><span>Edad:</span> {{ paciente.edad }}</div>
-        <div class="dato"><span>Diagnóstico:</span> {{ paciente.diagnostico }}</div>
-        <div class="dato"><span>Grado Escolar:</span> {{ paciente.grado }}</div>
-        <div class="dato"><span>Fecha de Ingreso:</span> {{ paciente.fecha_ingreso }}</div>
-        <form action="{% url 'enviar_pdf_whatsapp' paciente.carnet %}" method="POST">
+
+        {% for titulo, valor in paciente %}
+        <div class="dato">
+            <span>{{ titulo }}:</span> {{ valor }}
+        </div>
+        {% endfor %}
+
+        {% if tabla %}
+        <div class="dato">
+            <span>{{ tabla_titulo }}</span>
+            <table>
+                <thead>
+                <tr>
+                    {% for columna in tabla_columnas %}
+                    <th>{{ columna }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for fila in tabla %}
+                <tr>
+                    {% for dato in fila %}
+                    <td>{{ dato }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <form action="{% url 'enviar_pdf_whatsapp' carnet %}" method="POST">
             {% csrf_token %}
             <input name="numero" type="hidden" value="573001234567">
             <button class="btn-whatsapp" type="submit">
