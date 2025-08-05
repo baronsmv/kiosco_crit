@@ -1,0 +1,25 @@
+body {
+    font-family: sans-serif;
+    padding: 2rem;
+}
+
+.qr {
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    background-color: #e63946;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.status {
+    margin-top: 1rem;
+    color: green;
+}
+
+.error {
+    color: red;
+}

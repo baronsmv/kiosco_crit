@@ -1,0 +1,7 @@
+django
+djangorestframework
+fastexcel
+polars
+pyyaml
+requests
+weasyprint

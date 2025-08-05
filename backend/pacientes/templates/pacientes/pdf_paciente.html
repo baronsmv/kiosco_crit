@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ficha del Paciente</title>
+    {% load static %}
+    <link href="{% static 'pacientes/css/pdf_paciente.css' %}" rel="stylesheet">
+</head>
+<body>
+<h1>Ficha del Paciente</h1>
+
+<div class="info">
+    <div><span>Nombre:</span> {{ paciente.nombre }}</div>
+    <div><span>Número de Carnet:</span> {{ paciente.carnet }}</div>
+    <div><span>Edad:</span> {{ paciente.edad }}</div>
+    <div><span>Diagnóstico:</span> {{ paciente.diagnostico }}</div>
+    <div><span>Grado Escolar:</span> {{ paciente.grado }}</div>
+    <div><span>Fecha de Ingreso:</span> {{ paciente.fecha_ingreso }}</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    {% load static %}
+    <link href="{% static 'pacientes/css/buscar_paciente.css' %}" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1>{{ header }}</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="carnet">Número de Carnet:</label>
+        <input id="carnet" name="carnet" placeholder="Ej: 12345678" required type="text">
+        <button type="submit">Buscar</button>
+    </form>
+
+    {% if paciente %}
+    <div aria-live="polite" class="datos-paciente">
+        <h2>Datos del Paciente</h2>
+        <div class="dato"><span>Nombre:</span> {{ paciente.nombre }}</div>
+        <div class="dato"><span>Edad:</span> {{ paciente.edad }}</div>
+        <div class="dato"><span>Diagnóstico:</span> {{ paciente.diagnostico }}</div>
+        <div class="dato"><span>Grado Escolar:</span> {{ paciente.grado }}</div>
+        <div class="dato"><span>Fecha de Ingreso:</span> {{ paciente.fecha_ingreso }}</div>
+        <form action="{% url 'enviar_pdf_whatsapp' paciente.carnet %}" method="POST">
+            {% csrf_token %}
+            <input name="numero" type="hidden" value="573001234567"> <!-- número destino -->
+            <button style="background-color: #25D366; color: white;" type="submit">
+                📤 Generar PDF y Enviar por WhatsApp
+            </button>
+        </form>
+    </div>
+    {% elif not paciente and carnet_proporcionado %}
+    <p style="color:red; margin-top: 1rem;">No se encontró ningún paciente con ese carnet.</p>
+    {% endif %}
+</div>
+</body>
+</html>

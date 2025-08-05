@@ -1,0 +1,30 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 2cm;
+    font-size: 14px;
+    color: #333;
+}
+
+h1 {
+    color: #023e8a;
+    text-align: center;
+}
+
+.info {
+    margin-top: 2rem;
+}
+
+.info div {
+    margin-bottom: 1rem;
+}
+
+.info span {
+    font-weight: bold;
+}
+
+footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #777;
+}

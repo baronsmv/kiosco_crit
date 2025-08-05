@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    {% load static %}
+    <link href="{% static 'admin/css/whatsapp_admin.css' %}" rel="stylesheet">
+</head>
+<body>
+<h1>{{ header }}</h1>
+
+<h2>Estado del Cliente WhatsApp</h2>
+<p>
+  Estado: <strong>{{ client_status.status|default:"Desconocido" }}</strong><br>
+  Conectado:
+  <strong style="color: {{ client_status.connected|yesno:'#2a9d8f,#e63946' }}">
+    {{ client_status.connected|yesno:"Sí,No" }}
+  </strong>
+</p>
+
+
+{% if status_message %}
+<div class="status">{{ status_message }}</div>
+{% endif %}
+
+{% if error_qr %}
+<div class="error">{{ error_qr }}</div>
+{% endif %}
+
+{% if qr_data_url %}
+<div class="qr">
+    <h2>Escanea este código QR</h2>
+    <img alt="QR Code" src="{{ qr_data_url }}">
+</div>
+{% else %}
+<p>No hay QR disponible (probablemente el cliente ya está conectado).</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <button class="btn" name="reset" type="submit">🔄 Reiniciar sesión de WhatsApp</button>
+</form>
+</body>
+</html>
