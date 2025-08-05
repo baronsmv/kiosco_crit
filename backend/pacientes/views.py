@@ -1,18 +1,19 @@
 import os
 
 from django.conf import settings
+from django.http import HttpResponse
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from utils.logger import get_logger  # type: ignore
 from weasyprint import HTML
 
-from .models import Paciente, EnvioWhatsApp
+from .models import EnvioWhatsApp, Paciente
 
 logger = get_logger("backend_views")
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 import requests
 
 base_url = settings.WHATSAPP_API_BASE_URL
@@ -23,7 +24,6 @@ def admin_whatsapp(request):
     qr_data_url = None
     error_qr = None
     status_message = ""
-    client_status = {}
 
     if request.method == "POST":
         if "reset" in request.POST:
@@ -67,51 +67,48 @@ def admin_whatsapp(request):
 
 
 def buscar_paciente(request):
-    paciente = None
-    form_error = False
-    carnet_proporcionado = False
-    carnet = ""
+    context = {
+        "title": "Búsqueda por Carnet",
+        "header": "Búsqueda por Carnet",
+        "form_label": "Número de Carnet:",
+        "form_placeholder": "Ej: 123456",
+        "button_label": "Buscar",
+        "form_error": False,
+        "carnet": "",
+        "carnet_proporcionado": False,
+        "paciente": (),
+    }
 
     if request.method == "POST":
         carnet = request.POST.get("carnet", "").strip()
-        carnet_proporcionado = bool(carnet)
+        context["carnet"] = carnet
+        context["carnet_proporcionado"] = bool(carnet)
 
         if carnet:
             try:
-                paciente = Paciente.objects.get(carnet=carnet)
+                paciente_obj = Paciente.objects.get(carnet=carnet)
+                datos = paciente_obj.get_datos_dict()  # Método personalizado
+                context["paciente"] = tuple(datos.items())
             except Paciente.DoesNotExist:
-                form_error = True
-                carnet = ""
+                context["form_error"] = True
+                context["carnet"] = ""
         else:
-            form_error = True
+            context["form_error"] = True
 
-    carnet = 1
-    paciente = {
-        "Nombre": "Hola",
-        "Edad": 5,
-    }
+        # Si es una petición AJAX, devolver solo el fragmento
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            if context["paciente"]:
+                html = render_to_string(
+                    "pacientes/partials/modal_paciente.html", context, request=request
+                )
+            else:
+                html = render_to_string(
+                    "pacientes/partials/mensaje_error.html", context, request=request
+                )
+            return HttpResponse(html)
 
-    return render(
-        request,
-        "pacientes/buscar_paciente.html",
-        {
-            "title": "Búsqueda por Carnet",
-            "header": "Búsqueda por Carnet",
-            "form_label": "Número de Carnet:",
-            "form_placeholder": "Ej: 123456",
-            "form_error": form_error,
-            "button_label": "Buscar",
-            "carnet": carnet,
-            "carnet_proporcionado": carnet_proporcionado,
-            "paciente": tuple(paciente.items()),
-            "tabla": (
-                ("Hola", "Hola"),
-                ("Hola", "Hola"),
-            ),
-            "tabla_titulo": "Hola",
-            "tabla_columnas": ("Hola", "Hola"),
-        },
-    )
+    # Render completo
+    return render(request, "pacientes/buscar_paciente.html", context)
 
 
 @csrf_exempt
