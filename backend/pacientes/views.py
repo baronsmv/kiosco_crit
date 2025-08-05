@@ -68,23 +68,39 @@ def admin_whatsapp(request):
 
 def buscar_paciente(request):
     paciente = None
+    form_error = False
     carnet_proporcionado = False
+    carnet = ""
 
     if request.method == "POST":
-        carnet = request.POST.get("carnet")
-        carnet_proporcionado = True
-        try:
-            paciente = Paciente.objects.get(carnet=carnet)
-        except Paciente.DoesNotExist:
-            paciente = None
+        carnet = request.POST.get("carnet", "").strip()
+        carnet_proporcionado = bool(carnet)
+
+        if carnet:
+            try:
+                paciente = Paciente.objects.get(carnet=carnet)
+            except Paciente.DoesNotExist:
+                form_error = True
+                carnet = ""
+        else:
+            form_error = True
+
+    carnet = 1
+    paciente = {"nombre": "Hola", "carnet": carnet}
 
     return render(
         request,
         "pacientes/buscar_paciente.html",
         {
-            "header": "Consulta de Paciente",
-            "paciente": paciente,
+            "title": "Búsqueda por Carnet",
+            "header": "Búsqueda por Carnet",
+            "form_label": "Número de Carnet:",
+            "form_placeholder": "Ej: 123456",
+            "form_error": form_error,
+            "button_label": "Buscar",
+            "carnet": carnet,
             "carnet_proporcionado": carnet_proporcionado,
+            "paciente": paciente,
         },
     )
 

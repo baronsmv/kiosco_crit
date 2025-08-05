@@ -8,18 +8,46 @@
     <link href="{% static 'pacientes/css/buscar_paciente.css' %}" rel="stylesheet">
 </head>
 <body>
-<div class="container">
-    <h1>{{ header }}</h1>
-    <form method="POST">
+<div aria-labelledby="main-title" class="container" role="main">
+    <h1 id="main-title">{{ header }}</h1>
+    <form aria-describedby="form-error" method="POST" novalidate>
         {% csrf_token %}
-        <label for="carnet">Número de Carnet:</label>
-        <input id="carnet" name="carnet" placeholder="Ej: 12345678" required type="text">
-        <button type="submit">Buscar</button>
+        <div class="form-group">
+            <label for="carnet">{{ form_label }}</label>
+            <div class="input-group {% if form_error %}error{% endif %}">
+                <input
+                        id="carnet"
+                        name="carnet"
+                        placeholder="{{ form_placeholder }}"
+                        required
+                        type="text"
+                        value=""
+                >
+                {% if form_error %}
+                <span aria-hidden="true" class="icon-error" title="Error">
+                  <svg height="20" width="20">
+                    <use href="#icon-error"></use>
+                  </svg>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        <button aria-label="Buscar paciente por carnet" type="submit">{{ button_label }}</button>
     </form>
+</div>
 
-    {% if paciente %}
-    <div aria-live="polite" class="datos-paciente">
-        <h2>Datos del Paciente</h2>
+{% if paciente %}
+<div
+        aria-labelledby="modal-title"
+        aria-modal="true"
+        class="modal visible"
+        id="modal-paciente"
+        role="dialog"
+        tabindex="-1"
+>
+    <div class="modal-content">
+        <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal()">×</button>
+        <h2 id="modal-title">Datos del Paciente</h2>
         <div class="dato"><span>Nombre:</span> {{ paciente.nombre }}</div>
         <div class="dato"><span>Edad:</span> {{ paciente.edad }}</div>
         <div class="dato"><span>Diagnóstico:</span> {{ paciente.diagnostico }}</div>
@@ -27,15 +55,29 @@
         <div class="dato"><span>Fecha de Ingreso:</span> {{ paciente.fecha_ingreso }}</div>
         <form action="{% url 'enviar_pdf_whatsapp' paciente.carnet %}" method="POST">
             {% csrf_token %}
-            <input name="numero" type="hidden" value="573001234567"> <!-- número destino -->
-            <button style="background-color: #25D366; color: white;" type="submit">
+            <input name="numero" type="hidden" value="573001234567">
+            <button class="btn-whatsapp" type="submit">
                 📤 Generar PDF y Enviar por WhatsApp
             </button>
         </form>
     </div>
-    {% elif not paciente and carnet_proporcionado %}
-    <p style="color:red; margin-top: 1rem;">No se encontró ningún paciente con ese carnet.</p>
-    {% endif %}
 </div>
+{% elif not paciente and carnet_proporcionado %}
+<p aria-live="assertive" class="error-message" role="alert" style="margin-top: 1rem;">
+    ❌ No se encontró ningún paciente con ese carnet.
+</p>
+{% endif %}
+
+<!-- Ícono de error SVG -->
+<svg style="display:none;">
+    <symbol fill="none" id="icon-error" stroke="#e63946" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" x2="12" y1="8" y2="12"/>
+        <line x1="12" x2="12" y1="16" y2="16"/>
+    </symbol>
+</svg>
+
+<script defer src="{% static 'pacientes/js/buscar_paciente.js' %}"></script>
 </body>
 </html>
