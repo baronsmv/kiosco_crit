@@ -12,6 +12,16 @@ class Paciente(models.Model):
     def __str__(self):
         return self.nombre
 
+    def get_datos_dict(self):
+        return {
+            "Carnet": self.carnet,
+            "Nombre": self.nombre,
+            "Edad": self.edad,
+            "Diagnóstico": self.diagnostico,
+            "Grado": self.grado,
+            "Fecha de ingreso": self.fecha_ingreso.strftime("%d/%m/%Y"),
+        }
+
 
 class EnvioWhatsApp(models.Model):
     paciente = models.ForeignKey("Paciente", on_delete=models.CASCADE)
