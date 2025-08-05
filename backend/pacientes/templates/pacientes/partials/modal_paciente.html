@@ -10,7 +10,7 @@
         <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal()">×</button>
         <h2 id="modal-title">Datos del Paciente</h2>
 
-        {% for titulo, valor in paciente %}
+        {% for titulo, valor in paciente.get_datos_dict.items %}
         <div class="dato">
             <span>{{ titulo }}:</span> {{ valor }}
         </div>
@@ -40,12 +40,13 @@
         </div>
         {% endif %}
 
-        <form action="{% url 'enviar_pdf_whatsapp' carnet %}" method="POST">
+        {% if paciente.carnet %}
+        <form action="{% url 'enviar_pdf_whatsapp' paciente.carnet %}" id="form-enviar-pdf" method="POST">
             {% csrf_token %}
-            <input name="numero" type="hidden" value="573001234567">
-            <button class="btn-whatsapp" type="submit">
-                📤 Generar PDF y Enviar por WhatsApp
-            </button>
+            <input name="numero" type="hidden" value="5215535438788">
+            <button class="btn-whatsapp" type="submit">{{ send_button_label }}</button>
         </form>
+        <div class="mensaje-transitorio" id="mensaje-envio" style="display: none;"></div>
+        {% endif %}
     </div>
 </div>

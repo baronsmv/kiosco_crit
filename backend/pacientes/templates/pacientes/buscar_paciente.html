@@ -11,12 +11,13 @@
 <div aria-labelledby="main-title" class="container" role="main">
     <h1 id="main-title">{{ header }}</h1>
 
-    <form aria-describedby="form-error" id="buscar-form" method="POST" novalidate>
+    <form id="buscar-form" method="POST" novalidate>
         {% csrf_token %}
         <div class="form-group">
             <label for="carnet">{{ form_label }}</label>
             <div class="input-group {% if form_error %}error{% endif %}">
                 <input
+                        aria-describedby="form-error"
                         id="carnet"
                         name="carnet"
                         placeholder="{{ form_placeholder }}"
@@ -36,7 +37,7 @@
         <button aria-label="Buscar paciente por carnet" type="submit">{{ button_label }}</button>
     </form>
 
-    <!-- Contenedor para mensajes de error inyectados vía JS -->
+    <!-- Contenedor para inyectar errores por JS -->
     <div id="respuesta-ajax">
         {% if not paciente and carnet_proporcionado %}
         {% include 'pacientes/partials/mensaje_error.html' %}
@@ -44,13 +45,13 @@
     </div>
 </div>
 
-<!-- Modal del paciente, si ya existe en la carga inicial -->
-{% if paciente %}
+<!-- Modal si hay paciente en primera carga -->
+{% if paciente and carnet %}
 {% include 'pacientes/partials/modal_paciente.html' %}
 {% endif %}
 
-<!-- Ícono SVG de error oculto, para uso con <use> -->
-<svg style="display:none;">
+<!-- SVG reutilizable (icon-error) -->
+<svg style="display: none;">
     <symbol
             fill="none"
             id="icon-error"
@@ -66,9 +67,9 @@
     </symbol>
 </svg>
 
-<!-- Scripts JS externos -->
 <script defer src="{% static 'pacientes/js/error_form_handler.js' %}"></script>
 <script defer src="{% static 'pacientes/js/buscar_paciente.js' %}"></script>
+<script defer src="{% static 'pacientes/js/enviar_pdf_whatsapp.js' %}"></script>
 
 </body>
 </html>

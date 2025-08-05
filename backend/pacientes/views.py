@@ -73,6 +73,7 @@ def buscar_paciente(request):
         "form_label": "Número de Carnet:",
         "form_placeholder": "Ej: 123456",
         "button_label": "Buscar",
+        "send_button_label": "📤 Enviar por WhatsApp",
         "form_error": False,
         "carnet": "",
         "carnet_proporcionado": False,
@@ -87,11 +88,10 @@ def buscar_paciente(request):
         if carnet:
             try:
                 paciente_obj = Paciente.objects.get(carnet=carnet)
-                datos = paciente_obj.get_datos_dict()  # Método personalizado
-                context["paciente"] = tuple(datos.items())
+                context["paciente"] = paciente_obj
             except Paciente.DoesNotExist:
                 context["form_error"] = True
-                context["carnet"] = ""
+                context["paciente"] = None
         else:
             context["form_error"] = True
 

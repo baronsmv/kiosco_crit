@@ -62,7 +62,7 @@ function activarListenersModal(modal) {
 }
 
 function limpiarErrores() {
-    // Quita clases y íconos de error
+    // Quita clases e íconos de error
     document.querySelectorAll(".input-group").forEach(group => {
         group.classList.remove("error");
         const existingIcon = group.querySelector(".icon-error");
@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const carnet = carnetInput.value.trim();
         if (!carnet) {
             carnetInput.focus();
+            carnetInput.select();
             return;
         }
 
@@ -128,6 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }, 20);
 
                 activarListenersModal(nuevoModal);
+                activarEnvioWhatsApp(nuevoModal);
             } else {
                 // Si no hay paciente, muestra el mensaje de error
                 const container = document.querySelector(".container");
@@ -138,10 +140,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     mostrarErrorCampo("carnet");
                 }
                 carnetInput.focus();
+                carnetInput.select();
             }
         } catch (error) {
             console.error("Error al buscar paciente:", error);
             carnetInput.focus();
+            carnetInput.select();
         }
     });
 
