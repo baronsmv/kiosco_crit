@@ -14,19 +14,86 @@ function cerrarModal() {
     }, 300);
 }
 
+function activarListenersModal(modal) {
+    if (!modal) return;
+
+    // Tecla Escape
+    document.addEventListener("keydown", function onKeyDown(e) {
+        if (!document.getElementById("modal-paciente")) {
+            // Si modal ya no está en DOM, quita listener para evitar fugas
+            document.removeEventListener("keydown", onKeyDown);
+            return;
+        }
+
+        if (e.key === "Escape") {
+            cerrarModal();
+        }
+
+        // Loop de Tab
+        if (e.key === "Tab") {
+            const focusables = modal.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusables.length === 0) return;
+
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                }
+            } else {
+                if (document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        }
+    });
+
+    // Cerrar al hacer clic fuera del contenido
+    modal.addEventListener("click", function (event) {
+        if (event.target === modal) {
+            cerrarModal();
+        }
+    });
+}
+
+function limpiarErrores() {
+    // Quita clases y íconos de error
+    document.querySelectorAll(".input-group").forEach(group => {
+        group.classList.remove("error");
+        const existingIcon = group.querySelector(".icon-error");
+        if (existingIcon) existingIcon.remove();
+    });
+
+    // Quita mensajes de error visibles en el DOM
+    const container = document.querySelector(".container");
+    const error = container.querySelector(".error-message");
+    if (error) {
+        error.remove();
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const anterior = document.getElementById("modal-paciente");
     if (anterior) anterior.remove();
 
     const form = document.getElementById("buscar-form");
-    const modal = document.getElementById("modal-paciente");
 
     form.addEventListener("submit", async function (e) {
         e.preventDefault();
 
+        limpiarErrores();
+
         const carnetInput = document.getElementById("carnet");
         const carnet = carnetInput.value.trim();
-        if (!carnet) return;
+        if (!carnet) {
+            carnetInput.focus();
+            return;
+        }
 
         const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
@@ -46,14 +113,21 @@ document.addEventListener("DOMContentLoaded", function () {
             // Extrae el modal desde la respuesta y lo inserta
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            const modal = doc.getElementById("modal-paciente");
+            const nuevoModal = doc.getElementById("modal-paciente");
 
-            if (modal) {
-                document.body.appendChild(modal);
+            // Elimina modal viejo
+            const modalViejo = document.getElementById("modal-paciente");
+            if (modalViejo) modalViejo.remove();
+
+            if (nuevoModal) {
+                document.body.appendChild(nuevoModal);
                 setTimeout(() => {
-                    modal.classList.add("show");
-                    modal.focus();
+                    nuevoModal.classList.add("show");
+                    nuevoModal.focus();
+                    carnetInput.value = "";
                 }, 20);
+
+                activarListenersModal(nuevoModal);
             } else {
                 // Si no hay paciente, muestra el mensaje de error
                 const container = document.querySelector(".container");
@@ -63,57 +137,22 @@ document.addEventListener("DOMContentLoaded", function () {
                     container.insertAdjacentElement("beforeend", error);
                     mostrarErrorCampo("carnet");
                 }
+                carnetInput.focus();
             }
         } catch (error) {
             console.error("Error al buscar paciente:", error);
+            carnetInput.focus();
         }
     });
 
-    if (modal && modal.classList.contains("visible")) {
-        // Fuerza el reflow y luego aplica 'show' para activar transición
+    // Si en la carga inicial ya hay modal, activa listeners ahí
+    const modalInicial = document.getElementById("modal-paciente");
+    if (modalInicial) {
+        activarListenersModal(modalInicial);
+
         setTimeout(() => {
-            modal.classList.add("show");
-            modal.focus();
-        }, 20); // Delay pequeño para permitir pintar el estado inicial
-    }
-
-    if (modal && modal.classList.contains("show")) {
-        // Dale foco al modal
-        modal.focus();
-
-        // Tecla Escape
-        document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape") {
-                cerrarModal();
-            }
-
-            // Loop de Tab
-            if (e.key === "Tab") {
-                const focusables = modal.querySelectorAll(
-                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-                );
-                const first = focusables[0];
-                const last = focusables[focusables.length - 1];
-
-                if (e.shiftKey) {
-                    if (document.activeElement === first) {
-                        e.preventDefault();
-                        last.focus();
-                    }
-                } else {
-                    if (document.activeElement === last) {
-                        e.preventDefault();
-                        first.focus();
-                    }
-                }
-            }
-        });
-
-        // Cerrar al hacer clic fuera del contenido
-        window.addEventListener("click", function (event) {
-            if (event.target === modal) {
-                cerrarModal();
-            }
-        });
+            modalInicial.classList.add("show");
+            modalInicial.focus();
+        }, 20);
     }
 });
