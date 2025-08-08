@@ -11,34 +11,42 @@
 
 <h2>Estado del Cliente WhatsApp</h2>
 <p>
-  Estado: <strong>{{ client_status.status|default:"Desconocido" }}</strong><br>
-  Conectado:
-  <strong style="color: {{ client_status.connected|yesno:'#2a9d8f,#e63946' }}">
-    {{ client_status.connected|yesno:"Sí,No" }}
-  </strong>
+    Estado: <strong id="status-text">{{ client_status.status|default:"Desconocido" }}</strong><br>
+    Conectado:
+    <strong id="connected-text" style="color: {{ client_status.connected|yesno:'#2a9d8f,#e63946' }}">
+        {{ client_status.connected|yesno:"Sí,No" }}
+    </strong>
 </p>
 
+<div id="dynamic-alerts">
+    {% if status_message %}
+    <div class="status">{{ status_message }}</div>
+    {% endif %}
 
-{% if status_message %}
-<div class="status">{{ status_message }}</div>
-{% endif %}
-
-{% if error_qr %}
-<div class="error">{{ error_qr }}</div>
-{% endif %}
-
-{% if qr_data_url %}
-<div class="qr">
-    <h2>Escanea este código QR</h2>
-    <img alt="QR Code" src="{{ qr_data_url }}">
+    {% if error_qr %}
+    <div class="error">{{ error_qr }}</div>
+    {% endif %}
 </div>
-{% else %}
-<p>No hay QR disponible (probablemente el cliente ya está conectado).</p>
-{% endif %}
+
+<div class="qr" id="qr-container">
+    {% if qr_data_url %}
+    <h2>Escanea este código QR</h2>
+    <img id="qr-image" alt="QR Code" src="{{ qr_data_url }}">
+    {% else %}
+    <p id="no-qr">No hay QR disponible (probablemente el cliente ya está conectado).</p>
+    {% endif %}
+</div>
 
 <form method="post">
     {% csrf_token %}
     <button class="btn" name="reset" type="submit">🔄 Reiniciar sesión de WhatsApp</button>
 </form>
+
+<script>
+    const NODE_BASE_URL = "http://localhost:3000";
+</script>
+<script src="{% static 'admin/js/whatsapp_status.js' %}" defer></script>
+
+
 </body>
 </html>

@@ -62,6 +62,7 @@ def admin_whatsapp(request):
             "error_qr": error_qr,
             "status_message": status_message,
             "client_status": client_status,
+            "node_base_url": settings.WHATSAPP_API_BASE_URL,
         },
     )
 

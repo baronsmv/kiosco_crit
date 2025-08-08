@@ -17,6 +17,8 @@ services:
     environment:
       - PYTHONDONTWRITEBYTECODE=1
       - PYTHONUNBUFFERED=1
+    networks:
+      - whatsapp_net
 
   node:
     build:
@@ -29,3 +31,12 @@ services:
       - /app/node_modules
       - ./backend/media:/app/media
     restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - whatsapp_net
+    shm_size: '1gb'
+
+networks:
+  whatsapp_net:
