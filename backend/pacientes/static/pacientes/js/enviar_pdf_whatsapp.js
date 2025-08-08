@@ -5,7 +5,12 @@ function activarEnvioWhatsApp(modal) {
 
     formEnviarPDF.addEventListener("submit", async function (e) {
         e.preventDefault();
-        console.log("Submit interceptado");
+        const boton = formEnviarPDF.querySelector("button[type=submit]");
+        if (!boton) return;
+
+        const textoOriginal = boton.textContent;
+        boton.textContent = "Enviando...";
+        boton.disabled = true;
 
         const numero = formEnviarPDF.querySelector("input[name=numero]").value;
         const csrfToken = formEnviarPDF.querySelector("[name=csrfmiddlewaretoken]").value;
@@ -22,19 +27,32 @@ function activarEnvioWhatsApp(modal) {
                 body: new URLSearchParams({numero}),
             });
 
-            // Intenta parsear JSON, si falla muestra error
             let data;
             try {
                 data = await response.json();
             } catch {
                 mostrarMensajeEnvio(modal, "❌ Respuesta no válida del servidor.");
+                boton.textContent = textoOriginal;
+                boton.disabled = false;
                 return;
             }
 
-            mostrarMensajeEnvio(modal, data.status === "enviado" ? "✅ PDF enviado correctamente." : "❌ Falló el envío.");
+            if (data.status === "enviado") {
+                mostrarMensajeEnvio(modal, "✅ PDF enviado correctamente.");
+                boton.textContent = "Enviado";
+            } else {
+                mostrarMensajeEnvio(modal, "❌ Falló el envío.");
+                boton.textContent = textoOriginal;
+            }
         } catch (err) {
             console.error(err);
             mostrarMensajeEnvio(modal, "❌ Error al conectar con el servidor.");
+            boton.textContent = textoOriginal;
+        } finally {
+            setTimeout(() => {
+                boton.textContent = textoOriginal;
+                boton.disabled = false;
+            }, 4000);
         }
     });
 }

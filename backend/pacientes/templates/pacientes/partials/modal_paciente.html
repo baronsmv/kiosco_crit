@@ -43,7 +43,7 @@
         {% if paciente.carnet %}
         <form action="{% url 'enviar_pdf_whatsapp' paciente.carnet %}" id="form-enviar-pdf" method="POST">
             {% csrf_token %}
-            <input name="numero" type="hidden" value="5219991234567">
+            <input name="numero" type="hidden" value="5215535438788">
             <button class="btn-whatsapp" type="submit">{{ send_button_label }}</button>
         </form>
         <div class="mensaje-transitorio" id="mensaje-envio" style="display: none;"></div>
