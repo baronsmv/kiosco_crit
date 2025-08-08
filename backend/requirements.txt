@@ -1,7 +1,9 @@
 django
 djangorestframework
 fastexcel
+mssql-django
 polars
+pyodbc
 pyyaml
 requests
 weasyprint
