@@ -1,21 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <title>Ficha del Paciente</title>
     {% load static %}
-    <link href="{% static 'pacientes/css/pdf_paciente.css' %}" rel="stylesheet">
+    <link href="{% static 'pacientes/css/pdf_paciente.css' %}" rel="stylesheet"/>
 </head>
 <body>
-<h1>Ficha del Paciente</h1>
+<header>
+    <h1 id="titulo-principal">Ficha del Paciente</h1>
+</header>
 
-<div class="info">
-    <div><span>Nombre:</span> {{ paciente.nombre }}</div>
-    <div><span>Número de Carnet:</span> {{ paciente.carnet }}</div>
-    <div><span>Edad:</span> {{ paciente.edad }}</div>
-    <div><span>Diagnóstico:</span> {{ paciente.diagnostico }}</div>
-    <div><span>Grado Escolar:</span> {{ paciente.grado }}</div>
-    <div><span>Fecha de Ingreso:</span> {{ paciente.fecha_ingreso }}</div>
-</div>
+<main>
+    <section aria-labelledby="datos-paciente-title" class="info">
+        <h2 class="section-title" id="datos-paciente-title">Datos Personales</h2>
+        <dl>
+            {% for titulo, valor in paciente.items %}
+            <div class="dato">
+                <dt>{{ titulo }}</dt>
+                <dd>{{ valor }}</dd>
+            </div>
+            {% endfor %}
+        </dl>
+    </section>
+
+    {% if tabla %}
+    <section aria-labelledby="tabla-titulo" class="tabla-seccion">
+        <h2 class="section-title" id="tabla-titulo">{{ tabla_titulo }}</h2>
+        <div aria-label="{{ tabla_titulo }}" class="tabla-scrollable" role="region">
+            <table summary="Tabla de {{ tabla_titulo }}">
+                <thead>
+                <tr>
+                    {% for columna in tabla_columnas %}
+                    <th scope="col">{{ columna }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for fila in tabla %}
+                <tr>
+                    {% for dato in fila %}
+                    <td>{{ dato }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+</main>
+
+<footer>
+    <p class="footer-text">Generado por Sistema Clínico &copy; {{ now|date:"Y" }}</p>
+</footer>
 </body>
 </html>

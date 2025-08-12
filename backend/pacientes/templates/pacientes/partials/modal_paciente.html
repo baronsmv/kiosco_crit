@@ -10,7 +10,7 @@
         <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal()">×</button>
         <h2 id="modal-title">Datos del Paciente</h2>
 
-        {% for titulo, valor in paciente.get_datos_dict.items %}
+        {% for titulo, valor in paciente.items %}
         <div class="dato">
             <span>{{ titulo }}:</span> {{ valor }}
         </div>
@@ -19,29 +19,31 @@
         {% if tabla %}
         <div class="dato">
             <span>{{ tabla_titulo }}</span>
-            <table>
-                <thead>
-                <tr>
-                    {% for columna in tabla_columnas %}
-                    <th>{{ columna }}</th>
+            <div class="tabla-scrollable">
+                <table>
+                    <thead>
+                    <tr>
+                        {% for columna in tabla_columnas %}
+                        <th>{{ columna }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for fila in tabla %}
+                    <tr>
+                        {% for dato in fila %}
+                        <td>{{ dato }}</td>
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </tr>
-                </thead>
-                <tbody>
-                {% for fila in tabla %}
-                <tr>
-                    {% for dato in fila %}
-                    <td>{{ dato }}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
         {% endif %}
 
-        {% if paciente.carnet %}
-        <form action="{% url 'enviar_pdf_whatsapp' paciente.carnet %}" id="form-enviar-pdf" method="POST">
+        {% if paciente.Carnet %}
+        <form action="{% url 'enviar_pdf_whatsapp' paciente.Carnet %}" id="form-enviar-pdf" method="POST">
             {% csrf_token %}
             <input name="numero" type="hidden" value="5215535438788">
             <button class="btn-whatsapp" type="submit">{{ send_button_label }}</button>

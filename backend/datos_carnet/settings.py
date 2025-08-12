@@ -80,6 +80,10 @@ WSGI_APPLICATION = "datos_carnet.wsgi.application"
 
 DATABASES = {
     "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    },
+    "crit": {
         "ENGINE": "mssql",
         "NAME": os.getenv("DB_NAME"),
         "USER": os.getenv("DB_USER"),
@@ -90,7 +94,7 @@ DATABASES = {
             "driver": "ODBC Driver 17 for SQL Server",
             "extra_params": "TrustServerCertificate=yes;",
         },
-    }
+    },
 }
 
 # Password validation

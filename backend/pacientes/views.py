@@ -1,15 +1,17 @@
 import os
 
 from django.conf import settings
+from django.contrib.staticfiles import finders
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
+from utils.get_data import formatear_citas, obtener_citas  # type: ignore
 from utils.logger import get_logger  # type: ignore
 from weasyprint import HTML
 
-from .models import EnvioWhatsApp, Paciente
+from .models import EnvioWhatsApp
 
 logger = get_logger("backend_views")
 
@@ -68,6 +70,7 @@ def admin_whatsapp(request):
 
 
 def buscar_paciente(request):
+    logger.debug(f"Request method: {request.method}")
     context = {
         "title": "Búsqueda por Carnet",
         "header": "Búsqueda por Carnet",
@@ -78,25 +81,38 @@ def buscar_paciente(request):
         "form_error": False,
         "carnet": "",
         "carnet_proporcionado": False,
-        "paciente": (),
+        "paciente": None,
+        "citas": [],
     }
 
     if request.method == "POST":
         carnet = request.POST.get("carnet", "").strip()
+        logger.debug(f"Carnet recibido: '{carnet}'")
         context["carnet"] = carnet
         context["carnet_proporcionado"] = bool(carnet)
 
         if carnet:
-            try:
-                paciente_obj = Paciente.objects.get(carnet=carnet)
-                context["paciente"] = paciente_obj
-            except Paciente.DoesNotExist:
+            resultado = obtener_citas(carnet)
+
+            if resultado:
+                paciente, citas = formatear_citas(*resultado)
+
+                logger.debug(f"Paciente obtenido: {paciente}")
+                logger.debug(f"Citas obtenidas: {citas}")
+
+                context["paciente"] = paciente
+                context["tabla"] = citas
+                context["tabla_titulo"] = "Citas"
+                context["tabla_columnas"] = ("Servicio", "Fecha", "Colaborador")
+
+            else:
+                logger.warning(f"No se encontró paciente con carnet {carnet}")
                 context["form_error"] = True
-                context["paciente"] = None
+
         else:
+            logger.warning("No se proporcionó carnet en la solicitud POST")
             context["form_error"] = True
 
-        # Si es una petición AJAX, devolver solo el fragmento
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             if context["paciente"]:
                 html = render_to_string(
@@ -108,22 +124,34 @@ def buscar_paciente(request):
                 )
             return HttpResponse(html)
 
-    # Render completo
     return render(request, "pacientes/buscar_paciente.html", context)
 
 
 @csrf_exempt
 def enviar_pdf_whatsapp(request, carnet):
+    logger.debug(
+        f"enviar_pdf_whatsapp called with method {request.method} and carnet {carnet}"
+    )
     if request.method != "POST":
+        logger.warning(f"Método no permitido: {request.method}")
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
     numero = request.POST.get("numero")
+    logger.debug(f"Numero recibido: {numero}")
     if not numero:
+        logger.error("Número de WhatsApp requerido no proporcionado")
         return JsonResponse({"error": "Número de WhatsApp requerido"}, status=400)
 
-    try:
-        paciente = Paciente.objects.get(carnet=carnet)
-    except Paciente.DoesNotExist:
+    resultado = obtener_citas(carnet)
+
+    if resultado:
+        paciente, citas = formatear_citas(*resultado)
+
+        logger.debug(f"Paciente obtenido: {paciente}")
+        logger.debug(f"Citas obtenidas: {citas}")
+
+    else:
+        logger.error(f"Paciente no encontrado con carnet {carnet}")
         return JsonResponse({"error": "Paciente no encontrado"}, status=404)
 
     # 1. Generar el PDF
@@ -131,16 +159,30 @@ def enviar_pdf_whatsapp(request, carnet):
     output_dir = os.path.join(settings.MEDIA_ROOT, "pdfs")
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, filename)
+    logger.debug(f"Generando PDF en: {output_path}")
 
-    html = render_to_string("pacientes/pdf_paciente.html", {"paciente": paciente})
-    HTML(string=html).write_pdf(output_path)
+    css_path = finders.find("pacientes/css/pdf_paciente.css")
+    css_files = [css_path] if css_path else []
+
+    # Renderizar el PDF con citas
+    html = render_to_string(
+        "pacientes/pdf_paciente.html",
+        {
+            "paciente": paciente,
+            "tabla": citas,
+            "tabla_titulo": "Citas",
+            "tabla_columnas": ("Servicio", "Fecha", "Colaborador"),
+        },
+    )
+    HTML(string=html).write_pdf(output_path, stylesheets=css_files)
+    logger.debug("PDF generado correctamente")
 
     # 2. Preparar mensaje
     mensaje = f"""Datos del paciente:
-Nombre: {paciente.nombre}
-Carnet: {paciente.carnet}
-Diagnóstico: {paciente.diagnostico}
-Fecha de ingreso: {paciente.fecha_ingreso}"""
+Nombre: {paciente['Nombre']}
+Carnet: {paciente['Carnet']}
+Cantidad de citas: {len(citas)}"""
+    logger.debug(f"Mensaje a enviar: {mensaje}")
 
     payload = {
         "number": numero + "@c.us",
@@ -152,6 +194,7 @@ Fecha de ingreso: {paciente.fecha_ingreso}"""
     try:
         response = requests.post(f"{base_url}/send-media", json=payload)
         data = response.json()
+        logger.debug(f"Respuesta del microservicio: {data}")
 
         estado = "enviado" if response.status_code == 200 else "fallido"
         detalle_error = (
@@ -160,24 +203,27 @@ Fecha de ingreso: {paciente.fecha_ingreso}"""
 
         # Guardar en DB
         EnvioWhatsApp.objects.create(
-            paciente=paciente,
+            carnet=carnet,
             numero_destino=numero,
             mensaje=mensaje,
             archivo_pdf=payload["image_path"],
             estado=estado,
             detalle_error=detalle_error,
         )
+        logger.info(f"EnvioWhatsApp creado con estado {estado}")
 
         if estado == "enviado":
             return JsonResponse({"status": "enviado", "detalles": data})
         else:
+            logger.error(f"Error enviando mensaje: {detalle_error}")
             return JsonResponse(
                 {"status": "fallido", "error": detalle_error}, status=500
             )
 
     except requests.exceptions.RequestException as e:
+        logger.error(f"Error de conexión con microservicio: {str(e)}", exc_info=True)
         EnvioWhatsApp.objects.create(
-            paciente=paciente,
+            carnet=carnet,
             numero_destino=numero,
             mensaje=mensaje,
             archivo_pdf=payload["image_path"],

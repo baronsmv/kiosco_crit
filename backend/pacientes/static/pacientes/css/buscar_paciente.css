@@ -188,6 +188,40 @@ button:focus {
     font-weight: 600;
 }
 
+.tabla-scrollable {
+    max-height: 300px; /* Ajusta según necesidad */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    margin-top: 0.5rem;
+}
+
+/* Opcional: mejora visual en scroll y tabla */
+.tabla-scrollable table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-scrollable th,
+.tabla-scrollable td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.tabla-scrollable thead th {
+    position: sticky;
+    top: 0;
+    background: #f5f5f5;
+    z-index: 1;
+}
+
+.tabla-scrollable table,
+.tabla-scrollable thead,
+.tabla-scrollable tbody,
+.tabla-scrollable tr:first-child {
+    margin-top: 0;
+}
+
 button[style] {
     margin-top: 1rem;
     width: 100%;

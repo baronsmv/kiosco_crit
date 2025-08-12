@@ -1,30 +1,118 @@
+/* Reset básico */
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
-    margin: 2cm;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #222;
+    background-color: #fff;
+    margin: 20px;
     font-size: 14px;
+    line-height: 1.5;
+}
+
+header, footer {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+h1#titulo-principal {
+    font-size: 2.4em;
+    color: #004080;
+    margin-bottom: 0.3em;
+    border-bottom: 2px solid #004080;
+    padding-bottom: 0.2em;
+}
+
+.section-title {
+    font-size: 1.6em;
+    color: #003366;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.1em;
+}
+
+.info dl {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px 20px;
+    background: #f9faff;
+}
+
+.info .dato {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.info dt {
+    flex: 0 0 160px;
+    font-weight: 700;
+    color: #00509e;
+}
+
+.info dd {
+    flex: 1;
+    margin: 0;
+    padding-left: 10px;
+}
+
+.tabla-seccion {
+    margin-top: 30px;
+}
+
+.tabla-scrollable {
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    background: #004080;
+    color: white;
+    padding: 8px 12px;
+    border-bottom: 2px solid #003366;
+    text-align: left;
+}
+
+tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
     color: #333;
 }
 
-h1 {
-    color: #023e8a;
-    text-align: center;
+tbody tr:nth-child(even) {
+    background: #f6faff;
 }
 
-.info {
-    margin-top: 2rem;
+tbody tr:hover {
+    background: #d9eaff;
 }
 
-.info div {
-    margin-bottom: 1rem;
-}
-
-.info span {
-    font-weight: bold;
-}
-
-footer {
-    margin-top: 3rem;
-    text-align: center;
-    font-size: 0.9rem;
+.footer-text {
+    font-size: 0.85em;
     color: #777;
+}
+
+@media print {
+    body {
+        margin: 10mm;
+        font-size: 12pt;
+    }
+
+    .tabla-scrollable {
+        max-height: none;
+        overflow: visible;
+    }
 }
