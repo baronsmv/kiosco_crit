@@ -116,3 +116,9 @@ tbody tr:hover {
         overflow: visible;
     }
 }
+
+/* Evita que un bloque se divida entre páginas */
+.tabla-scrollable table tr, /* cada fila de tabla */
+tr {
+    page-break-inside: avoid; /* evita saltos de página dentro del elemento */
+}
