@@ -18,17 +18,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcairo2 \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
-    libgdk-pixbuf2.0-0 \
+    libgdk-pixbuf-2.0-0 \
     libffi-dev \
     libxml2 \
-    libxslt1.1 \
     libjpeg62-turbo \
     libfreetype6 \
     libharfbuzz0b \
-    shared-mime-info \
-    fonts-dejavu \
     locales \
-    libglib2.0-0 \
     apt-transport-https \
     ca-certificates \
  && mkdir -p /etc/apt/keyrings \
