@@ -2,7 +2,7 @@ from django.db import models
 
 
 class EnvioWhatsApp(models.Model):
-    carnet = models.CharField(max_length=20, default="SIN_CARNET")
+    carnet = models.CharField(max_length=20)
     numero_destino = models.CharField(max_length=20)
     mensaje = models.TextField()
     archivo_pdf = models.CharField(max_length=255)
