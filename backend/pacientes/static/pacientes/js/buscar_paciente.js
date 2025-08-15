@@ -137,6 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     nuevoModal.classList.add("show");
                     nuevoModal.focus();
                     carnetInput.value = "";
+                    fechaInput.value = "";
                 }, 20);
 
                 activarListenersModal(nuevoModal);
