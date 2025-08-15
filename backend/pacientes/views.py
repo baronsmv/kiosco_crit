@@ -82,7 +82,8 @@ def buscar_paciente(request):
         "carnet": "",
         "carnet_proporcionado": False,
         "paciente": None,
-        "citas": [],
+        "tabla_titulo": "Citas",
+        "tabla_columnas": ("Servicio", "Fecha", "Colaborador"),
     }
 
     if request.method == "POST":
@@ -102,8 +103,6 @@ def buscar_paciente(request):
 
                 context["paciente"] = paciente
                 context["tabla"] = citas
-                context["tabla_titulo"] = "Citas"
-                context["tabla_columnas"] = ("Servicio", "Fecha", "Colaborador")
 
             else:
                 logger.warning(f"No se encontró paciente con carnet {carnet}")
