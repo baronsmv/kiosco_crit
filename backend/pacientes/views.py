@@ -11,6 +11,7 @@ from utils.get_data import formatear_citas, obtener_citas  # type: ignore
 from utils.logger import get_logger  # type: ignore
 from weasyprint import HTML
 
+from .forms import BuscarPacienteForm
 from .models import EnvioWhatsApp
 
 logger = get_logger("backend_views")
@@ -71,56 +72,95 @@ def admin_whatsapp(request):
 
 def buscar_paciente(request):
     logger.debug(f"Request method: {request.method}")
+    print("POST data:", request.POST, flush=True)
+
     context = {
-        "title": "Búsqueda por Carnet",
-        "header": "Búsqueda por Carnet",
+        "title": "Búsqueda de citas",
+        "header": "Búsqueda de citas",
         "form_label": "Número de Carnet:",
         "form_placeholder": "Ej: 123456",
         "button_label": "Buscar",
+        "date_placeholder": "Ej: 01-01-25",
+        "date_label": "Fecha:",
         "send_button_label": "📤 Enviar por WhatsApp",
         "form_error": False,
+        "date_error": False,
         "carnet": "",
         "carnet_proporcionado": False,
         "paciente": None,
         "tabla_titulo": "Citas",
         "tabla_columnas": ("Servicio", "Fecha", "Colaborador"),
+        "mensaje_error": "",
+        "error_target": "",
     }
 
     if request.method == "POST":
-        carnet = request.POST.get("carnet", "").strip()
-        logger.debug(f"Carnet recibido: '{carnet}'")
-        context["carnet"] = carnet
-        context["carnet_proporcionado"] = bool(carnet)
+        form = BuscarPacienteForm(request.POST)
 
-        if carnet:
-            resultado = obtener_citas(carnet)
+        if form.is_valid():
+            carnet = form.cleaned_data["carnet"]
+            fecha = form.cleaned_data["fecha"]
+            context.update(
+                {
+                    "carnet": carnet,
+                    "carnet_proporcionado": True,
+                    "fecha": fecha,
+                }
+            )
 
-            if resultado:
-                paciente, citas = formatear_citas(*resultado)
+            resultado = obtener_citas(carnet, fecha)
 
-                logger.debug(f"Paciente obtenido: {paciente}")
-                logger.debug(f"Citas obtenidas: {citas}")
+            if resultado is None or resultado.get("error") == "paciente_no_encontrado":
+                context.update(
+                    {
+                        "form_error": True,
+                        "error_target": "carnet",
+                        "mensaje_error": "❌ No se encontró ningún paciente con ese carnet.",
+                    }
+                )
+                logger.warning(context["mensaje_error"])
 
-                context["paciente"] = paciente
-                context["tabla"] = citas
+            elif not resultado["citas"]:
+                error_context = {
+                    "mensaje_error": (
+                        "❌ No se encontraron citas con la fecha especificada."
+                        if fecha
+                        else "❌ No se encontraron citas para este carnet."
+                    ),
+                    "error_target": "fecha" if fecha else "carnet",
+                }
+
+                context.update(error_context)
+                context[error_context["error_target"] + "_error"] = True
+                logger.info(error_context["mensaje_error"])
 
             else:
-                logger.warning(f"No se encontró paciente con carnet {carnet}")
-                context["form_error"] = True
-
+                paciente_fmt, citas_fmt = formatear_citas(
+                    resultado["paciente"], resultado["citas"]
+                )
+                context.update(
+                    {
+                        "paciente": paciente_fmt,
+                        "tabla": citas_fmt,
+                    }
+                )
         else:
-            logger.warning("No se proporcionó carnet en la solicitud POST")
-            context["form_error"] = True
+            context.update(
+                {
+                    "form_error": bool(form["carnet"].errors),
+                    "date_error": bool(form["fecha"].errors),
+                }
+            )
+            logger.warning("Formulario inválido")
 
+        # Respuesta AJAX
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
-            if context["paciente"]:
-                html = render_to_string(
-                    "pacientes/partials/modal_paciente.html", context, request=request
-                )
-            else:
-                html = render_to_string(
-                    "pacientes/partials/mensaje_error.html", context, request=request
-                )
+            template = (
+                "pacientes/partials/modal_paciente.html"
+                if context["paciente"]
+                else "pacientes/partials/mensaje_error.html"
+            )
+            html = render_to_string(template, context, request=request)
             return HttpResponse(html)
 
     return render(request, "pacientes/buscar_paciente.html", context)
@@ -131,6 +171,7 @@ def enviar_pdf_whatsapp(request, carnet):
     logger.debug(
         f"enviar_pdf_whatsapp called with method {request.method} and carnet {carnet}"
     )
+
     if request.method != "POST":
         logger.warning(f"Método no permitido: {request.method}")
         return JsonResponse({"error": "Método no permitido"}, status=405)
@@ -143,17 +184,15 @@ def enviar_pdf_whatsapp(request, carnet):
 
     resultado = obtener_citas(carnet)
 
-    if resultado:
-        paciente, citas = formatear_citas(*resultado)
-
-        logger.debug(f"Paciente obtenido: {paciente}")
-        logger.debug(f"Citas obtenidas: {citas}")
-
-    else:
+    if resultado is None or resultado.get("error") == "paciente_no_encontrado":
         logger.error(f"Paciente no encontrado con carnet {carnet}")
         return JsonResponse({"error": "Paciente no encontrado"}, status=404)
 
-    # 1. Generar el PDF
+    paciente, citas = formatear_citas(resultado["paciente"], resultado["citas"])
+    logger.debug(f"Paciente obtenido: {paciente}")
+    logger.debug(f"Citas obtenidas: {citas}")
+
+    # Generar PDF
     filename = f"paciente_{carnet}.pdf"
     output_dir = os.path.join(settings.MEDIA_ROOT, "pdfs")
     os.makedirs(output_dir, exist_ok=True)
@@ -163,7 +202,6 @@ def enviar_pdf_whatsapp(request, carnet):
     css_path = finders.find("pacientes/css/pdf_paciente.css")
     css_files = [css_path] if css_path else []
 
-    # Renderizar el PDF con citas
     html = render_to_string(
         "pacientes/pdf_paciente.html",
         {
@@ -176,12 +214,11 @@ def enviar_pdf_whatsapp(request, carnet):
     HTML(string=html).write_pdf(output_path, stylesheets=css_files)
     logger.debug("PDF generado correctamente")
 
-    # 2. Preparar mensaje
+    # Mensaje WhatsApp
     mensaje = f"""Datos del paciente:
 Nombre: {paciente['Nombre']}
 Carnet: {paciente['Carnet']}
 Cantidad de citas: {len(citas)}"""
-    logger.debug(f"Mensaje a enviar: {mensaje}")
 
     payload = {
         "number": numero + "@c.us",
@@ -189,7 +226,6 @@ Cantidad de citas: {len(citas)}"""
         "image_path": f"media/pdfs/{filename}",
     }
 
-    # 3. Enviar al microservicio
     try:
         response = requests.post(f"{base_url}/send-media", json=payload)
         data = response.json()
@@ -200,7 +236,6 @@ Cantidad de citas: {len(citas)}"""
             None if estado == "enviado" else data.get("error", "Error desconocido")
         )
 
-        # Guardar en DB
         EnvioWhatsApp.objects.create(
             carnet=carnet,
             numero_destino=numero,
@@ -209,9 +244,9 @@ Cantidad de citas: {len(citas)}"""
             estado=estado,
             detalle_error=detalle_error,
         )
-        logger.info(f"EnvioWhatsApp creado con estado {estado}")
 
         if estado == "enviado":
+            logger.info("Mensaje enviado correctamente")
             return JsonResponse({"status": "enviado", "detalles": data})
         else:
             logger.error(f"Error enviando mensaje: {detalle_error}")

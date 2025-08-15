@@ -14,30 +14,44 @@
     <form id="buscar-form" method="POST" novalidate>
         {% csrf_token %}
         <div class="form-group">
+
+            <!-- Campo Carnet -->
             <label for="carnet">{{ form_label }}</label>
             <div class="input-group {% if form_error %}error{% endif %}">
                 <input
-                        aria-describedby="form-error"
+                        aria-describedby="{% if form_error %}carnet-error{% endif %}"
+                        aria-invalid="{% if form_error %}true{% else %}false{% endif %}"
+                        class="{% if form_error %}error{% endif %}"
                         id="carnet"
                         name="carnet"
                         placeholder="{{ form_placeholder }}"
                         required
                         type="text"
-                        value="{{ carnet }}"
+                        value="{{ carnet|default:'' }}"
                 />
-                {% if form_error %}
-                <span aria-hidden="true" class="icon-error" title="Error">
-                    <svg height="20" width="20">
-                        <use href="#icon-error"></use>
-                    </svg>
-                </span>
-                {% endif %}
             </div>
+
+            <!-- Campo Fecha -->
+            <label for="fecha" style="margin-top: 15px">{{ date_label }}</label>
+            <p style="margin-top: -8px; font-size: 13px">(Dejar vacío para mostrar todas)</p>
+            <div class="input-group {% if date_error %}error{% endif %}">
+                <input
+                        aria-describedby="{% if date_error %}fecha-error{% endif %}"
+                        aria-invalid="{% if date_error %}true{% else %}false{% endif %}"
+                        class="{% if date_error %}error{% endif %}"
+                        id="fecha"
+                        name="fecha"
+                        placeholder="{{ date_placeholder }}"
+                        type="date"
+                />
+            </div>
+
         </div>
+
         <button aria-label="Buscar paciente por carnet" type="submit">{{ button_label }}</button>
     </form>
 
-    <!-- Contenedor para inyectar errores por JS -->
+    <!-- AJAX fallback -->
     <div id="respuesta-ajax">
         {% if not paciente and carnet_proporcionado %}
         {% include 'pacientes/partials/mensaje_error.html' %}
@@ -49,23 +63,6 @@
 {% if paciente and carnet %}
 {% include 'pacientes/partials/modal_paciente.html' %}
 {% endif %}
-
-<!-- SVG reutilizable (icon-error) -->
-<svg style="display: none;">
-    <symbol
-            fill="none"
-            id="icon-error"
-            stroke="#e63946"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-    >
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" x2="12" y1="8" y2="12"/>
-        <line x1="12" x2="12" y1="16" y2="16"/>
-    </symbol>
-</svg>
 
 <script defer src="{% static 'pacientes/js/error_form_handler.js' %}"></script>
 <script defer src="{% static 'pacientes/js/buscar_paciente.js' %}"></script>

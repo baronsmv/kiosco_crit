@@ -1,3 +1,8 @@
-<p aria-live="assertive" class="error-message" role="alert" style="margin-top: 1rem;">
-    ❌ No se encontró ningún paciente con ese carnet.
+<p aria-live="assertive"
+   class="error-message"
+   data-error-target="{{ error_target }}"
+   role="alert"
+   style="margin-top: 1rem;"
+>
+    {{ mensaje_error }}
 </p>

@@ -61,6 +61,13 @@ function activarListenersModal(modal) {
     });
 }
 
+function mostrarErrorCampo(nombreCampo) {
+    const grupo = document.getElementById(nombreCampo)?.closest(".input-group");
+    if (!grupo) return;
+
+    grupo.classList.add("error");
+}
+
 function limpiarErrores() {
     // Quita clases e íconos de error
     document.querySelectorAll(".input-group").forEach(group => {
@@ -89,7 +96,11 @@ document.addEventListener("DOMContentLoaded", function () {
         limpiarErrores();
 
         const carnetInput = document.getElementById("carnet");
+        const fechaInput = document.getElementById("fecha");
+
         const carnet = carnetInput.value.trim();
+        const fecha = fechaInput.value.trim();
+
         if (!carnet) {
             carnetInput.focus();
             carnetInput.select();
@@ -106,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     "X-Requested-With": "XMLHttpRequest",
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
-                body: new URLSearchParams({carnet}),
+                body: new URLSearchParams({carnet, fecha}),
             });
 
             const html = await response.text();
@@ -137,7 +148,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (error) {
                     container.querySelector(".error-message")?.remove(); // Elimina error anterior
                     container.insertAdjacentElement("beforeend", error);
-                    mostrarErrorCampo("carnet");
+
+                    const target = error.getAttribute("data-error-target") || "carnet";
+                    mostrarErrorCampo(target);
+
+                    const input = document.getElementById(target);
+                    if (input) {
+                        input.focus();
+                        input.select();
+                    }
                 }
                 carnetInput.focus();
                 carnetInput.select();
