@@ -127,7 +127,7 @@ def buscar_paciente(request):
                     "mensaje_error": (
                         "❌ No se encontraron citas con la fecha especificada."
                         if fecha
-                        else "❌ No se encontraron citas para este carnet."
+                        else "❌ No se encontraron citas activas para este carnet."
                     ),
                     "error_target": "fecha" if fecha else "carnet",
                 }
