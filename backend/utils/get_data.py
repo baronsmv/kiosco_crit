@@ -34,7 +34,8 @@ def obtener_citas(carnet, fecha=None):
                          INNER JOIN SCRITS2.K_CITA kc ON kpc.FL_CITA = kc.FL_CITA
                          INNER JOIN SCRITS2.C_SERVICIO cs ON kc.FL_SERVICIO = cs.FL_SERVICIO
                          INNER JOIN SCRITS2.C_USUARIO cu ON kc.FL_USUARIO = cu.FL_USUARIO
-                WHERE cp.NO_CARNET = %s \
+                WHERE cp.NO_CARNET = %s
+                  AND kpc.CL_ESTATUS_CITA = 'A'
                 """
         params = [carnet]
 
