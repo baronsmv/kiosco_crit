@@ -7,7 +7,7 @@ ENV LANG=es_MX.UTF-8 \
 
 WORKDIR /app
 
-# Instala dependencias del sistema y msodbcsql17
+# Instala dependencias del sistema para SQL Server y PostgreSQL
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     locales \
     apt-transport-https \
     ca-certificates \
+    libpq-dev \
  && mkdir -p /etc/apt/keyrings \
  && curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg \
  && chmod 644 /etc/apt/keyrings/microsoft.gpg \
@@ -37,11 +38,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && sed -i '/es_MX.UTF-8/s/^# //g' /etc/locale.gen \
  && locale-gen
 
-# Copiar archivos e instalar Python deps
+# Crear usuario sin privilegios
+RUN addgroup --system django && adduser --system --ingroup django django
+
+# Copiar e instalar dependencias Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
+# Copiar código
 COPY . .
+
+# Cambiar propietario para el usuario django
+RUN chown -R django:django /app
+
+USER django
+
+# Si usás collectstatic, descomentá esta línea
+# RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000

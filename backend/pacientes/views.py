@@ -21,6 +21,8 @@ import requests
 
 base_url = settings.WHATSAPP_API_BASE_URL
 
+tabla_columnas = ("Servicio", "Fecha", "Colaborador", "Clínica", "Estatus")
+
 
 @login_required
 def admin_whatsapp(request):
@@ -89,7 +91,7 @@ def buscar_paciente(request):
         "carnet_proporcionado": False,
         "paciente": None,
         "tabla_titulo": "Citas",
-        "tabla_columnas": ("Servicio", "Fecha", "Colaborador"),
+        "tabla_columnas": tabla_columnas,
         "mensaje_error": "",
         "error_target": "",
     }
@@ -208,7 +210,7 @@ def enviar_pdf_whatsapp(request, carnet):
             "paciente": paciente,
             "tabla": citas,
             "tabla_titulo": "Citas",
-            "tabla_columnas": ("Servicio", "Fecha", "Colaborador"),
+            "tabla_columnas": tabla_columnas,
         },
     )
     HTML(string=html).write_pdf(output_path, stylesheets=css_files)

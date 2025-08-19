@@ -1,7 +1,7 @@
 FROM node:20-slim
 
 # Instala dependencias necesarias para Puppeteer
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     ca-certificates \
     fonts-liberation \
@@ -24,7 +24,6 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     libu2f-udev \
     libvulkan1 \
-    --no-install-recommends \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -35,7 +34,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala dependencias de Node.js
-RUN npm install
+RUN npm install --production
 
 # Copia el resto del código fuente
 COPY . .

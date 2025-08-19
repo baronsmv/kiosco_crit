@@ -28,20 +28,27 @@ def obtener_citas(carnet, fecha=None):
         query = """
                 SELECT cs.NB_SERVICIO,
                        kc.FE_CITA,
-                       CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO) AS nombre_colaborador
+                       CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO) AS nombre_colaborador,
+                       cc.DS_CLINICA,
+                       kpc.CL_ESTATUS_CITA
                 FROM SCRITS2.C_PACIENTE cp
                          INNER JOIN SCRITS2.K_PACIENTE_CITA kpc ON cp.FL_PACIENTE = kpc.FL_PACIENTE
                          INNER JOIN SCRITS2.K_CITA kc ON kpc.FL_CITA = kc.FL_CITA
                          INNER JOIN SCRITS2.C_SERVICIO cs ON kc.FL_SERVICIO = cs.FL_SERVICIO
                          INNER JOIN SCRITS2.C_USUARIO cu ON kc.FL_USUARIO = cu.FL_USUARIO
-                WHERE cp.NO_CARNET = %s
-                  AND kpc.CL_ESTATUS_CITA = 'A'
+                         INNER JOIN SCRITS2.C_CLINICA cc ON cp.FL_CLINICA = cc.FL_CLINICA
+                WHERE cp.NO_CARNET = %s \
                 """
         params = [carnet]
 
         if fecha:
-            query += " AND CAST(kc.FE_CITA AS DATE) = %s"
+            query += """
+                AND kpc.CL_ESTATUS_CITA IN ('A', 'N')
+                AND CAST(kc.FE_CITA AS DATE) = %s
+            """
             params.append(fecha)
+        else:
+            query += " AND kpc.CL_ESTATUS_CITA = 'A'"
 
         query += " ORDER BY kc.FE_CITA DESC"
 
@@ -53,6 +60,8 @@ def obtener_citas(carnet, fecha=None):
                 "nb_servicio": row[0],
                 "fe_cita": row[1],
                 "nombre_colaborador": row[2],
+                "ds_clinica": row[3],
+                "cl_estatus_cita": row[4],
             }
             for row in rows
         ]
@@ -61,6 +70,14 @@ def obtener_citas(carnet, fecha=None):
             "paciente": paciente,
             "citas": citas,
         }
+
+
+estatus_dict = {
+    "A": "Activo",
+    "I": "Inasistencia",
+    "P": "Pospuesta",
+    "T": "Tomada",
+}
 
 
 def formatear_citas(paciente, citas):
@@ -80,7 +97,14 @@ def formatear_citas(paciente, citas):
         )
 
     citas_fmt = tuple(
-        (c["nb_servicio"], fmt(c["fe_cita"]), c["nombre_colaborador"]) for c in citas
+        (
+            c["nb_servicio"],
+            fmt(c["fe_cita"]),
+            c["nombre_colaborador"],
+            c["ds_clinica"],
+            estatus_dict.get(c["cl_estatus_cita"], c["cl_estatus_cita"]),
+        )
+        for c in citas
     )
 
     return paciente_fmt, citas_fmt

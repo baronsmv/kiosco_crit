@@ -128,7 +128,7 @@ button:focus {
     border-radius: 10px;
     padding: 2rem;
     width: 90%;
-    max-width: 500px;
+    max-width: 1920px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transform: translateY(20px);
     opacity: 0;
@@ -189,7 +189,7 @@ button:focus {
 }
 
 .tabla-scrollable {
-    max-height: 300px; /* Ajusta según necesidad */
+    max-height: 50%;
     overflow-y: auto;
     border: 1px solid #ccc;
     margin-top: 0.5rem;

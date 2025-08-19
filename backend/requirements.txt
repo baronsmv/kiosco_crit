@@ -1,6 +1,8 @@
 django
 djangorestframework
+gunicorn
 mssql-django
+psycopg2-binary
 pyodbc
 pyyaml
 requests
