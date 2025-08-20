@@ -1,5 +1,5 @@
 """
-ASGI config for datos_carnet project.
+ASGI config for kiosco_crit project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'datos_carnet.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kiosco_crit.settings')
 
 application = get_asgi_application()

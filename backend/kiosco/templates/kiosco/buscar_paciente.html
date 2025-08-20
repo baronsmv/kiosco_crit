@@ -5,7 +5,7 @@
     <title>{{ title }}</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     {% load static %}
-    <link href="{% static 'pacientes/css/buscar_paciente.css' %}" rel="stylesheet"/>
+    <link href="{% static 'kiosco/css/buscar_paciente.css' %}" rel="stylesheet"/>
 </head>
 <body>
 
@@ -57,20 +57,20 @@
     <!-- Respuesta AJAX (fallback) -->
     <div id="respuesta-ajax">
         {% if not paciente and carnet_proporcionado %}
-        {% include 'pacientes/partials/mensaje_error.html' %}
+        {% include 'kiosco/partials/mensaje_error.html' %}
         {% endif %}
     </div>
 </div>
 
 <!-- Modal de paciente si hay resultados -->
 {% if paciente and carnet %}
-{% include 'pacientes/partials/modal_paciente.html' %}
+{% include 'kiosco/partials/modal_paciente.html' %}
 {% endif %}
 
 <!-- Scripts -->
-<script defer src="{% static 'pacientes/js/error_form_handler.js' %}"></script>
-<script defer src="{% static 'pacientes/js/buscar_paciente.js' %}"></script>
-<script defer src="{% static 'pacientes/js/enviar_pdf_whatsapp.js' %}"></script>
+<script defer src="{% static 'kiosco/js/error_form_handler.js' %}"></script>
+<script defer src="{% static 'kiosco/js/buscar_paciente.js' %}"></script>
+<script defer src="{% static 'kiosco/js/enviar_pdf_whatsapp.js' %}"></script>
 
 </body>
 </html>

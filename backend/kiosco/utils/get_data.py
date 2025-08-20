@@ -40,7 +40,7 @@ def existe_paciente(carnet: str, cursor) -> Optional[Dict[str, str]]:
 
 
 def query_citas(
-        carnet: str, fecha: Optional[datetime], campos: List[str]
+    carnet: str, fecha: Optional[datetime], campos: List[str]
 ) -> Tuple[str, Tuple]:
     for campo in campos:
         if campo not in mapeo_campos:
@@ -73,7 +73,7 @@ def query_citas(
 
 
 def obtener_citas(
-        carnet: str, campos: List[str], fecha: Optional[datetime] = None
+    carnet: str, campos: List[str], fecha: Optional[datetime] = None
 ) -> Optional[Dict[str, Any]]:
     with connections["crit"].cursor() as cursor:
         paciente = existe_paciente(carnet, cursor)
@@ -91,9 +91,9 @@ def obtener_citas(
 
 
 def formatear_citas(
-        paciente: Dict[str, str],
-        citas: List[Dict[str, Any]],
-        campos: List[str],
+    paciente: Dict[str, str],
+    citas: List[Dict[str, Any]],
+    campos: List[str],
 ) -> Tuple[Dict[str, str], Tuple[Tuple]]:
     paciente_fmt = {
         "Nombre": paciente.get("nombre", ""),

@@ -1,5 +1,5 @@
 """
-URL configuration for datos_carnet project.
+URL configuration for kiosco_crit project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
@@ -21,6 +21,6 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-                  path("admin/", admin.site.urls),
-                  path("", include("kiosco.urls")),
-              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path("admin/", admin.site.urls),
+    path("", include("kiosco.urls")),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
