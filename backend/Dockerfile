@@ -36,7 +36,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql17 \
  && rm -rf /var/lib/apt/lists/* \
  && sed -i '/es_MX.UTF-8/s/^# //g' /etc/locale.gen \
- && locale-gen
+ && locale-gen \
+ && mkdir -p /var/cache/fontconfig \
+ && chmod -R 777 /var/cache/fontconfig
 
 # Crear usuario sin privilegios
 RUN addgroup --system django && adduser --system --ingroup django django

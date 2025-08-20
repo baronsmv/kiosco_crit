@@ -1,110 +1,111 @@
 from datetime import datetime
+from typing import Dict, List, Optional, Tuple, Any
 
 from django.db import connections
 
+from .config import citas_sql
 
-def obtener_citas(carnet, fecha=None):
-    with connections["crit"].cursor() as cursor:
-        # Primero buscamos el paciente por el carnet
-        cursor.execute(
-            """
-            SELECT NB_PACIENTE, NB_PATERNO, NO_CARNET
-            FROM SCRITS2.C_PACIENTE
-            WHERE NO_CARNET = %s
-            """,
-            [carnet],
+mapeo_campos: Dict[str, Dict[str, str]] = citas_sql["campos"]
+mapeo_estatus: Dict[str, str] = citas_sql["mapeo_estatus"]
+
+
+def formatear_dato(dato, tipo: Optional[str] = None) -> str:
+    if tipo == "fecha":
+        return (
+            dato.strftime("%d/%m/%Y %H:%M") if isinstance(dato, datetime) else str(dato)
         )
-        paciente_row = cursor.fetchone()
+    if tipo == "estatus":
+        return mapeo_estatus.get(dato, dato)
+    return dato
 
-        if not paciente_row:
-            return {"error": "paciente_no_encontrado"}
 
-        paciente = {
-            "nombre": f"{paciente_row[0]} {paciente_row[1]}",
-            "no_carnet": paciente_row[2],
+def existe_paciente(carnet: str, cursor) -> Optional[Dict[str, str]]:
+    cursor.execute(
+        """
+        SELECT NB_PACIENTE, NB_PATERNO, NO_CARNET
+        FROM SCRITS2.C_PACIENTE
+        WHERE NO_CARNET = %s
+        """,
+        (carnet,),
+    )
+    row = cursor.fetchone()
+    return (
+        {
+            "nombre": f"{row[0]} {row[1]}",
+            "no_carnet": row[2],
         }
+        if row
+        else None
+    )
 
-        # Luego buscamos las citas (si existen)
-        query = """
-                SELECT cs.NB_SERVICIO,
-                       kc.FE_CITA,
-                       CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO) AS nombre_colaborador,
-                       cc.DS_CLINICA,
-                       kpc.CL_ESTATUS_CITA
-                FROM SCRITS2.C_PACIENTE cp
-                         INNER JOIN SCRITS2.K_PACIENTE_CITA kpc ON cp.FL_PACIENTE = kpc.FL_PACIENTE
-                         INNER JOIN SCRITS2.K_CITA kc ON kpc.FL_CITA = kc.FL_CITA
-                         INNER JOIN SCRITS2.C_SERVICIO cs ON kc.FL_SERVICIO = cs.FL_SERVICIO
-                         INNER JOIN SCRITS2.C_USUARIO cu ON kc.FL_USUARIO = cu.FL_USUARIO
-                         INNER JOIN SCRITS2.C_CLINICA cc ON cp.FL_CLINICA = cc.FL_CLINICA
-                WHERE cp.NO_CARNET = %s \
-                """
-        params = [carnet]
 
-        if fecha:
-            query += """
-                AND kpc.CL_ESTATUS_CITA IN ('A', 'N')
-                AND CAST(kc.FE_CITA AS DATE) = %s
-            """
-            params.append(fecha)
-        else:
-            query += " AND kpc.CL_ESTATUS_CITA = 'A'"
+def query_citas(
+        carnet: str, fecha: Optional[datetime], campos: List[str]
+) -> Tuple[str, Tuple]:
+    for campo in campos:
+        if campo not in mapeo_campos:
+            raise ValueError(f"Campo desconocido: {campo}")
 
-        query += " ORDER BY kc.FE_CITA DESC"
+    select_clause = ", ".join(mapeo_campos[c]["sql"] + f" AS {c}" for c in campos)
 
+    query = f"""
+        SELECT {select_clause}
+        FROM SCRITS2.C_PACIENTE cp
+        INNER JOIN SCRITS2.K_PACIENTE_CITA kpc ON cp.FL_PACIENTE = kpc.FL_PACIENTE
+        INNER JOIN SCRITS2.K_CITA kc ON kpc.FL_CITA = kc.FL_CITA
+        INNER JOIN SCRITS2.C_SERVICIO cs ON kc.FL_SERVICIO = cs.FL_SERVICIO
+        INNER JOIN SCRITS2.C_USUARIO cu ON kc.FL_USUARIO = cu.FL_USUARIO
+        INNER JOIN SCRITS2.C_CLINICA cc ON cp.FL_CLINICA = cc.FL_CLINICA
+        WHERE cp.NO_CARNET = %s
+    """
+
+    params: Tuple = (carnet,)
+    if fecha:
+        query += (
+            " AND kpc.CL_ESTATUS_CITA IN ('A', 'N') AND CAST(kc.FE_CITA AS DATE) = %s"
+        )
+        params += (fecha,)
+    else:
+        query += " AND kpc.CL_ESTATUS_CITA = 'A'"
+
+    query += " ORDER BY kc.FE_CITA DESC"
+    return query, params
+
+
+def obtener_citas(
+        carnet: str, campos: List[str], fecha: Optional[datetime] = None
+) -> Optional[Dict[str, Any]]:
+    with connections["crit"].cursor() as cursor:
+        paciente = existe_paciente(carnet, cursor)
+        if not paciente:
+            return None
+
+        query, params = query_citas(carnet, fecha, campos)
         cursor.execute(query, params)
         rows = cursor.fetchall()
 
-        citas = [
-            {
-                "nb_servicio": row[0],
-                "fe_cita": row[1],
-                "nombre_colaborador": row[2],
-                "ds_clinica": row[3],
-                "cl_estatus_cita": row[4],
-            }
-            for row in rows
-        ]
-
-        return {
-            "paciente": paciente,
-            "citas": citas,
-        }
+    return {
+        "paciente": paciente,
+        "citas": [dict(zip(campos, row)) for row in rows],
+    }
 
 
-estatus_dict = {
-    "A": "Activo",
-    "I": "Inasistencia",
-    "P": "Pospuesta",
-    "T": "Tomada",
-}
-
-
-def formatear_citas(paciente, citas):
-    if not paciente:
-        return None
-
+def formatear_citas(
+        paciente: Dict[str, str],
+        citas: List[Dict[str, Any]],
+        campos: List[str],
+) -> Tuple[Dict[str, str], Tuple[Tuple]]:
     paciente_fmt = {
         "Nombre": paciente.get("nombre", ""),
         "Carnet": paciente.get("no_carnet", ""),
     }
 
-    def fmt(fecha):
-        return (
-            fecha.strftime("%d/%m/%Y %H:%M")
-            if isinstance(fecha, datetime)
-            else str(fecha)
-        )
-
     citas_fmt = tuple(
-        (
-            c["nb_servicio"],
-            fmt(c["fe_cita"]),
-            c["nombre_colaborador"],
-            c["ds_clinica"],
-            estatus_dict.get(c["cl_estatus_cita"], c["cl_estatus_cita"]),
+        tuple(
+            formatear_dato(cita.get(campo), mapeo_campos[campo].get("tipo"))
+            for campo in campos
         )
-        for c in citas
+        for cita in citas
     )
 
     return paciente_fmt, citas_fmt

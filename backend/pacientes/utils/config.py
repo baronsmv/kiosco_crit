@@ -13,17 +13,69 @@ default_config: Dict = {
             "header": "Administración de WhatsApp",
         }
     },
-    "page_buscar_citas": {
-        "context": {
-            "title": "Búsqueda de citas",
-            "header": "Búsqueda de citas",
-            "form_label": "Número de Carnet:",
-            "form_placeholder": "Ej: 123456",
-            "button_label": "Buscar",
-            "date_label": "Fecha:",
-            "send_button_label": "📤 Enviar por WhatsApp",
-            "tabla_titulo": "Citas",
-        }
+    "buscar_citas": {
+        "webpage": {
+            "campos": [
+                "nb_servicio",
+                "fe_cita",
+                "nombre_colaborador",
+                "ds_clinica",
+                "cl_estatus_cita",
+            ],
+            "context": {
+                "title": "Búsqueda de citas",
+                "header": "Búsqueda de citas",
+                "form_label": "Número de Carnet:",
+                "form_placeholder": "Ej: 123456",
+                "button_label": "Buscar",
+                "date_label": "Fecha:",
+                "send_button_label": "📤 Enviar por WhatsApp",
+                "tabla_titulo": "Citas",
+            },
+        },
+        "pdf": {
+            "campos": [
+                "nb_servicio",
+                "fe_cita",
+                "nombre_colaborador",
+                "cl_estatus_cita",
+            ],
+            "context": {
+                "tabla_titulo": "Citas",
+            },
+        },
+        "sql": {
+            "campos": {
+                "nb_servicio": {
+                    "nombre": "Servicio",
+                    "sql": "cs.NB_SERVICIO",
+                },
+                "fe_cita": {
+                    "nombre": "Fecha y hora",
+                    "sql": "kc.FE_CITA",
+                    "tipo": "fecha",
+                },
+                "nombre_colaborador": {
+                    "nombre": "Colaborador",
+                    "sql": "CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO)",
+                },
+                "ds_clinica": {
+                    "nombre": "Clínica",
+                    "sql": "cc.DS_CLINICA",
+                },
+                "cl_estatus_cita": {
+                    "nombre": "Estatus",
+                    "sql": "kpc.CL_ESTATUS_CITA",
+                    "tipo": "estatus",
+                },
+            },
+            "mapeo_estatus": {
+                "A": "Activo",
+                "I": "Inasistencia",
+                "P": "Pospuesta",
+                "T": "Tomada",
+            },
+        },
     },
 }
 
@@ -41,4 +93,6 @@ else:
         config = safe_load(f) or {}
 
 whatsapp_admin = config.get("admin_whatsapp", {})
-page_citas = config.get("page_buscar_citas", {})
+citas_web = config.get("buscar_citas", {}).get("webpage", {})
+citas_pdf = config.get("buscar_citas", {}).get("pdf", {})
+citas_sql = config.get("buscar_citas", {}).get("sql", {})

@@ -15,5 +15,9 @@ urlpatterns = [
         name="admin_whatsapp",
     ),
     path("", buscar_paciente, name="buscar_paciente"),
-    path("enviar-pdf/<str:carnet>/", enviar_pdf_whatsapp, name="enviar_pdf_whatsapp"),
+    path(
+        "enviar-pdf/<str:carnet>/<str:fecha>/",
+        enviar_pdf_whatsapp,
+        name="enviar_pdf_whatsapp",
+    ),
 ]

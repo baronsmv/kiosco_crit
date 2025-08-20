@@ -12,15 +12,13 @@ from weasyprint import HTML
 
 from .forms import BuscarPacienteForm
 from .models import EnvioWhatsApp
-from .utils.config import whatsapp_admin, page_citas
+from .utils.config import whatsapp_admin, citas_web, citas_pdf, citas_sql
 from .utils.get_data import formatear_citas, obtener_citas
 from .utils.logger import get_logger
 
 logger = get_logger("backend_views")
 
 base_url = settings.WHATSAPP_API_BASE_URL
-
-tabla_columnas = ("Servicio", "Fecha", "Colaborador", "Clínica", "Estatus")
 
 
 @login_required
@@ -71,19 +69,28 @@ def admin_whatsapp(request):
 
 
 def buscar_paciente(request):
-    logger.debug(f"Request method: {request.method}")
-    print("POST data:", request.POST, flush=True)
+    logger.info(f"Request method: {request.method}")
+    logger.debug(f"POST data: {request.POST}")
+
+    campos = citas_web.get("campos", {})
+    mapeo_campos = citas_sql["campos"]
+
+    for campo in campos:
+        if campo not in mapeo_campos:
+            raise ValueError(f"Campo desconocido: {campo}")
+
+    tabla_columnas = tuple(mapeo_campos[campo]["nombre"] for campo in campos)
 
     context = {
-        **page_citas.get("context", {}),
-        "form_error": False,
-        "date_error": False,
-        "carnet": "",
-        "carnet_proporcionado": False,
-        "paciente": None,
+        **citas_web.get("context", {}),
         "tabla_columnas": tabla_columnas,
+        "carnet": "",
         "mensaje_error": "",
         "error_target": "",
+        "paciente": None,
+        "carnet_proporcionado": False,
+        "form_error": False,
+        "date_error": False,
     }
 
     if request.method == "POST":
@@ -95,14 +102,14 @@ def buscar_paciente(request):
             context.update(
                 {
                     "carnet": carnet,
-                    "carnet_proporcionado": True,
                     "fecha": fecha,
+                    "carnet_proporcionado": True,
                 }
             )
 
-            resultado = obtener_citas(carnet, fecha)
+            resultado = obtener_citas(carnet, fecha=fecha, campos=campos)
 
-            if resultado is None or resultado.get("error") == "paciente_no_encontrado":
+            if not resultado:
                 context.update(
                     {
                         "form_error": True,
@@ -112,7 +119,7 @@ def buscar_paciente(request):
                 )
                 logger.warning(context["mensaje_error"])
 
-            elif not resultado["citas"]:
+            elif not resultado.get("citas"):
                 error_context = {
                     "mensaje_error": (
                         "❌ No se encontraron citas con la fecha especificada."
@@ -127,9 +134,7 @@ def buscar_paciente(request):
                 logger.info(error_context["mensaje_error"])
 
             else:
-                paciente_fmt, citas_fmt = formatear_citas(
-                    resultado["paciente"], resultado["citas"]
-                )
+                paciente_fmt, citas_fmt = formatear_citas(**resultado, campos=campos)
                 context.update(
                     {
                         "paciente": paciente_fmt,
@@ -159,7 +164,7 @@ def buscar_paciente(request):
 
 
 @csrf_exempt
-def enviar_pdf_whatsapp(request, carnet):
+def enviar_pdf_whatsapp(request, carnet, fecha):
     logger.debug(
         f"enviar_pdf_whatsapp called with method {request.method} and carnet {carnet}"
     )
@@ -174,14 +179,24 @@ def enviar_pdf_whatsapp(request, carnet):
         logger.error("Número de WhatsApp requerido no proporcionado")
         return JsonResponse({"error": "Número de WhatsApp requerido"}, status=400)
 
-    resultado = obtener_citas(carnet)
+    campos = citas_pdf.get("campos", {})
+    mapeo_campos = citas_sql["campos"]
 
-    if resultado is None or resultado.get("error") == "paciente_no_encontrado":
+    for campo in campos:
+        if campo not in mapeo_campos:
+            raise ValueError(f"Campo desconocido: {campo}")
+
+    tabla_columnas = tuple(mapeo_campos[campo]["nombre"] for campo in campos)
+
+    resultado = obtener_citas(
+        carnet, campos=campos, fecha=None if fecha == "None" else fecha
+    )
+
+    if not resultado:
         logger.error(f"Paciente no encontrado con carnet {carnet}")
         return JsonResponse({"error": "Paciente no encontrado"}, status=404)
 
-    paciente, citas = formatear_citas(resultado["paciente"], resultado["citas"])
-    citas = {k: v for k, v in citas.items() if k != ""}
+    paciente, citas = formatear_citas(**resultado, campos=campos)
     logger.debug(f"Paciente obtenido: {paciente}")
     logger.debug(f"Citas obtenidas: {citas}")
 
@@ -198,10 +213,10 @@ def enviar_pdf_whatsapp(request, carnet):
     html = render_to_string(
         "pacientes/pdf_paciente.html",
         {
+            **citas_pdf.get("context", {}),
+            "tabla_columnas": tabla_columnas,
             "paciente": paciente,
             "tabla": citas,
-            "tabla_titulo": "Citas",
-            "tabla_columnas": tabla_columnas,
         },
     )
     HTML(string=html).write_pdf(output_path, stylesheets=css_files)
