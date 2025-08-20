@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pacientes', '0004_remove_enviowhatsapp_paciente_enviowhatsapp_carnet_and_more'),
+        ("kiosco", "0004_remove_enviowhatsapp_paciente_enviowhatsapp_carnet_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='enviowhatsapp',
-            name='carnet',
+            model_name="enviowhatsapp",
+            name="carnet",
             field=models.CharField(max_length=20),
         ),
     ]

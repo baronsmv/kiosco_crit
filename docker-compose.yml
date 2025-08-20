@@ -1,7 +1,7 @@
 services:
   django:
     build: ./backend
-    container_name: django_app_carnet
+    container_name: django_app_kiosco
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
@@ -20,7 +20,7 @@ services:
 
   node:
     build: ./whatsapp_node
-    container_name: node_whatsapp_carnet
+    container_name: node_whatsapp_kiosco
     ports:
       - "3000:3000"
     volumes:
@@ -34,7 +34,7 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx_proxy_carnet
+    container_name: nginx_proxy_kiosco
     ports:
       - "80:80"
       # - "443:443"
@@ -50,7 +50,7 @@ services:
 
   db:
     image: postgres:15
-    container_name: postgres_db_carnet
+    container_name: postgres_db_kiosco
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:

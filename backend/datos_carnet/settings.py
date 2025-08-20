@@ -17,7 +17,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # URL a la API de WhatsApp (en Node.Js)
-WHATSAPP_API_BASE_URL = "http://node_whatsapp_carnet:3000"
+WHATSAPP_API_BASE_URL = "http://node_whatsapp_kiosco:3000"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -30,6 +30,9 @@ SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False") == "True"
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -44,7 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "pacientes",
+    "kiosco",
 ]
 
 # Para desarrollo local
@@ -65,7 +68,7 @@ ROOT_URLCONF = "datos_carnet.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "pacientes", "templates")],
+        "DIRS": [os.path.join(BASE_DIR, "kiosco", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

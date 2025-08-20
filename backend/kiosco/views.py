@@ -11,7 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 from weasyprint import HTML
 
 from .forms import BuscarPacienteForm
-from .models import EnvioWhatsApp
+from .models import CitasWhatsapp, CitasConsulta
+from .utils import get_client
 from .utils.config import whatsapp_admin, citas_web, citas_pdf, citas_sql
 from .utils.get_data import formatear_citas, obtener_citas
 from .utils.logger import get_logger
@@ -150,17 +151,21 @@ def buscar_paciente(request):
             )
             logger.warning("Formulario inválido")
 
+        CitasConsulta.objects.create(
+            carnet=carnet, fecha_especificada=fecha, ip_cliente=get_client.ip(request)
+        )
+
         # Respuesta AJAX
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             template = (
-                "pacientes/partials/modal_paciente.html"
+                "kiosco/partials/modal_paciente.html"
                 if context["paciente"]
-                else "pacientes/partials/mensaje_error.html"
+                else "kiosco/partials/mensaje_error.html"
             )
             html = render_to_string(template, context, request=request)
             return HttpResponse(html)
 
-    return render(request, "pacientes/buscar_paciente.html", context)
+    return render(request, "kiosco/buscar_paciente.html", context)
 
 
 @csrf_exempt
@@ -207,11 +212,11 @@ def enviar_pdf_whatsapp(request, carnet, fecha):
     output_path = os.path.join(output_dir, filename)
     logger.debug(f"Generando PDF en: {output_path}")
 
-    css_path = finders.find("pacientes/css/pdf_paciente.css")
+    css_path = finders.find("kiosco/css/pdf_paciente.css")
     css_files = [css_path] if css_path else []
 
     html = render_to_string(
-        "pacientes/pdf_paciente.html",
+        "kiosco/pdf_paciente.html",
         {
             **citas_pdf.get("context", {}),
             "tabla_columnas": tabla_columnas,
@@ -244,13 +249,14 @@ Cantidad de citas: {len(citas)}"""
             None if estado == "enviado" else data.get("error", "Error desconocido")
         )
 
-        EnvioWhatsApp.objects.create(
+        CitasWhatsapp.objects.create(
             carnet=carnet,
             numero_destino=numero,
             mensaje=mensaje,
             archivo_pdf=payload["image_path"],
             estado=estado,
             detalle_error=detalle_error,
+            ip_cliente=get_client.ip(request),
         )
 
         if estado == "enviado":
@@ -264,7 +270,7 @@ Cantidad de citas: {len(citas)}"""
 
     except requests.exceptions.RequestException as e:
         logger.error(f"Error de conexión con microservicio: {str(e)}", exc_info=True)
-        EnvioWhatsApp.objects.create(
+        CitasWhatsapp.objects.create(
             carnet=carnet,
             numero_destino=numero,
             mensaje=mensaje,

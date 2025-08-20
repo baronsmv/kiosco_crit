@@ -4,22 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pacientes', '0003_enviowhatsapp_delete_mensajewhatsapp'),
+        ("kiosco", "0003_enviowhatsapp_delete_mensajewhatsapp"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='enviowhatsapp',
-            name='paciente',
+            model_name="enviowhatsapp",
+            name="paciente",
         ),
         migrations.AddField(
-            model_name='enviowhatsapp',
-            name='carnet',
-            field=models.CharField(default='SIN_CARNET', max_length=20),
+            model_name="enviowhatsapp",
+            name="carnet",
+            field=models.CharField(default="SIN_CARNET", max_length=20),
         ),
         migrations.DeleteModel(
-            name='Paciente',
+            name="Paciente",
         ),
     ]
