@@ -3,16 +3,40 @@ function activarEnvioWhatsApp(modal) {
     const formEnviarPDF = modal.querySelector("#form-enviar-pdf");
     if (!formEnviarPDF) return;
 
+    const input = formEnviarPDF.querySelector("input[name=numero]");
+    const mensajeDiv = modal.querySelector("#mensaje-envio");
+
     formEnviarPDF.addEventListener("submit", async function (e) {
         e.preventDefault();
+
+        const numero = input.value.trim();
+        const regex = /^\d{10}$/;
+
+        // Limpiar estado anterior
+        input.classList.remove("input-error");
+        if (mensajeDiv) {
+            mensajeDiv.textContent = "";
+            mensajeDiv.style.display = "none";
+        }
+
+        if (!regex.test(numero)) {
+            if (mensajeDiv) {
+                mensajeDiv.textContent = "❌ El número debe tener exactamente 10 dígitos.";
+                mensajeDiv.style.display = "block";
+            }
+            input.classList.add("input-error");
+            input.focus();
+            return;
+        }
+
         const boton = formEnviarPDF.querySelector("button[type=submit]");
-        if (!boton) return;
+        const textoOriginal = boton?.textContent || "Enviar";
 
-        const textoOriginal = boton.textContent;
-        boton.textContent = "Enviando...";
-        boton.disabled = true;
+        if (boton) {
+            boton.textContent = "Enviando...";
+            boton.disabled = true;
+        }
 
-        const numero = formEnviarPDF.querySelector("input[name=numero]").value;
         const csrfToken = formEnviarPDF.querySelector("[name=csrfmiddlewaretoken]").value;
         const actionUrl = formEnviarPDF.getAttribute("action") || window.location.pathname;
 
@@ -31,49 +55,36 @@ function activarEnvioWhatsApp(modal) {
             try {
                 data = await response.json();
             } catch {
-                mostrarMensajeEnvio(modal, "❌ Respuesta no válida del servidor.");
-                boton.textContent = textoOriginal;
-                boton.disabled = false;
+                mostrarMensajeEnvio(mensajeDiv, "❌ Respuesta no válida del servidor.");
                 return;
             }
 
             if (data.status === "enviado") {
-                mostrarMensajeEnvio(modal, "✅ PDF enviado correctamente.");
-                boton.textContent = "Enviado";
+                mostrarMensajeEnvio(mensajeDiv, "✅ PDF enviado correctamente.");
+                if (boton) boton.textContent = "Enviado";
             } else {
-                mostrarMensajeEnvio(modal, "❌ Falló el envío.");
-                boton.textContent = textoOriginal;
+                mostrarMensajeEnvio(mensajeDiv, "❌ Falló el envío.");
             }
         } catch (err) {
             console.error(err);
-            mostrarMensajeEnvio(modal, "❌ Error al conectar con el servidor.");
-            boton.textContent = textoOriginal;
+            mostrarMensajeEnvio(mensajeDiv, "❌ Error al conectar con el servidor.");
         } finally {
-            setTimeout(() => {
-                boton.textContent = textoOriginal;
-                boton.disabled = false;
-            }, 4000);
+            if (boton) {
+                setTimeout(() => {
+                    boton.textContent = textoOriginal;
+                    boton.disabled = false;
+                }, 4000);
+            }
         }
     });
 }
 
-function mostrarMensajeEnvio(modal, texto) {
-    if (!modal) return;
-    const mensajeDiv = modal.querySelector("#mensaje-envio");
-    if (!mensajeDiv) return;
-
-    mensajeDiv.textContent = texto;
-    mensajeDiv.style.display = "block";
+function mostrarMensajeEnvio(elemento, texto) {
+    if (!elemento) return;
+    elemento.textContent = texto;
+    elemento.style.display = "block";
 
     setTimeout(() => {
-        mensajeDiv.style.display = "none";
+        elemento.style.display = "none";
     }, 4000);
 }
-
-document.addEventListener("DOMContentLoaded", function () {
-    // Intentamos activar para el modal inicial si existe
-    const modalInicial = document.getElementById("modal-paciente");
-    if (modalInicial) {
-        activarEnvioWhatsApp(modalInicial);
-    }
-});

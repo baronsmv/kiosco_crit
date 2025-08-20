@@ -18,7 +18,7 @@
 
         {% if tabla %}
         <div class="dato">
-            <span>{{ tabla_titulo }}</span>
+            <h3>{{ tabla_titulo }}</h3>
             <div class="tabla-scrollable">
                 <table>
                     <thead>
@@ -43,11 +43,26 @@
         {% endif %}
 
         {% if paciente.Carnet %}
+
         <form action="{% url 'enviar_pdf_whatsapp' paciente.Carnet %}" id="form-enviar-pdf" method="POST">
             {% csrf_token %}
-            <input name="numero" type="hidden" value="5215535438788">
-            <button class="btn-whatsapp" type="submit">{{ send_button_label }}</button>
+            <div class="input-button-row">
+                <label class="btn-whatsapp-label" for="numero-whatsapp">Número telefónico:</label>
+
+                <input class="btn-whatsapp-input"
+                       id="numero-whatsapp"
+                       name="numero"
+                       pattern="^\d{10}$"
+                       placeholder="Ej. 5512345678"
+                       required
+                       title="Debe tener 10 dígitos numéricos"
+                       type="text"/>
+
+                <button class="btn-whatsapp" type="submit">{{ send_button_label }}</button>
+            </div>
         </form>
+
+        <!-- Contenedor donde se cargará el mensaje de error por AJAX -->
         <div class="mensaje-transitorio" id="mensaje-envio" style="display: none;"></div>
         {% endif %}
     </div>

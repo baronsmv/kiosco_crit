@@ -1,23 +1,22 @@
 import os
 
+import requests
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles import finders
-from django.http import HttpResponse
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
-from utils.get_data import formatear_citas, obtener_citas  # type: ignore
-from utils.logger import get_logger  # type: ignore
 from weasyprint import HTML
 
 from .forms import BuscarPacienteForm
 from .models import EnvioWhatsApp
+from .utils.config import whatsapp_admin, page_citas
+from .utils.get_data import formatear_citas, obtener_citas
+from .utils.logger import get_logger
 
 logger = get_logger("backend_views")
-
-from django.contrib.auth.decorators import login_required
-import requests
 
 base_url = settings.WHATSAPP_API_BASE_URL
 
@@ -61,13 +60,12 @@ def admin_whatsapp(request):
         request,
         "admin/whatsapp_admin.html",
         {
-            "title": "Administración de WhatsApp",
-            "header": "Administración de WhatsApp",
+            **whatsapp_admin.get("context", {}),
             "qr_data_url": qr_data_url,
             "error_qr": error_qr,
             "status_message": status_message,
             "client_status": client_status,
-            "node_base_url": settings.WHATSAPP_API_BASE_URL,
+            "node_base_url": base_url,
         },
     )
 
@@ -77,20 +75,12 @@ def buscar_paciente(request):
     print("POST data:", request.POST, flush=True)
 
     context = {
-        "title": "Búsqueda de citas",
-        "header": "Búsqueda de citas",
-        "form_label": "Número de Carnet:",
-        "form_placeholder": "Ej: 123456",
-        "button_label": "Buscar",
-        "date_placeholder": "Ej: 01-01-25",
-        "date_label": "Fecha:",
-        "send_button_label": "📤 Enviar por WhatsApp",
+        **page_citas.get("context", {}),
         "form_error": False,
         "date_error": False,
         "carnet": "",
         "carnet_proporcionado": False,
         "paciente": None,
-        "tabla_titulo": "Citas",
         "tabla_columnas": tabla_columnas,
         "mensaje_error": "",
         "error_target": "",
@@ -191,6 +181,7 @@ def enviar_pdf_whatsapp(request, carnet):
         return JsonResponse({"error": "Paciente no encontrado"}, status=404)
 
     paciente, citas = formatear_citas(resultado["paciente"], resultado["citas"])
+    citas = {k: v for k, v in citas.items() if k != ""}
     logger.debug(f"Paciente obtenido: {paciente}")
     logger.debug(f"Citas obtenidas: {citas}")
 
@@ -223,7 +214,7 @@ Carnet: {paciente['Carnet']}
 Cantidad de citas: {len(citas)}"""
 
     payload = {
-        "number": numero + "@c.us",
+        "number": "521" + numero + "@c.us",
         "message": mensaje,
         "image_path": f"media/pdfs/{filename}",
     }

@@ -3,18 +3,29 @@
     box-sizing: border-box;
 }
 
+html {
+    font-size: 18px;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #6abf69 0%, #a8d5a0 100%);
     min-height: 100vh;
     margin: 0;
+    padding: 2rem;
+    color: #2d3a2e;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 2rem;
-    color: #2d3a2e;
 }
 
+label,
+input,
+button {
+    font-size: 1.15rem;
+}
+
+/* Contenedor principal */
 .container {
     margin: auto;
     background: white;
@@ -26,6 +37,7 @@ body {
     animation: fadeInUp 0.6s ease forwards;
 }
 
+/* Títulos */
 h1 {
     text-align: center;
     font-weight: 700;
@@ -34,6 +46,7 @@ h1 {
     color: #336633;
 }
 
+/* Formularios */
 form {
     display: flex;
     flex-direction: column;
@@ -42,25 +55,39 @@ form {
 
 label {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.1rem;
     margin-bottom: 0.3rem;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="date"],
+.form-group input {
     padding: 0.6rem 1rem;
     border: 2px solid #a8d5a0;
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
+    width: 100%;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="date"]:focus,
+.form-group input:focus {
     outline: none;
     border-color: #4caf50;
     box-shadow: 0 0 8px #a8d5a0;
 }
 
-button {
+.form-sublabel {
+    margin-top: -8px;
+    font-size: 0.9rem;
+    color: #444;
+}
+
+/* Botones */
+button,
+.btn-whatsapp,
+button[style] {
     background-color: #4caf50;
     color: white;
     padding: 0.75rem 1rem;
@@ -73,31 +100,35 @@ button {
 }
 
 button:hover,
-button:focus {
+button:focus,
+.btn-whatsapp:hover,
+.btn-whatsapp:focus,
+button[style]:hover,
+button[style]:focus {
     background-color: #388e3c;
+    outline: none;
 }
 
+button[style] {
+    margin-top: 0.5rem;
+    width: 100%;
+    font-size: 1.15rem;
+    padding: 0.85rem;
+}
+
+/* Form groups */
 .form-group {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    margin-bottom: 1.5rem;
 }
 
 .form-group label {
-    font-weight: 600;
-    font-size: 1rem;
     margin-bottom: 0.5rem;
 }
 
-.form-group input {
-    padding: 0.6rem 1rem;
-    border: 2px solid #a8d5a0;
-    border-radius: 8px;
-    font-size: 1rem;
-}
-
+/* Modal */
 .modal {
     position: fixed;
     top: 0;
@@ -127,8 +158,7 @@ button:focus {
     background-color: white;
     border-radius: 10px;
     padding: 2rem;
-    width: 90%;
-    max-width: 1920px;
+    width: 90vw;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transform: translateY(20px);
     opacity: 0;
@@ -138,6 +168,14 @@ button:focus {
 .modal.show .modal-content {
     transform: translateY(0);
     opacity: 1;
+}
+
+.modal:focus {
+    outline: none;
+}
+
+.modal-content:focus {
+    outline: 2px solid #2a9d8f;
 }
 
 .close-btn {
@@ -151,14 +189,7 @@ button:focus {
     color: #333;
 }
 
-.modal:focus {
-    outline: none;
-}
-
-.modal-content:focus {
-    outline: 2px solid #2a9d8f;
-}
-
+/* Datos del paciente */
 .dato {
     margin-bottom: 0.7rem;
     font-size: 1rem;
@@ -172,7 +203,7 @@ button:focus {
 .dato table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 0.5rem;
+    margin-top: 0;
 }
 
 .dato table th,
@@ -188,14 +219,14 @@ button:focus {
     font-weight: 600;
 }
 
+/* Tabla scrollable */
 .tabla-scrollable {
-    max-height: 50%;
+    max-height: 40vh;
     overflow-y: auto;
     border: 1px solid #ccc;
-    margin-top: 0.5rem;
+    margin-top: 0;
 }
 
-/* Opcional: mejora visual en scroll y tabla */
 .tabla-scrollable table {
     width: 100%;
     border-collapse: collapse;
@@ -203,9 +234,11 @@ button:focus {
 
 .tabla-scrollable th,
 .tabla-scrollable td {
-    padding: 8px 12px;
+    padding: 0.75rem 1rem;
     text-align: left;
     border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    line-height: 1.4;
 }
 
 .tabla-scrollable thead th {
@@ -213,31 +246,120 @@ button:focus {
     top: 0;
     background: #f5f5f5;
     z-index: 1;
+    border-bottom: 2px solid #ccc;
+    box-shadow: inset 0 -1px 0 #ccc;
 }
 
-.tabla-scrollable table,
-.tabla-scrollable thead,
-.tabla-scrollable tbody,
 .tabla-scrollable tr:first-child {
     margin-top: 0;
 }
 
-button[style] {
-    margin-top: 1rem;
-    width: 100%;
-    font-size: 1.15rem;
-    padding: 0.85rem;
+/* Íconos de error */
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.input-group.error input {
+    border-color: #e63946;
+    box-shadow: 0 0 6px #e63946aa;
+}
+
+.icon-error {
+    position: absolute;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    background: url('#icon-error') no-repeat center;
+    fill: #e63946;
+}
+
+.input-group.error::after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    background: none;
+    pointer-events: none;
+    mask: url('#icon-error') no-repeat center;
+    -webkit-mask: url('#icon-error') no-repeat center;
+    background-color: #e63946;
+}
+
+/* Mensajes de error */
+.error-message {
+    color: #e63946;
+    font-weight: 600;
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.input-error {
+    border-color: #f44336;
+    box-shadow: 0 0 4px #f44336;
+}
+
+/* WhatsApp form */
+.input-button-row {
+    max-width: 50vw;
+    margin: 1rem auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-whatsapp-label {
+    font-weight: 500;
+    font-size: 1.2rem;
+    color: #388e3c;
+    min-width: 130px;
+    text-align: right;
+}
+
+.btn-whatsapp-input {
+    flex: 1 1 200px;
+    min-width: 160px;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    border: 2px solid #4caf50;
+    border-radius: 6px;
+    transition: border-color 0.2s ease;
+}
+
+.btn-whatsapp-input:focus {
+    border-color: #388e3c;
+    outline: none;
+}
+
+/* Mensaje flotante */
+.mensaje-flotante {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
     border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.25s ease;
+    font-weight: bold;
+    color: #fff;
+    z-index: 9999;
+    display: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-button[style]:hover,
-button[style]:focus {
-    background-color: #1ebe47 !important;
+.mensaje-flotante.success {
+    background-color: #2b9348;
 }
 
+.mensaje-flotante.error {
+    background-color: #d90429;
+}
+
+/* Estilo para párrafos con inline style (si no se puede evitar) */
 p[style] {
     font-weight: 600;
     font-size: 1rem;
@@ -264,96 +386,21 @@ p[style] {
     }
 }
 
-/* Íconos */
-.input-group {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-group.error input {
-    border-color: #e63946;
-    box-shadow: 0 0 6px #e63946aa;
-}
-
-.icon-error {
-    position: absolute;
-    right: 10px;
-    width: 20px;
-    height: 20px;
-    pointer-events: none;
-    background: url('#icon-error') no-repeat center;
-    fill: #e63946;
-}
-
-/* Como background url con símbolo no funciona en todos los navegadores,
-   usaremos ::after con SVG inline */
-.input-group.error::after {
-    content: '';
-    position: absolute;
-    right: 10px;
-    width: 20px;
-    height: 20px;
-    background: none;
-    pointer-events: none;
-    mask: url('#icon-error') no-repeat center;
-    -webkit-mask: url('#icon-error') no-repeat center;
-    background-color: #e63946;
-}
-
-/* Mensajes de error */
-.error-message {
-    color: #e63946;
-    font-weight: 600;
-    margin-top: 0.25rem;
-    font-size: 0.9rem;
-}
-
-/* Botón verde WhatsApp con hover */
-.btn-whatsapp {
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    margin-top: 1rem;
-    padding: 0.85rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1.1rem;
-    transition: background-color 0.25s ease;
-    width: 100%;
-}
-
-.btn-whatsapp:hover,
-.btn-whatsapp:focus {
-    background-color: #388e3c;
-    outline: none;
-}
-
-.mensaje-flotante {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-    color: #fff;
-    z-index: 9999;
-    display: none;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.mensaje-flotante.success {
-    background-color: #2b9348;
-}
-
-.mensaje-flotante.error {
-    background-color: #d90429;
-}
-
 /* Responsive */
 @media (max-width: 520px) {
     .container {
         padding: 2rem 1.5rem;
+    }
+
+    .input-button-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-whatsapp-label,
+    .btn-whatsapp-input,
+    .btn-whatsapp {
+        text-align: left;
+        width: 100%;
     }
 }
