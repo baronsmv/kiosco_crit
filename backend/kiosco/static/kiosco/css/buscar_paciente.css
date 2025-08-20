@@ -221,7 +221,7 @@ button[style] {
 
 /* Tabla scrollable */
 .tabla-scrollable {
-    max-height: 40vh;
+    max-height: 35vh;
     overflow-y: auto;
     border: 1px solid #ccc;
     margin-top: 0;
@@ -294,8 +294,8 @@ button[style] {
 .error-message {
     color: #e63946;
     font-weight: 600;
-    margin-top: 0.25rem;
-    font-size: 0.9rem;
+    font-size: 0.87rem;
+    margin-top: 1rem;
 }
 
 .input-error {
