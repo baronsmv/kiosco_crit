@@ -65,3 +65,5 @@ whatsapp_node
 !whatsapp_node/Dockerfile
 !whatsapp_node/index.js
 !whatsapp_node/package.json
+
+*/config.yml
