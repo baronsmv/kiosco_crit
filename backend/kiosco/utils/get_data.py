@@ -40,7 +40,7 @@ def existe_paciente(carnet: str, cursor) -> Optional[Dict[str, str]]:
 
 
 def query_citas(
-    carnet: str, fecha: Optional[datetime], campos: List[str]
+    carnet: str, fecha: Optional[datetime], campos: List[str] = mapeo_campos.keys()
 ) -> Tuple[str, Tuple]:
     for campo in campos:
         if campo not in mapeo_campos:

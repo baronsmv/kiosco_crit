@@ -1,18 +1,25 @@
+import os
 from typing import Dict, Optional, Callable
 
-from django.http import HttpResponse
+import requests
+from django.conf import settings
+from django.contrib.staticfiles import finders
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from weasyprint import HTML
 
 from .get_client import ip
 from .logger import get_logger
 
-logger = get_logger("views_parser")
+logger = get_logger("parsers")
+
+base_url = settings.WHATSAPP_API_BASE_URL
 
 
-def obtener_tabla(web: Dict[str, Dict], sql: Dict[str, Dict]):
-    campos = web.get("campos", {})
-    mapeo_campos = sql["campos"]
+def mapear_columnas(data: Dict[str, Dict], mapeo: Dict[str, Dict]):
+    campos = data.get("campos", {})
+    mapeo_campos = mapeo["campos"]
 
     for campo in campos:
         if campo not in mapeo_campos:
@@ -90,7 +97,12 @@ def parse_form(
             persona=persona,
             objetos=objetos,
         )
-        model.objects.create(id, fecha_especificada=fecha, ip_cliente=ip(request))
+        request.session["context_data"] = {
+            c: context.get(c) for c in (persona, "tabla", "tabla_columnas")
+        }
+        model.objects.create(
+            **{identificador: id}, fecha_especificada=fecha, ip_cliente=ip(request)
+        )
     else:
         context.update(
             {
@@ -117,8 +129,8 @@ def ajax(
 
 def buscar(
     request,
-    web: Dict,
-    sql: Dict,
+    web_data: Dict,
+    sql_data: Dict,
     form,
     model,
     get_func: Callable,
@@ -131,8 +143,8 @@ def buscar(
     logger.debug(f"POST data: {request.POST}")
 
     context = {
-        **web.get("context", {}),
-        "tabla_columnas": obtener_tabla(web=web, sql=sql),
+        **web_data.get("context", {}),
+        "tabla_columnas": mapear_columnas(web_data, mapeo=sql_data),
         identificador: "",
         persona: None,
         f"{identificador}_proporcionado": False,
@@ -146,7 +158,7 @@ def buscar(
         parse_form(
             request,
             context,
-            campos=web.get("campos", {}),
+            campos=web_data.get("campos", {}),
             form=form(request.POST),
             model=model,
             get_func=get_func,
@@ -164,3 +176,130 @@ def buscar(
             return respuesta_ajax
 
     return render(request, f"kiosco/buscar_{persona}.html", context)
+
+
+def mapear_tabla(data, sql_data, context):
+    def indices_coincidentes(total, subset):
+        return tuple(i for i, campo in enumerate(total) if campo in subset)
+
+    columnas_pdf = mapear_columnas(data, sql_data)
+    context["tabla"] = tuple(
+        (t[i] for i in indices_coincidentes(context["tabla_columnas"], columnas_pdf))
+        for t in context["sql"]
+    )
+    context["tabla_columnas"] = columnas_pdf
+
+
+def generar_pdf(
+    identificador,
+    pdf_data: Dict[str, Dict],
+    sql_data: Dict[str, Dict],
+    previous_context: Dict,
+    persona: str,
+) -> str:
+    filename = f"{persona}_{identificador}.pdf"
+    output_dir = os.path.join(settings.MEDIA_ROOT, "pdfs")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, filename)
+    logger.debug(f"Generando PDF en: {output_path}")
+
+    css_path = finders.find(f"kiosco/css/pdf_{persona}.css")
+    css_files = [css_path] if css_path else []
+
+    mapear_tabla(pdf_data, sql_data, previous_context)
+
+    html = render_to_string(
+        f"kiosco/pdf_{persona}.html",
+        {**pdf_data.get("context", {}), **previous_context},
+    )
+    HTML(string=html).write_pdf(output_path, stylesheets=css_files)
+    logger.debug("PDF generado correctamente")
+
+    return filename
+
+
+def enviar_pdf(
+    request,
+    id: str,
+    identificador: str,
+    persona: str,
+    pdf_data: Dict,
+    sql_data: Dict,
+    model,
+):
+    logger.debug(
+        f"enviar_pdf_whatsapp called with method {request.method} and {identificador} {id}"
+    )
+
+    if request.method != "POST":
+        logger.warning(f"Método no permitido: {request.method}")
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    numero = request.POST.get("numero")
+    logger.debug(f"Numero recibido: {numero}")
+    if not numero:
+        logger.error("Número de WhatsApp requerido no proporcionado")
+        return JsonResponse({"error": "Número de WhatsApp requerido"}, status=400)
+
+    web_context = request.session.get("context_data", {})
+    filename = generar_pdf(
+        id,
+        persona=persona,
+        pdf_data=pdf_data,
+        sql_data=sql_data,
+        previous_context=web_context,
+    )
+
+    # Mensaje WhatsApp
+    mensaje = f"""Datos del {persona}:
+Nombre: {web_context[persona]['Nombre']}
+{identificador.title()}: {web_context[persona][identificador.title()]}"""
+
+    payload = {
+        "number": "521" + numero + "@c.us",
+        "message": mensaje,
+        "image_path": f"media/pdfs/{filename}",
+    }
+
+    try:
+        response = requests.post(f"{base_url}/send-media", json=payload)
+        data = response.json()
+        logger.debug(f"Respuesta del microservicio: {data}")
+
+        estado = "enviado" if response.status_code == 200 else "fallido"
+        detalle_error = (
+            None if estado == "enviado" else data.get("error", "Error desconocido")
+        )
+
+        model.objects.create(
+            **{identificador: id},
+            numero_destino=numero,
+            mensaje=mensaje,
+            archivo_pdf=payload["image_path"],
+            estado=estado,
+            detalle_error=detalle_error,
+            ip_cliente=ip(request),
+        )
+
+        if estado == "enviado":
+            logger.info("Mensaje enviado correctamente")
+            return JsonResponse({"status": "enviado", "detalles": data})
+        else:
+            logger.error(f"Error enviando mensaje: {detalle_error}")
+            return JsonResponse(
+                {"status": "fallido", "error": detalle_error}, status=500
+            )
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error de conexión con microservicio: {str(e)}", exc_info=True)
+        model.objects.create(
+            id,
+            numero_destino=numero,
+            mensaje=mensaje,
+            archivo_pdf=payload["image_path"],
+            estado="fallido",
+            detalle_error=str(e),
+        )
+        return JsonResponse(
+            {"error": f"Error de conexión con microservicio: {str(e)}"}, status=500
+        )
