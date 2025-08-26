@@ -4,7 +4,7 @@ import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles import finders
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
@@ -16,6 +16,7 @@ from .utils import get_client
 from .utils.config import whatsapp_admin, citas_web, citas_pdf, citas_sql
 from .utils.get_data import formatear_citas, obtener_citas
 from .utils.logger import get_logger
+from .utils.parsers import buscar
 
 logger = get_logger("backend_views")
 
@@ -69,103 +70,19 @@ def admin_whatsapp(request):
     )
 
 
-def buscar_paciente(request):
-    logger.info(f"Request method: {request.method}")
-    logger.debug(f"POST data: {request.POST}")
-
-    campos = citas_web.get("campos", {})
-    mapeo_campos = citas_sql["campos"]
-
-    for campo in campos:
-        if campo not in mapeo_campos:
-            raise ValueError(f"Campo desconocido: {campo}")
-
-    tabla_columnas = tuple(mapeo_campos[campo]["nombre"] for campo in campos)
-
-    context = {
-        **citas_web.get("context", {}),
-        "tabla_columnas": tabla_columnas,
-        "carnet": "",
-        "mensaje_error": "",
-        "error_target": "",
-        "paciente": None,
-        "carnet_proporcionado": False,
-        "form_error": False,
-        "date_error": False,
-    }
-
-    if request.method == "POST":
-        form = BuscarPacienteForm(request.POST)
-
-        if form.is_valid():
-            carnet = form.cleaned_data["carnet"]
-            fecha = form.cleaned_data["fecha"]
-            context.update(
-                {
-                    "carnet": carnet,
-                    "fecha": fecha,
-                    "carnet_proporcionado": True,
-                }
-            )
-
-            resultado = obtener_citas(carnet, fecha=fecha, campos=campos)
-
-            if not resultado:
-                context.update(
-                    {
-                        "form_error": True,
-                        "error_target": "carnet",
-                        "mensaje_error": "❌ No se encontró ningún paciente con ese carnet.",
-                    }
-                )
-                logger.warning(context["mensaje_error"])
-
-            elif not resultado.get("citas"):
-                error_context = {
-                    "mensaje_error": (
-                        "❌ No se encontraron citas con la fecha especificada."
-                        if fecha
-                        else "❌ No se encontraron citas activas para este carnet."
-                    ),
-                    "error_target": "fecha" if fecha else "carnet",
-                }
-
-                context.update(error_context)
-                context[error_context["error_target"] + "_error"] = True
-                logger.info(error_context["mensaje_error"])
-
-            else:
-                paciente_fmt, citas_fmt = formatear_citas(**resultado, campos=campos)
-                context.update(
-                    {
-                        "paciente": paciente_fmt,
-                        "tabla": citas_fmt,
-                    }
-                )
-        else:
-            context.update(
-                {
-                    "form_error": bool(form["carnet"].errors),
-                    "date_error": bool(form["fecha"].errors),
-                }
-            )
-            logger.warning("Formulario inválido")
-
-        CitasConsulta.objects.create(
-            carnet=carnet, fecha_especificada=fecha, ip_cliente=get_client.ip(request)
-        )
-
-        # Respuesta AJAX
-        if request.headers.get("x-requested-with") == "XMLHttpRequest":
-            template = (
-                "kiosco/partials/modal_paciente.html"
-                if context["paciente"]
-                else "kiosco/partials/mensaje_error.html"
-            )
-            html = render_to_string(template, context, request=request)
-            return HttpResponse(html)
-
-    return render(request, "kiosco/buscar_paciente.html", context)
+def buscar_citas_paciente(request):
+    return buscar(
+        request,
+        web=citas_web,
+        sql=citas_sql,
+        form=BuscarPacienteForm,
+        model=CitasConsulta,
+        get_func=obtener_citas,
+        format_func=formatear_citas,
+        identificador="carnet",
+        persona="paciente",
+        objetos="citas",
+    )
 
 
 @csrf_exempt

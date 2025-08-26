@@ -18,11 +18,11 @@
 
             <!-- Carnet -->
             <label for="carnet">{{ form_label }}</label>
-            <div class="input-group {% if form_error %}error{% endif %}">
+            <div class="input-group {% if carnet_error %}error{% endif %}">
                 <input
-                        aria-describedby="{% if form_error %}carnet-error{% endif %}"
-                        aria-invalid="{% if form_error %}true{% else %}false{% endif %}"
-                        class="{% if form_error %}error{% endif %}"
+                        aria-describedby="{% if carnet_error %}carnet-error{% endif %}"
+                        aria-invalid="{% if carnet_error %}true{% else %}false{% endif %}"
+                        class="{% if carnet_error %}error{% endif %}"
                         id="carnet"
                         name="carnet"
                         placeholder="{{ form_placeholder }}"

@@ -94,18 +94,17 @@ def formatear_citas(
     paciente: Dict[str, str],
     citas: List[Dict[str, Any]],
     campos: List[str],
-) -> Tuple[Dict[str, str], Tuple[Tuple]]:
-    paciente_fmt = {
-        "Nombre": paciente.get("nombre", ""),
-        "Carnet": paciente.get("no_carnet", ""),
+) -> Dict[str, Dict[str, str] | Tuple[Tuple]]:
+    return {
+        "paciente": {
+            "Nombre": paciente.get("nombre", ""),
+            "Carnet": paciente.get("no_carnet", ""),
+        },
+        "tabla": tuple(
+            tuple(
+                formatear_dato(cita.get(campo), mapeo_campos[campo].get("tipo"))
+                for campo in campos
+            )
+            for cita in citas
+        ),
     }
-
-    citas_fmt = tuple(
-        tuple(
-            formatear_dato(cita.get(campo), mapeo_campos[campo].get("tipo"))
-            for campo in campos
-        )
-        for cita in citas
-    )
-
-    return paciente_fmt, citas_fmt
