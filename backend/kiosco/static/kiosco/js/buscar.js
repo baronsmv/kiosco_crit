@@ -7,7 +7,7 @@ function cerrarModal() {
     setTimeout(() => {
         modal.classList.remove("visible");
 
-        const input = document.getElementById("carnet");
+        const input = document.getElementById("id");
         if (input) {
             input.focus();
         }
@@ -95,15 +95,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         limpiarErrores();
 
-        const carnetInput = document.getElementById("carnet");
+        const idInput = document.getElementById("id");
         const fechaInput = document.getElementById("fecha");
 
-        const carnet = carnetInput.value.trim();
+        const id = idInput.value.trim();
         const fecha = fechaInput.value.trim();
 
-        if (!carnet) {
-            carnetInput.focus();
-            carnetInput.select();
+        if (!id) {
+            idInput.focus();
+            idInput.select();
             return;
         }
 
@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     "X-Requested-With": "XMLHttpRequest",
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
-                body: new URLSearchParams({carnet, fecha}),
+                body: new URLSearchParams({id}),
             });
 
             const html = await response.text();
@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 setTimeout(() => {
                     nuevoModal.classList.add("show");
                     nuevoModal.focus();
-                    carnetInput.value = "";
+                    idInput.value = "";
                     fechaInput.value = "";
                 }, 20);
 
@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     container.querySelector(".error-message")?.remove(); // Elimina error anterior
                     container.insertAdjacentElement("beforeend", error);
 
-                    const target = error.getAttribute("data-error-target") || "carnet";
+                    const target = error.getAttribute("data-error-target") || "id";
                     mostrarErrorCampo(target);
 
                     const input = document.getElementById(target);
@@ -158,13 +158,13 @@ document.addEventListener("DOMContentLoaded", function () {
                         input.select();
                     }
                 }
-                carnetInput.focus();
-                carnetInput.select();
+                idInput.focus();
+                idInput.select();
             }
         } catch (error) {
             console.error("Error al buscar:", error);
-            carnetInput.focus();
-            carnetInput.select();
+            idInput.focus();
+            idInput.select();
         }
     });
 

@@ -16,19 +16,18 @@
         {% csrf_token %}
         <div class="form-group">
 
-            <!-- Carnet -->
-            <label for="carnet">{{ form_label }}</label>
-            <div class="input-group {% if carnet_error %}error{% endif %}">
+            <label for="id">{{ form_label }}</label>
+            <div class="input-group {% if id_error %}error{% endif %}">
                 <input
-                        aria-describedby="{% if carnet_error %}carnet-error{% endif %}"
-                        aria-invalid="{% if carnet_error %}true{% else %}false{% endif %}"
-                        class="{% if carnet_error %}error{% endif %}"
-                        id="carnet"
-                        name="carnet"
+                        aria-describedby="{% if id_error %}id-error{% endif %}"
+                        aria-invalid="{% if id_error %}true{% else %}false{% endif %}"
+                        class="{% if id_error %}error{% endif %}"
+                        id="id"
+                        name="id"
                         placeholder="{{ form_placeholder }}"
                         required
                         type="text"
-                        value="{{ carnet|default:'' }}"
+                        value="{{ id|default:'' }}"
                 />
             </div>
 
@@ -56,14 +55,14 @@
 
     <!-- Respuesta AJAX (fallback) -->
     <div id="respuesta-ajax">
-        {% if not persona and carnet_proporcionado %}
+        {% if not persona and id_proporcionado %}
         {% include 'kiosco/partials/mensaje_error.html' %}
         {% endif %}
     </div>
 </div>
 
 <!-- Modal de persona si hay resultados -->
-{% if persona and carnet %}
+{% if persona and id %}
 {% include 'kiosco/partials/modal_buscar.html' %}
 {% endif %}
 

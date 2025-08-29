@@ -41,8 +41,8 @@ def parse_result(
     if not resultado:
         context.update(
             {
-                f"{identificador}_error": True,
-                "error_target": identificador,
+                "id_error": True,
+                "error_target": "id",
                 "mensaje_error": f"❌ No se encontró ningún {persona} con ese {identificador}.",
             }
         )
@@ -55,7 +55,7 @@ def parse_result(
                 if fecha
                 else f"❌ No se encontraron {objetos} activas para este {identificador}."
             ),
-            "error_target": "fecha" if fecha else identificador,
+            "error_target": "fecha" if fecha else "id",
         }
 
         context.update(error_context)
@@ -80,13 +80,13 @@ def parse_form(
     pdf_url: str,
 ):
     if form.is_valid():
-        id = form.cleaned_data[identificador]
+        id = form.cleaned_data["id"]
         fecha = form.cleaned_data["fecha"]
         context.update(
             {
-                identificador: id,
+                "id": id,
+                "id_proporcionado": True,
                 "fecha": fecha,
-                f"{identificador}_proporcionado": True,
                 "pdf_url": reverse(pdf_url, args=(id,)),
             }
         )
@@ -109,11 +109,11 @@ def parse_form(
     else:
         context.update(
             {
-                f"{identificador}_error": bool(form[identificador].errors),
+                "id_error": bool(form[identificador].errors),
                 "date_error": bool(form["fecha"].errors),
             }
         )
-        logger.warning("Formulario inválido")
+        logger.warning(f"Formulario inválido:\n{form.errors.as_json()}")
 
 
 def ajax(
@@ -148,10 +148,10 @@ def buscar(
     context = {
         **web_data.get("context", {}),
         "tabla_columnas": mapear_columnas(web_data, mapeo=sql_data),
-        identificador: "",
+        "id": "",
         "persona": None,
-        f"{identificador}_proporcionado": False,
-        f"{identificador}_error": False,
+        "id_proporcionado": False,
+        "id_error": False,
         "date_error": False,
         "mensaje_error": "",
         "error_target": "",
@@ -293,7 +293,7 @@ Nombre: {web_context['persona']['Nombre']}
     except requests.exceptions.RequestException as e:
         logger.error(f"Error de conexión con microservicio: {str(e)}", exc_info=True)
         model.objects.create(
-            id,
+            **{identificador: id},
             numero_destino=numero,
             mensaje=mensaje,
             archivo_pdf=payload["image_path"],

@@ -16,7 +16,6 @@
         </div>
         {% endfor %}
 
-        {% if tabla %}
         <div class="dato">
             <h3>{{ table_title }}</h3>
             <div class="tabla-scrollable">
@@ -40,9 +39,6 @@
                 </table>
             </div>
         </div>
-        {% endif %}
-
-        {% if persona.Carnet %}
 
         <form action="{{ pdf_url }}" id="form-enviar-pdf" method="POST">
             {% csrf_token %}
@@ -64,6 +60,5 @@
 
         <!-- Contenedor donde se cargará el mensaje de error por AJAX -->
         <div class="mensaje-transitorio" id="mensaje-envio" style="display: none;"></div>
-        {% endif %}
     </div>
 </div>
