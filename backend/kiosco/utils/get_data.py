@@ -73,38 +73,42 @@ def query_citas(
 
 
 def obtener_citas(
-    carnet: str, campos: List[str], fecha: Optional[datetime] = None
+    carnet: str,
+    campos: List[str] = mapeo_campos.keys(),
+    fecha: Optional[datetime] = None,
 ) -> Optional[Dict[str, Any]]:
     with connections["crit"].cursor() as cursor:
         paciente = existe_paciente(carnet, cursor)
         if not paciente:
             return None
 
-        query, params = query_citas(carnet, fecha, campos)
+        query, params = query_citas(carnet, campos=campos, fecha=fecha)
         cursor.execute(query, params)
         rows = cursor.fetchall()
 
     return {
-        "paciente": paciente,
-        "citas": [dict(zip(campos, row)) for row in rows],
+        "paciente_sf": paciente,
+        "citas_sf": [
+            {
+                campo: formatear_dato(row[i], mapeo_campos[campo].get("tipo"))
+                for i, campo in enumerate(campos)
+            }
+            for row in rows
+        ],
     }
 
 
 def formatear_citas(
-    paciente: Dict[str, str],
-    citas: List[Dict[str, Any]],
-    campos: List[str],
+    paciente_sf: Dict[str, str],
+    citas_sf: List[Dict[str, Any]],
+    campos: List[str] = mapeo_campos.keys(),
 ) -> Dict[str, Dict[str, str] | Tuple[Tuple]]:
     return {
         "paciente": {
-            "Nombre": paciente.get("nombre", ""),
-            "Carnet": paciente.get("no_carnet", ""),
+            "Nombre": paciente_sf.get("nombre", ""),
+            "Carnet": paciente_sf.get("no_carnet", ""),
         },
         "tabla": tuple(
-            tuple(
-                formatear_dato(cita.get(campo), mapeo_campos[campo].get("tipo"))
-                for campo in campos
-            )
-            for cita in citas
+            tuple(cita.get(campo, "") for campo in campos) for cita in citas_sf
         ),
     }

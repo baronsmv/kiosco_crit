@@ -85,6 +85,7 @@ def enviar_citas_paciente(request, carnet, fecha):
         id=carnet,
         identificador="carnet",
         persona="paciente",
+        format_func=formatear_citas,
         pdf_data=citas_pdf,
         sql_data=citas_sql,
         model=CitasWhatsapp,

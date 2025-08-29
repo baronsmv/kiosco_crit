@@ -47,7 +47,7 @@ def parse_result(
         )
         logger.warning(context["mensaje_error"])
 
-    elif not resultado.get(objetos):
+    elif not resultado.get(f"{objetos}_sf"):
         error_context = {
             "mensaje_error": (
                 f"❌ No se encontraron {objetos} con la fecha especificada."
@@ -62,7 +62,7 @@ def parse_result(
         logger.info(error_context["mensaje_error"])
 
     else:
-        context.update(**success_dict)
+        context.update(**success_dict, **resultado)
 
 
 def parse_form(
@@ -87,7 +87,7 @@ def parse_form(
                 f"{identificador}_proporcionado": True,
             }
         )
-        resultado = get_func(id, fecha=fecha, campos=campos)
+        resultado = get_func(id, fecha=fecha)
         parse_result(
             resultado,
             context,
@@ -98,7 +98,7 @@ def parse_form(
             objetos=objetos,
         )
         request.session["context_data"] = {
-            c: context.get(c) for c in (persona, "tabla", "tabla_columnas")
+            c: context.get(c) for c in (f"{persona}_sf", f"{objetos}_sf")
         }
         model.objects.create(
             **{identificador: id}, fecha_especificada=fecha, ip_cliente=ip(request)
@@ -167,6 +167,7 @@ def buscar(
             persona=persona,
             objetos=objetos,
         )
+        print("A" * 1000, context, sep="\n", flush=True)
         if respuesta_ajax := ajax(
             request,
             context,
@@ -178,20 +179,9 @@ def buscar(
     return render(request, f"kiosco/buscar_{persona}.html", context)
 
 
-def mapear_tabla(data, sql_data, context):
-    def indices_coincidentes(total, subset):
-        return tuple(i for i, campo in enumerate(total) if campo in subset)
-
-    columnas_pdf = mapear_columnas(data, sql_data)
-    context["tabla"] = tuple(
-        (t[i] for i in indices_coincidentes(context["tabla_columnas"], columnas_pdf))
-        for t in context["sql"]
-    )
-    context["tabla_columnas"] = columnas_pdf
-
-
 def generar_pdf(
     identificador,
+    format_func: Callable,
     pdf_data: Dict[str, Dict],
     sql_data: Dict[str, Dict],
     previous_context: Dict,
@@ -206,7 +196,11 @@ def generar_pdf(
     css_path = finders.find(f"kiosco/css/pdf_{persona}.css")
     css_files = [css_path] if css_path else []
 
-    mapear_tabla(pdf_data, sql_data, previous_context)
+    campos = pdf_data.get("campos", ())
+    previous_context.update(
+        format_func(**previous_context, campos=campos),
+    )
+    previous_context["tabla_columnas"] = mapear_columnas(pdf_data, mapeo=sql_data)
 
     html = render_to_string(
         f"kiosco/pdf_{persona}.html",
@@ -223,6 +217,7 @@ def enviar_pdf(
     id: str,
     identificador: str,
     persona: str,
+    format_func: Callable,
     pdf_data: Dict,
     sql_data: Dict,
     model,
@@ -245,6 +240,7 @@ def enviar_pdf(
     filename = generar_pdf(
         id,
         persona=persona,
+        format_func=format_func,
         pdf_data=pdf_data,
         sql_data=sql_data,
         previous_context=web_context,
