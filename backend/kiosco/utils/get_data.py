@@ -124,7 +124,7 @@ def formatear_citas(
     campos: List[str] = citas_mapeo_campos.keys(),
 ) -> Dict[str, Dict[str, str] | Tuple[Tuple]]:
     return {
-        "paciente": {
+        "persona": {
             "Nombre": paciente_sf.get("nombre", ""),
             "Carnet": paciente_sf.get("no_carnet", ""),
         },

@@ -56,14 +56,14 @@
 
     <!-- Respuesta AJAX (fallback) -->
     <div id="respuesta-ajax">
-        {% if not paciente and carnet_proporcionado %}
+        {% if not persona and carnet_proporcionado %}
         {% include 'kiosco/partials/mensaje_error.html' %}
         {% endif %}
     </div>
 </div>
 
-<!-- Modal de paciente si hay resultados -->
-{% if paciente and carnet %}
+<!-- Modal de persona si hay resultados -->
+{% if persona and carnet %}
 {% include 'kiosco/partials/modal_buscar.html' %}
 {% endif %}
 

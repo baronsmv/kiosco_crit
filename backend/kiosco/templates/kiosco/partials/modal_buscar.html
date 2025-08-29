@@ -2,7 +2,7 @@
         aria-labelledby="modal-title"
         aria-modal="true"
         class="modal visible"
-        id="modal-paciente"
+        id="modal"
         role="dialog"
         tabindex="-1"
 >
@@ -10,7 +10,7 @@
         <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal()">×</button>
         <h2 id="modal-title">{{ data_title }}</h2>
 
-        {% for titulo, valor in paciente.items %}
+        {% for titulo, valor in persona.items %}
         <div class="dato">
             <span>{{ titulo }}:</span> {{ valor }}
         </div>
@@ -42,7 +42,7 @@
         </div>
         {% endif %}
 
-        {% if paciente.Carnet %}
+        {% if persona.Carnet %}
 
         <form action="{{ pdf_url }}" id="form-enviar-pdf" method="POST">
             {% csrf_token %}

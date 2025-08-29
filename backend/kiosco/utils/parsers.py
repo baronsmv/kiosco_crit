@@ -119,13 +119,12 @@ def parse_form(
 def ajax(
     request,
     context: Dict,
-    persona: str,
     partial: str,
     partial_error: str = "mensaje_error.html",
 ):
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         template = "kiosco/partials/"
-        template += partial if context[persona] else partial_error
+        template += partial if context["persona"] else partial_error
         html = render_to_string(template, context, request=request)
         return HttpResponse(html)
 
@@ -150,7 +149,7 @@ def buscar(
         **web_data.get("context", {}),
         "tabla_columnas": mapear_columnas(web_data, mapeo=sql_data),
         identificador: "",
-        persona: None,
+        "persona": None,
         f"{identificador}_proporcionado": False,
         f"{identificador}_error": False,
         "date_error": False,
@@ -175,7 +174,6 @@ def buscar(
         if respuesta_ajax := ajax(
             request,
             context,
-            persona=persona,
             partial=f"modal_buscar.html",
         ):
             return respuesta_ajax
@@ -254,8 +252,8 @@ def enviar_pdf(
 
     # Mensaje WhatsApp
     mensaje = f"""Datos del {persona}:
-Nombre: {web_context[persona]['Nombre']}
-{identificador.title()}: {web_context[persona][identificador.title()]}"""
+Nombre: {web_context['persona']['Nombre']}
+{identificador.title()}: {web_context['persona'][identificador.title()]}"""
 
     payload = {
         "number": "521" + numero + "@c.us",

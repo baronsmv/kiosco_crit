@@ -1,5 +1,5 @@
 function cerrarModal() {
-    const modal = document.getElementById("modal-paciente");
+    const modal = document.getElementById("modal");
     if (!modal) return;
 
     modal.classList.remove("show");
@@ -19,7 +19,7 @@ function activarListenersModal(modal) {
 
     // Tecla Escape
     document.addEventListener("keydown", function onKeyDown(e) {
-        if (!document.getElementById("modal-paciente")) {
+        if (!document.getElementById("modal")) {
             // Si modal ya no está en DOM, quita listener para evitar fugas
             document.removeEventListener("keydown", onKeyDown);
             return;
@@ -85,7 +85,7 @@ function limpiarErrores() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    const anterior = document.getElementById("modal-paciente");
+    const anterior = document.getElementById("modal");
     if (anterior) anterior.remove();
 
     const form = document.getElementById("buscar-form");
@@ -125,10 +125,10 @@ document.addEventListener("DOMContentLoaded", function () {
             // Extrae el modal desde la respuesta y lo inserta
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            const nuevoModal = doc.getElementById("modal-paciente");
+            const nuevoModal = doc.getElementById("modal");
 
             // Elimina modal viejo
-            const modalViejo = document.getElementById("modal-paciente");
+            const modalViejo = document.getElementById("modal");
             if (modalViejo) modalViejo.remove();
 
             if (nuevoModal) {
@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Si en la carga inicial ya hay modal, activa listeners ahí
-    const modalInicial = document.getElementById("modal-paciente");
+    const modalInicial = document.getElementById("modal");
     if (modalInicial) {
         activarListenersModal(modalInicial);
 
