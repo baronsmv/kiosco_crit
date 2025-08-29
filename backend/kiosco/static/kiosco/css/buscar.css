@@ -8,8 +8,10 @@ html {
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #6abf69 0%, #a8d5a0 100%);
+    background: linear-gradient(270deg, #4b0082, #8a2be2, #1e90ff, #6a0dad, #4b0082);
+    background-size: 600% 600%;
+    animation: gradientAnim 25s ease infinite;
+    font-family: "Myriad Pro", sans-serif;
     min-height: 100vh;
     margin: 0;
     padding: 2rem;
@@ -17,6 +19,19 @@ body {
     display: flex;
     justify-content: center;
     align-items: flex-start;
+}
+
+/* Animación de fondo */
+@keyframes gradientAnim {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 label,
@@ -43,7 +58,7 @@ h1 {
     font-weight: 700;
     font-size: 2.2rem;
     margin-bottom: 1.8rem;
-    color: #336633;
+    color: #4b0082;
 }
 
 /* Formularios */
@@ -57,13 +72,14 @@ label {
     font-weight: 600;
     font-size: 1.1rem;
     margin-bottom: 0.3rem;
+    color: #2c2c54;
 }
 
 input[type="text"],
 input[type="date"],
 .form-group input {
     padding: 0.6rem 1rem;
-    border: 2px solid #a8d5a0;
+    border: 2px solid #b09fdc;
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
@@ -74,8 +90,8 @@ input[type="text"]:focus,
 input[type="date"]:focus,
 .form-group input:focus {
     outline: none;
-    border-color: #4caf50;
-    box-shadow: 0 0 8px #a8d5a0;
+    border-color: #8a2be2;
+    box-shadow: 0 0 8px #b09fdc;
 }
 
 .form-sublabel {
@@ -88,7 +104,7 @@ input[type="date"]:focus,
 button,
 .btn-whatsapp,
 button[style] {
-    background-color: #4caf50;
+    background-color: #6a0dad;
     color: white;
     padding: 0.75rem 1rem;
     border: none;
@@ -105,7 +121,7 @@ button:focus,
 .btn-whatsapp:focus,
 button[style]:hover,
 button[style]:focus {
-    background-color: #388e3c;
+    background-color: #4b0082;
     outline: none;
 }
 
@@ -175,7 +191,7 @@ button[style] {
 }
 
 .modal-content:focus {
-    outline: 2px solid #2a9d8f;
+    outline: 2px solid #6a0dad;
 }
 
 .close-btn {
@@ -189,7 +205,7 @@ button[style] {
     color: #333;
 }
 
-/* Datos del paciente */
+/* Datos */
 .dato {
     margin-bottom: 0.7rem;
     font-size: 1rem;
@@ -197,7 +213,7 @@ button[style] {
 
 .dato span {
     font-weight: 600;
-    color: #336633;
+    color: #4b0082;
 }
 
 .dato table {
@@ -214,8 +230,8 @@ button[style] {
 }
 
 .dato table th {
-    background-color: #f0f0f0;
-    color: #336633;
+    background-color: #ede7f6;
+    color: #4b0082;
     font-weight: 600;
 }
 
@@ -244,7 +260,7 @@ button[style] {
 .tabla-scrollable thead th {
     position: sticky;
     top: 0;
-    background: #f5f5f5;
+    background: #f4f0fb;
     z-index: 1;
     border-bottom: 2px solid #ccc;
     box-shadow: inset 0 -1px 0 #ccc;
@@ -263,8 +279,8 @@ button[style] {
 }
 
 .input-group.error input {
-    border-color: #e63946;
-    box-shadow: 0 0 6px #e63946aa;
+    border-color: #d90429;
+    box-shadow: 0 0 6px #d90429aa;
 }
 
 .icon-error {
@@ -303,7 +319,7 @@ button[style] {
     box-shadow: 0 0 4px #f44336;
 }
 
-/* WhatsApp form */
+/* WhatsApp form adaptado */
 .input-button-row {
     max-width: 50vw;
     margin: 1rem auto 0;
@@ -317,7 +333,7 @@ button[style] {
 .btn-whatsapp-label {
     font-weight: 500;
     font-size: 1.2rem;
-    color: #388e3c;
+    color: #6a0dad;
     min-width: 130px;
     text-align: right;
 }
@@ -327,13 +343,13 @@ button[style] {
     min-width: 160px;
     padding: 0.6rem 0.75rem;
     font-size: 1rem;
-    border: 2px solid #4caf50;
+    border: 2px solid #6a0dad;
     border-radius: 6px;
     transition: border-color 0.2s ease;
 }
 
 .btn-whatsapp-input:focus {
-    border-color: #388e3c;
+    border-color: #4b0082;
     outline: none;
 }
 
@@ -352,14 +368,14 @@ button[style] {
 }
 
 .mensaje-flotante.success {
-    background-color: #2b9348;
+    background-color: #6a0dad;
 }
 
 .mensaje-flotante.error {
     background-color: #d90429;
 }
 
-/* Estilo para párrafos con inline style (si no se puede evitar) */
+/* Estilo para párrafos con inline style */
 p[style] {
     font-weight: 600;
     font-size: 1rem;

@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import path
 
-from .views import admin_whatsapp, buscar_citas_paciente, enviar_citas_paciente
+from .views import admin_whatsapp, buscar_citas_por_carnet, enviar_citas_por_carnet
 
 
 def is_staff(user):
@@ -14,10 +14,10 @@ urlpatterns = [
         user_passes_test(is_staff)(admin_whatsapp),
         name="admin_whatsapp",
     ),
-    path("", buscar_citas_paciente, name="buscar_paciente"),
+    path("", buscar_citas_por_carnet, name="buscar_paciente"),
     path(
-        "enviar-pdf/<str:carnet>/",
-        enviar_citas_paciente,
-        name="enviar_pdf_whatsapp",
+        "pdf-citas-carnet/<str:carnet>/",
+        enviar_citas_por_carnet,
+        name="pdf_citas_carnet",
     ),
 ]

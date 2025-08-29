@@ -7,6 +7,7 @@ from django.contrib.staticfiles import finders
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.urls import reverse
 from weasyprint import HTML
 
 from .get_client import ip
@@ -76,6 +77,7 @@ def parse_form(
     identificador: str,
     persona: str,
     objetos: str,
+    pdf_url: str,
 ):
     if form.is_valid():
         id = form.cleaned_data[identificador]
@@ -85,6 +87,7 @@ def parse_form(
                 identificador: id,
                 "fecha": fecha,
                 f"{identificador}_proporcionado": True,
+                "pdf_url": reverse(pdf_url, args=(id,)),
             }
         )
         resultado = get_func(id, fecha=fecha)
@@ -138,6 +141,7 @@ def buscar(
     identificador: str,
     persona: str,
     objetos: str,
+    pdf_url: str,
 ):
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
@@ -166,6 +170,7 @@ def buscar(
             identificador=identificador,
             persona=persona,
             objetos=objetos,
+            pdf_url=pdf_url,
         )
         if respuesta_ajax := ajax(
             request,

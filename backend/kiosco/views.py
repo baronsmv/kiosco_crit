@@ -63,7 +63,7 @@ def admin_whatsapp(request):
     )
 
 
-def buscar_citas_paciente(request):
+def buscar_citas_por_carnet(request):
     return buscar(
         request,
         web_data=citas_web,
@@ -75,11 +75,12 @@ def buscar_citas_paciente(request):
         identificador="carnet",
         persona="paciente",
         objetos="citas",
+        pdf_url="pdf_citas_carnet",
     )
 
 
 @csrf_exempt
-def enviar_citas_paciente(request, carnet):
+def enviar_citas_por_carnet(request, carnet):
     return enviar_pdf(
         request,
         id=carnet,
