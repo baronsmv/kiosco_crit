@@ -5,7 +5,7 @@
     <title>{{ title }}</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     {% load static %}
-    <link href="{% static 'kiosco/css/buscar_paciente.css' %}" rel="stylesheet"/>
+    <link href="{% static 'kiosco/css/buscar.css' %}" rel="stylesheet"/>
 </head>
 <body>
 
@@ -49,7 +49,7 @@
 
         </div>
 
-        <button aria-label="Buscar paciente por carnet" type="submit">
+        <button aria-label="{{ button_label }}" type="submit">
             {{ button_label }}
         </button>
     </form>
@@ -64,12 +64,12 @@
 
 <!-- Modal de paciente si hay resultados -->
 {% if paciente and carnet %}
-{% include 'kiosco/partials/modal_paciente.html' %}
+{% include 'kiosco/partials/modal_buscar.html' %}
 {% endif %}
 
 <!-- Scripts -->
 <script defer src="{% static 'kiosco/js/error_form_handler.js' %}"></script>
-<script defer src="{% static 'kiosco/js/buscar_paciente.js' %}"></script>
+<script defer src="{% static 'kiosco/js/buscar.js' %}"></script>
 <script defer src="{% static 'kiosco/js/enviar_pdf_whatsapp.js' %}"></script>
 
 </body>

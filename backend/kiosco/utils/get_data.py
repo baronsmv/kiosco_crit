@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any, Callable
 
 from django.db import connections
 
 from .config import citas_sql
 
-mapeo_campos: Dict[str, Dict[str, str]] = citas_sql["campos"]
-mapeo_estatus: Dict[str, str] = citas_sql["mapeo_estatus"]
+citas_mapeo_campos: Dict[str, Dict[str, str]] = citas_sql["campos"]
+citas_mapeo_estatus: Dict[str, str] = citas_sql["mapeo_estatus"]
 
 
 def formatear_dato(dato, tipo: Optional[str] = None) -> str:
@@ -15,7 +15,7 @@ def formatear_dato(dato, tipo: Optional[str] = None) -> str:
             dato.strftime("%d/%m/%Y %H:%M") if isinstance(dato, datetime) else str(dato)
         )
     if tipo == "estatus":
-        return mapeo_estatus.get(dato, dato)
+        return citas_mapeo_estatus.get(dato, dato)
     return dato
 
 
@@ -40,13 +40,15 @@ def existe_paciente(carnet: str, cursor) -> Optional[Dict[str, str]]:
 
 
 def query_citas(
-    carnet: str, fecha: Optional[datetime], campos: List[str] = mapeo_campos.keys()
+    carnet: str,
+    fecha: Optional[datetime],
+    campos: List[str] = citas_mapeo_campos.keys(),
 ) -> Tuple[str, Tuple]:
     for campo in campos:
-        if campo not in mapeo_campos:
+        if campo not in citas_mapeo_campos:
             raise ValueError(f"Campo desconocido: {campo}")
 
-    select_clause = ", ".join(mapeo_campos[c]["sql"] + f" AS {c}" for c in campos)
+    select_clause = ", ".join(citas_mapeo_campos[c]["sql"] + f" AS {c}" for c in campos)
 
     query = f"""
         SELECT {select_clause}
@@ -72,28 +74,46 @@ def query_citas(
     return query, params
 
 
+def obtener_filas(
+    id: str,
+    exist_func: Callable,
+    query_func: Callable,
+    campos: List[str],
+    fecha: Optional[datetime] = None,
+    db_name: str = "crit",
+) -> Optional[Tuple]:
+    with connections[db_name].cursor() as cursor:
+        persona = exist_func(id, cursor)
+        if not persona:
+            return None
+        cursor.execute(*query_func(id, campos=campos, fecha=fecha))
+        return persona, cursor.fetchall()
+
+
 def obtener_citas(
     carnet: str,
-    campos: List[str] = mapeo_campos.keys(),
+    campos: List[str] = citas_mapeo_campos.keys(),
     fecha: Optional[datetime] = None,
 ) -> Optional[Dict[str, Any]]:
-    with connections["crit"].cursor() as cursor:
-        paciente = existe_paciente(carnet, cursor)
-        if not paciente:
-            return None
-
-        query, params = query_citas(carnet, campos=campos, fecha=fecha)
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
+    filas = obtener_filas(
+        carnet,
+        exist_func=existe_paciente,
+        query_func=query_citas,
+        campos=campos,
+        fecha=fecha,
+    )
+    if not filas:
+        return None
+    paciente, citas = filas
 
     return {
         "paciente_sf": paciente,
         "citas_sf": [
             {
-                campo: formatear_dato(row[i], mapeo_campos[campo].get("tipo"))
+                campo: formatear_dato(cita[i], citas_mapeo_campos[campo].get("tipo"))
                 for i, campo in enumerate(campos)
             }
-            for row in rows
+            for cita in citas
         ],
     }
 
@@ -101,7 +121,7 @@ def obtener_citas(
 def formatear_citas(
     paciente_sf: Dict[str, str],
     citas_sf: List[Dict[str, Any]],
-    campos: List[str] = mapeo_campos.keys(),
+    campos: List[str] = citas_mapeo_campos.keys(),
 ) -> Dict[str, Dict[str, str] | Tuple[Tuple]]:
     return {
         "paciente": {

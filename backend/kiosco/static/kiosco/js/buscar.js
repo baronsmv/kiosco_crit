@@ -143,7 +143,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 activarListenersModal(nuevoModal);
                 activarEnvioWhatsApp(nuevoModal);
             } else {
-                // Si no hay paciente, muestra el mensaje de error
                 const container = document.querySelector(".container");
                 const error = doc.querySelector(".error-message");
                 if (error) {
@@ -163,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 carnetInput.select();
             }
         } catch (error) {
-            console.error("Error al buscar paciente:", error);
+            console.error("Error al buscar:", error);
             carnetInput.focus();
             carnetInput.select();
         }

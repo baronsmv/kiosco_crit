@@ -44,7 +44,7 @@
 
         {% if paciente.Carnet %}
 
-        <form action="{% url 'enviar_pdf_whatsapp' paciente.Carnet fecha %}" id="form-enviar-pdf" method="POST">
+        <form action="{% url 'enviar_pdf_whatsapp' paciente.Carnet %}" id="form-enviar-pdf" method="POST">
             {% csrf_token %}
             <div class="input-button-row">
                 <label class="btn-whatsapp-label" for="numero-whatsapp">{{ number_label }}</label>

@@ -79,7 +79,7 @@ def buscar_citas_paciente(request):
 
 
 @csrf_exempt
-def enviar_citas_paciente(request, carnet, fecha):
+def enviar_citas_paciente(request, carnet):
     return enviar_pdf(
         request,
         id=carnet,

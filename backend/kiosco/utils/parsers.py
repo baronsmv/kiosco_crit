@@ -171,15 +171,15 @@ def buscar(
             request,
             context,
             persona=persona,
-            partial=f"modal_{persona}.html",
+            partial=f"modal_buscar.html",
         ):
             return respuesta_ajax
 
-    return render(request, f"kiosco/buscar_{persona}.html", context)
+    return render(request, f"kiosco/buscar.html", context)
 
 
 def generar_pdf(
-    identificador,
+    identificador: str,
     format_func: Callable,
     pdf_data: Dict[str, Dict],
     sql_data: Dict[str, Dict],
@@ -192,7 +192,7 @@ def generar_pdf(
     output_path = os.path.join(output_dir, filename)
     logger.debug(f"Generando PDF en: {output_path}")
 
-    css_path = finders.find(f"kiosco/css/pdf_{persona}.css")
+    css_path = finders.find(f"kiosco/css/pdf.css")
     css_files = [css_path] if css_path else []
 
     previous_context.update(
@@ -200,7 +200,7 @@ def generar_pdf(
     )
 
     html = render_to_string(
-        f"kiosco/pdf_{persona}.html",
+        f"kiosco/pdf.html",
         {
             **pdf_data.get("context", {}),
             **previous_context,

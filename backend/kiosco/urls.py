@@ -16,7 +16,7 @@ urlpatterns = [
     ),
     path("", buscar_citas_paciente, name="buscar_paciente"),
     path(
-        "enviar-pdf/<str:carnet>/<str:fecha>/",
+        "enviar-pdf/<str:carnet>/",
         enviar_citas_paciente,
         name="enviar_pdf_whatsapp",
     ),
