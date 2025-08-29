@@ -61,7 +61,7 @@ def parse_result(
         context[error_context["error_target"] + "_error"] = True
         logger.info(error_context["mensaje_error"])
 
-    else:
+    elif success_dict:
         context.update(**success_dict, **resultado)
 
 
@@ -92,7 +92,7 @@ def parse_form(
             resultado,
             context,
             fecha,
-            success_dict=format_func(**resultado, campos=campos),
+            success_dict=format_func(**resultado, campos=campos) if resultado else None,
             identificador=identificador,
             persona=persona,
             objetos=objetos,
