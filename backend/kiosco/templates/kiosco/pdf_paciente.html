@@ -2,18 +2,18 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8"/>
-    <title>Ficha del Paciente</title>
+    <title>{{ title }}</title>
     {% load static %}
     <link href="{% static 'kiosco/css/pdf_paciente.css' %}" rel="stylesheet"/>
 </head>
 <body>
 <header>
-    <h1 id="titulo-principal">Ficha del Paciente</h1>
+    <h1 id="titulo-principal">{{ header }}</h1>
 </header>
 
 <main>
     <section aria-labelledby="datos-paciente-title" class="info">
-        <h2 class="section-title" id="datos-paciente-title">Datos Personales</h2>
+        <h2 class="section-title" id="datos-paciente-title">{{ data_title }}</h2>
         <dl>
             {% for titulo, valor in paciente.items %}
             <div class="dato">
@@ -26,9 +26,9 @@
 
     {% if tabla %}
     <section aria-labelledby="tabla-titulo" class="tabla-seccion">
-        <h2 class="section-title" id="tabla-titulo">{{ tabla_titulo }}</h2>
-        <div aria-label="{{ tabla_titulo }}" class="tabla-scrollable" role="region">
-            <table summary="Tabla de {{ tabla_titulo }}">
+        <h2 class="section-title" id="tabla-titulo">{{ table_title }}</h2>
+        <div aria-label="{{ table_title }}" class="tabla-scrollable" role="region">
+            <table summary="Tabla de {{ table_title }}">
                 <thead>
                 <tr>
                     {% for columna in tabla_columnas %}
@@ -52,7 +52,7 @@
 </main>
 
 <footer>
-    <p class="footer-text">Generado por Sistema Clínico &copy; {{ now|date:"Y" }}</p>
+    <p class="footer-text">{{ footer }}</p>
 </footer>
 </body>
 </html>

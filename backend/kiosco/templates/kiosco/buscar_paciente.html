@@ -34,7 +34,7 @@
 
             <!-- Fecha -->
             <label class="fecha-label" for="fecha">{{ date_label }}</label>
-            <p class="form-sublabel">(Dejar vacío para mostrar todas)</p>
+            <p class="form-sublabel">{{ date_sublabel }}</p>
             <div class="input-group {% if date_error %}error{% endif %}">
                 <input
                         aria-describedby="{% if date_error %}fecha-error{% endif %}"

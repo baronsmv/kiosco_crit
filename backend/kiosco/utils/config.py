@@ -27,10 +27,13 @@ default_config: Dict = {
                 "header": "Búsqueda de citas",
                 "form_label": "Número de Carnet:",
                 "form_placeholder": "Ej: 123456",
-                "button_label": "Buscar",
                 "date_label": "Fecha:",
+                "date_sublabel": "(Dejar vacío para mostrar todas)",
+                "button_label": "Buscar",
+                "data_title": "Datos del Paciente",
+                "table_title": "Citas",
+                "number_label": "Número telefónico:",
                 "send_button_label": "📤 Enviar por WhatsApp",
-                "tabla_titulo": "Citas",
             },
         },
         "pdf": {
@@ -41,7 +44,11 @@ default_config: Dict = {
                 "cl_estatus_cita",
             ],
             "context": {
-                "tabla_titulo": "Citas",
+                "title": "Ficha del Paciente",
+                "header": "Ficha del Paciente",
+                "data_title": "Datos Personales",
+                "table_title": "Citas",
+                "footer": "Fundación Teletón México A.C.",
             },
         },
         "sql": {

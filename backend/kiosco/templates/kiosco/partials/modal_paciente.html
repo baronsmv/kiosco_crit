@@ -8,7 +8,7 @@
 >
     <div class="modal-content">
         <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal()">×</button>
-        <h2 id="modal-title">Datos del Paciente</h2>
+        <h2 id="modal-title">{{ data_title }}</h2>
 
         {% for titulo, valor in paciente.items %}
         <div class="dato">
@@ -18,7 +18,7 @@
 
         {% if tabla %}
         <div class="dato">
-            <h3>{{ tabla_titulo }}</h3>
+            <h3>{{ table_title }}</h3>
             <div class="tabla-scrollable">
                 <table>
                     <thead>
@@ -47,7 +47,7 @@
         <form action="{% url 'enviar_pdf_whatsapp' paciente.Carnet fecha %}" id="form-enviar-pdf" method="POST">
             {% csrf_token %}
             <div class="input-button-row">
-                <label class="btn-whatsapp-label" for="numero-whatsapp">Número telefónico:</label>
+                <label class="btn-whatsapp-label" for="numero-whatsapp">{{ number_label }}</label>
 
                 <input class="btn-whatsapp-input"
                        id="numero-whatsapp"
