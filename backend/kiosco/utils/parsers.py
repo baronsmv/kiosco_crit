@@ -167,7 +167,6 @@ def buscar(
             persona=persona,
             objetos=objetos,
         )
-        print("A" * 1000, context, sep="\n", flush=True)
         if respuesta_ajax := ajax(
             request,
             context,
@@ -196,15 +195,17 @@ def generar_pdf(
     css_path = finders.find(f"kiosco/css/pdf_{persona}.css")
     css_files = [css_path] if css_path else []
 
-    campos = pdf_data.get("campos", ())
     previous_context.update(
-        format_func(**previous_context, campos=campos),
+        format_func(**previous_context, campos=pdf_data.get("campos", ())),
     )
-    previous_context["tabla_columnas"] = mapear_columnas(pdf_data, mapeo=sql_data)
 
     html = render_to_string(
         f"kiosco/pdf_{persona}.html",
-        {**pdf_data.get("context", {}), **previous_context},
+        {
+            **pdf_data.get("context", {}),
+            **previous_context,
+            "tabla_columnas": mapear_columnas(pdf_data, mapeo=sql_data),
+        },
     )
     HTML(string=html).write_pdf(output_path, stylesheets=css_files)
     logger.debug("PDF generado correctamente")
