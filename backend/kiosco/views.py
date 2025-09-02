@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from .forms import BuscarIdFechaForm
-from .models import CitasWhatsapp, CitasConsulta
+from .models import CitasCarnetWhatsapp, CitasCarnetConsulta
 from .utils.config import whatsapp_admin, citas_web, citas_sql, citas_pdf
 from .utils.get_data import formatear_citas, obtener_citas
 from .utils.logger import get_logger
@@ -69,7 +69,7 @@ def buscar_citas_por_carnet(request):
         web_data=citas_web,
         sql_data=citas_sql,
         form=BuscarIdFechaForm,
-        model=CitasConsulta,
+        model=CitasCarnetConsulta,
         get_func=obtener_citas,
         format_func=formatear_citas,
         identificador="carnet",
@@ -89,5 +89,5 @@ def pdf_citas_por_carnet(request, carnet):
         format_func=formatear_citas,
         pdf_data=citas_pdf,
         sql_data=citas_sql,
-        model=CitasWhatsapp,
+        model=CitasCarnetWhatsapp,
     )

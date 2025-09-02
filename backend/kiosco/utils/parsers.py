@@ -104,7 +104,7 @@ def parse_form(
             c: context.get(c) for c in (f"{persona}_sf", f"{objetos}_sf")
         }
         model.objects.create(
-            **{identificador: id}, fecha_especificada=fecha, ip_cliente=ip(request)
+            identificador=id, fecha_especificada=fecha, ip_cliente=ip(request)
         )
     else:
         context.update(
@@ -272,7 +272,7 @@ Nombre: {web_context['persona']['Nombre']}
         )
 
         model.objects.create(
-            **{identificador: id},
+            identificador=id,
             numero_destino=numero,
             mensaje=mensaje,
             archivo_pdf=payload["image_path"],
@@ -293,7 +293,7 @@ Nombre: {web_context['persona']['Nombre']}
     except requests.exceptions.RequestException as e:
         logger.error(f"Error de conexión con microservicio: {str(e)}", exc_info=True)
         model.objects.create(
-            **{identificador: id},
+            identificador=id,
             numero_destino=numero,
             mensaje=mensaje,
             archivo_pdf=payload["image_path"],

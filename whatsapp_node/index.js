@@ -26,15 +26,20 @@ function createWhatsAppClient() {
         authStrategy: new LocalAuth({dataPath: './sessions'}),
         puppeteer: {
             headless: true,
+            executablePath: '/usr/bin/chromium',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
                 '--disable-gpu',
-                '--no-zygote',
+                '--disable-software-rasterizer',
                 '--single-process'
             ],
+            dumpio: true,
         },
+        takeoverOnConflict: true,
+        qrTimeoutMs: 0,
     });
 
     newClient.on('qr', qr => {
@@ -42,6 +47,10 @@ function createWhatsAppClient() {
         clientStatus.status = 'qr';
         clientStatus.connected = false;
         console.log('🧾 QR actualizado');
+    });
+
+    newClient.on('authenticated', () => {
+        console.log('🔐 Autenticado con éxito');
     });
 
     newClient.on('ready', () => {
