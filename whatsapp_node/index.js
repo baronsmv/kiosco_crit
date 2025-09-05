@@ -34,6 +34,7 @@ function createWhatsAppClient() {
                 '--disable-accelerated-2d-canvas',
                 '--disable-gpu',
                 '--disable-software-rasterizer',
+                '--no-zygote',
                 '--single-process'
             ],
         },

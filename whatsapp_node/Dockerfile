@@ -40,6 +40,9 @@ RUN npm install --production
 # Copia el resto del código fuente
 COPY . .
 
+# Configura el path de Chromium para Puppeteer
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
 # Expone el puerto
 EXPOSE 3000
 

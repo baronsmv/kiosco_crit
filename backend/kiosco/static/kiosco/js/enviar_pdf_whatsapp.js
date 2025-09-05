@@ -1,10 +1,36 @@
-function activarEnvioWhatsApp(modal) {
+async function activarEnvioWhatsApp(modal) {
     if (!modal) return;
-    const formEnviarPDF = modal.querySelector("#form-enviar-pdf");
-    if (!formEnviarPDF) return;
 
+    const formEnviarPDF = modal.querySelector("#form-enviar-pdf");
     const input = formEnviarPDF.querySelector("input[name=numero]");
     const mensajeDiv = modal.querySelector("#mensaje-envio");
+
+    // Verifica si el servicio de WhatsApp está listo
+    try {
+        const resp = await fetch("/whatsapp/status");
+        const data = await resp.json();
+
+        const noDisponible = !data || data.status !== "listo" || !data.connected;
+
+        if (noDisponible && formEnviarPDF) {
+            formEnviarPDF.classList.add("hidden");
+            if (mensajeDiv) {
+                mensajeDiv.textContent = "⚠️ Servicio de WhatsApp no disponible en este momento.";
+                mensajeDiv.style.display = "block";
+            }
+            return;
+        }
+    } catch (err) {
+        console.warn("No se pudo verificar el estado de WhatsApp:", err);
+        if (formEnviarPDF) formEnviarPDF.classList.add("hidden");
+        if (mensajeDiv) {
+            mensajeDiv.textContent = "⚠️ Error al verificar el servicio de WhatsApp.";
+            mensajeDiv.style.display = "block";
+        }
+        return;
+    }
+
+    if (!formEnviarPDF) return;
 
     formEnviarPDF.addEventListener("submit", async function (e) {
         e.preventDefault();
