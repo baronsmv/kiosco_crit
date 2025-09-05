@@ -33,7 +33,7 @@ def obtener_filas(
 
 def obtener_datos(
     id: str,
-    campos: Dict,
+    sql_campos: Dict,
     exist_func: Callable,
     query_func: Callable,
     fecha: Optional[datetime] = None,
@@ -47,8 +47,8 @@ def obtener_datos(
         "persona_sf": persona,
         "objetos_sf": [
             {
-                campo: formatear_dato(cita[i], campos[campo].get("tipo"))
-                for i, campo in enumerate(campos.keys())
+                campo: formatear_dato(cita[i], sql_campos[campo].get("tipo"))
+                for i, campo in enumerate(sql_campos.keys())
             }
             for cita in objetos
         ],

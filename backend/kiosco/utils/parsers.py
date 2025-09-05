@@ -70,6 +70,7 @@ def parse_form(
     request,
     context: Dict,
     campos: Dict,
+    sql_campos: Dict,
     form,
     model,
     exist_func: Callable,
@@ -93,7 +94,11 @@ def parse_form(
             }
         )
         resultado = get_func(
-            id, campos=campos, exist_func=exist_func, query_func=query_func, fecha=fecha
+            id,
+            sql_campos=sql_campos,
+            exist_func=exist_func,
+            query_func=query_func,
+            fecha=fecha,
         )
         parse_result(
             resultado,
@@ -170,6 +175,7 @@ def buscar(
             request,
             context,
             campos=web_data.get("campos", {}),
+            sql_campos=sql_data.get("campos", {}),
             form=form(request.POST),
             model=model,
             exist_func=exist_func,
