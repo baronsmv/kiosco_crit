@@ -13,74 +13,146 @@ default_config: Dict = {
             "header": "Administración de WhatsApp",
         }
     },
-    "buscar_citas": {
-        "webpage": {
-            "campos": [
-                "nb_servicio",
-                "fe_cita",
-                "nombre_colaborador",
-                "ds_clinica",
-                "cl_estatus_cita",
-            ],
-            "context": {
-                "title": "Búsqueda de citas",
-                "header": "Búsqueda de citas",
-                "form_label": "Número de Carnet:",
-                "form_placeholder": "Ej: 123456",
-                "date_label": "Fecha:",
-                "date_sublabel": "(Dejar vacío para mostrar todas)",
-                "button_label": "Buscar",
-                "data_title": "Datos del Paciente",
-                "table_title": "Citas",
-                "number_label": "Número telefónico:",
-                "send_button_label": "📤 Enviar por WhatsApp",
+    "mapeo_estatus": {
+        "A": "Activo",
+        "I": "Inasistencia",
+        "P": "Pospuesta",
+        "T": "Tomada",
+    },
+    "citas": {
+        "carnet": {
+            "web": {
+                "campos": [
+                    "nb_servicio",
+                    "fe_cita",
+                    "nombre_colaborador",
+                    "ds_clinica",
+                    "cl_estatus_cita",
+                ],
+                "context": {
+                    "title": "Búsqueda de citas",
+                    "header": "Búsqueda de citas",
+                    "form_label": "Número de Carnet:",
+                    "form_placeholder": "Ej: 123456",
+                    "date_label": "Fecha:",
+                    "date_sublabel": "(Dejar vacío para mostrar todas)",
+                    "button_label": "Buscar",
+                    "data_title": "Datos del Paciente",
+                    "table_title": "Citas",
+                    "number_label": "Número telefónico:",
+                    "send_button_label": "📤 Enviar por WhatsApp",
+                },
+            },
+            "pdf": {
+                "campos": [
+                    "nb_servicio",
+                    "fe_cita",
+                    "nombre_colaborador",
+                    "cl_estatus_cita",
+                ],
+                "context": {
+                    "title": "Ficha del Paciente",
+                    "header": "Ficha del Paciente",
+                    "data_title": "Datos Personales",
+                    "table_title": "Citas",
+                    "footer": "Fundación Teletón México A.C.",
+                },
+            },
+            "sql": {
+                "campos": {
+                    "nb_servicio": {
+                        "nombre": "Servicio",
+                        "sql": "cs.NB_SERVICIO",
+                    },
+                    "fe_cita": {
+                        "nombre": "Fecha y hora",
+                        "sql": "kc.FE_CITA",
+                        "tipo": "fecha",
+                    },
+                    "nombre_colaborador": {
+                        "nombre": "Colaborador",
+                        "sql": "CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO)",
+                    },
+                    "ds_clinica": {
+                        "nombre": "Clínica",
+                        "sql": "cc.DS_CLINICA",
+                    },
+                    "cl_estatus_cita": {
+                        "nombre": "Estatus",
+                        "sql": "kpc.CL_ESTATUS_CITA",
+                        "tipo": "estatus",
+                    },
+                },
             },
         },
-        "pdf": {
-            "campos": [
-                "nb_servicio",
-                "fe_cita",
-                "nombre_colaborador",
-                "cl_estatus_cita",
-            ],
-            "context": {
-                "title": "Ficha del Paciente",
-                "header": "Ficha del Paciente",
-                "data_title": "Datos Personales",
-                "table_title": "Citas",
-                "footer": "Fundación Teletón México A.C.",
-            },
-        },
-        "sql": {
-            "campos": {
-                "nb_servicio": {
-                    "nombre": "Servicio",
-                    "sql": "cs.NB_SERVICIO",
-                },
-                "fe_cita": {
-                    "nombre": "Fecha y hora",
-                    "sql": "kc.FE_CITA",
-                    "tipo": "fecha",
-                },
-                "nombre_colaborador": {
-                    "nombre": "Colaborador",
-                    "sql": "CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO)",
-                },
-                "ds_clinica": {
-                    "nombre": "Clínica",
-                    "sql": "cc.DS_CLINICA",
-                },
-                "cl_estatus_cita": {
-                    "nombre": "Estatus",
-                    "sql": "kpc.CL_ESTATUS_CITA",
-                    "tipo": "estatus",
+        "colaborador": {
+            "web": {
+                "campos": [
+                    "nb_servicio",
+                    "fe_cita",
+                    "nombre_paciente",
+                    "no_carnet",
+                    "clinica_abrev",
+                    "estatus",
+                ],
+                "context": {
+                    "title": "Citas por Colaborador",
+                    "header": "Citas por Colaborador",
+                    "form_label": "Nombre de Usuario:",
+                    "form_placeholder": "Ej: miguel.moedano",
+                    "date_label": "Fecha:",
+                    "date_sublabel": "(Dejar vacío para mostrar todas)",
+                    "button_label": "Buscar",
+                    "data_title": "Datos del Colaborador",
+                    "table_title": "Citas del Día",
+                    "number_label": "Número telefónico:",
+                    "send_button_label": "📤 Enviar por WhatsApp",
                 },
             },
-            "mapeo_estatus": {
-                "A": "Activo",
-                "I": "Inasistencia",
-                "P": "Pospuesta",
-                "T": "Tomada",
+            "pdf": {
+                "campos": [
+                    "nb_servicio",
+                    "fe_cita",
+                    "hora",
+                    "nombre_paciente",
+                    "no_carnet",
+                ],
+                "context": {
+                    "title": "Agenda del Colaborador",
+                    "header": "Agenda del Colaborador",
+                    "data_title": "Datos del Colaborador",
+                    "table_title": "Citas del Día",
+                    "footer": "Fundación Teletón México A.C.",
+                },
+            },
+            "sql": {
+                "campos": {
+                    "nb_servicio": {
+                        "nombre": "Servicio",
+                        "sql": "cs.NB_SERVICIO",
+                    },
+                    "fe_cita": {
+                        "nombre": "Fecha",
+                        "sql": "kc.FE_CITA",
+                        "tipo": "fecha",
+                    },
+                    "nombre_paciente": {
+                        "nombre": "Paciente",
+                        "sql": "CONCAT(cp.NB_PACIENTE,' ',cp.NB_PATERNO,' ',cp.NB_MATERNO)",
+                    },
+                    "no_carnet": {
+                        "nombre": "Carnet",
+                        "sql": "cp.NO_CARNET",
+                    },
+                    "clinica_abrev": {
+                        "nombre": "Clínica",
+                        "sql": "cc.NB_ABREVIADO",
+                    },
+                    "estatus": {
+                        "nombre": "Estatus",
+                        "sql": "cec.NB_ESTATUS_CITA",
+                    },
+                },
             },
         },
     },
@@ -99,7 +171,9 @@ else:
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         config = safe_load(f) or {}
 
-whatsapp_admin = config.get("admin_whatsapp", {})
-citas_web = config.get("buscar_citas", {}).get("webpage", {})
-citas_pdf = config.get("buscar_citas", {}).get("pdf", {})
-citas_sql = config.get("buscar_citas", {}).get("sql", {})
+cfg_whatsapp_admin = config.get("admin_whatsapp", {})
+cfg_mapeo_estatus = config.get("mapeo_estatus", {})
+
+cfg_citas = config.get("citas", {})
+cfg_citas_carnet = cfg_citas.get("carnet", {})
+cfg_citas_colaborador = cfg_citas.get("colaborador", {})

@@ -5,9 +5,13 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from .forms import BuscarIdFechaForm
-from .models import CitasCarnetWhatsapp, CitasCarnetConsulta
-from .utils.config import whatsapp_admin, citas_web, citas_sql, citas_pdf
-from .utils.get_data import formatear_citas, obtener_citas
+from .models import (
+    CitasCarnetWhatsapp,
+    CitasCarnetConsulta,
+    CitasColaboradorConsulta,
+)
+from .utils import config
+from .utils.data import data_queries, exist_queries, handle_data
 from .utils.logger import get_logger
 from .utils.parsers import buscar, enviar_pdf
 
@@ -53,7 +57,7 @@ def admin_whatsapp(request):
         request,
         "admin/whatsapp_admin.html",
         {
-            **whatsapp_admin.get("context", {}),
+            **config.cfg_whatsapp_admin.get("context", {}),
             "qr_data_url": qr_data_url,
             "error_qr": error_qr,
             "status_message": status_message,
@@ -66,12 +70,13 @@ def admin_whatsapp(request):
 def buscar_citas_por_carnet(request):
     return buscar(
         request,
-        web_data=citas_web,
-        sql_data=citas_sql,
+        data=config.cfg_citas_carnet,
         form=BuscarIdFechaForm,
         model=CitasCarnetConsulta,
-        get_func=obtener_citas,
-        format_func=formatear_citas,
+        exist_func=exist_queries.paciente,
+        get_func=handle_data.obtener_datos,
+        query_func=data_queries.citas_carnet,
+        format_func=handle_data.formatear_datos,
         identificador="carnet",
         persona="paciente",
         objetos="citas",
@@ -83,11 +88,40 @@ def buscar_citas_por_carnet(request):
 def pdf_citas_por_carnet(request, carnet):
     return enviar_pdf(
         request,
-        id=carnet,
+        carnet,
         identificador="carnet",
         persona="paciente",
-        format_func=formatear_citas,
-        pdf_data=citas_pdf,
-        sql_data=citas_sql,
+        format_func=handle_data.formatear_datos,
+        data=config.cfg_citas_carnet,
+        model=CitasCarnetWhatsapp,
+    )
+
+
+def buscar_citas_por_colaborador(request):
+    return buscar(
+        request,
+        data=config.cfg_citas_colaborador,
+        form=BuscarIdFechaForm,
+        model=CitasColaboradorConsulta,
+        exist_func=exist_queries.colaborador,
+        get_func=handle_data.obtener_datos,
+        query_func=data_queries.citas_colaborador,
+        format_func=handle_data.formatear_datos,
+        identificador="ID",
+        persona="colaborador",
+        objetos="citas",
+        pdf_url="pdf_citas_carnet",
+    )
+
+
+@csrf_exempt
+def pdf_citas_por_colaborador(request, id):
+    return enviar_pdf(
+        request,
+        id,
+        identificador="ID",
+        persona="colaborador",
+        format_func=handle_data.formatear_datos,
+        data=config.cfg_citas_carnet,
         model=CitasCarnetWhatsapp,
     )

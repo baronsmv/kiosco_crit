@@ -36,10 +36,7 @@ function createWhatsAppClient() {
                 '--disable-software-rasterizer',
                 '--single-process'
             ],
-            dumpio: true,
         },
-        takeoverOnConflict: true,
-        qrTimeoutMs: 0,
     });
 
     newClient.on('qr', qr => {

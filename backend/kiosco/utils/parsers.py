@@ -72,7 +72,9 @@ def parse_form(
     campos: Dict,
     form,
     model,
+    exist_func: Callable,
     get_func: Callable,
+    query_func: Callable,
     format_func: Callable,
     identificador: str,
     persona: str,
@@ -90,7 +92,9 @@ def parse_form(
                 "pdf_url": reverse(pdf_url, args=(id,)),
             }
         )
-        resultado = get_func(id, fecha=fecha)
+        resultado = get_func(
+            id, campos=campos, exist_func=exist_func, query_func=query_func, fecha=fecha
+        )
         parse_result(
             resultado,
             context,
@@ -131,11 +135,12 @@ def ajax(
 
 def buscar(
     request,
-    web_data: Dict,
-    sql_data: Dict,
+    data: Dict,
     form,
     model,
+    exist_func: Callable,
     get_func: Callable,
+    query_func: Callable,
     format_func: Callable,
     identificador: str,
     persona: str,
@@ -144,6 +149,9 @@ def buscar(
 ):
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
+
+    web_data = data["web"]
+    sql_data = data["sql"]
 
     context = {
         **web_data.get("context", {}),
@@ -164,7 +172,9 @@ def buscar(
             campos=web_data.get("campos", {}),
             form=form(request.POST),
             model=model,
+            exist_func=exist_func,
             get_func=get_func,
+            query_func=query_func,
             format_func=format_func,
             identificador=identificador,
             persona=persona,
@@ -184,11 +194,13 @@ def buscar(
 def generar_pdf(
     identificador: str,
     format_func: Callable,
-    pdf_data: Dict[str, Dict],
-    sql_data: Dict[str, Dict],
+    data: Dict[str, Dict],
     previous_context: Dict,
     persona: str,
 ) -> str:
+    pdf_data = data["pdf"]
+    sql_data = data["sql"]
+
     filename = f"{persona}_{identificador}.pdf"
     output_dir = os.path.join(settings.MEDIA_ROOT, "pdfs")
     os.makedirs(output_dir, exist_ok=True)
@@ -222,8 +234,7 @@ def enviar_pdf(
     identificador: str,
     persona: str,
     format_func: Callable,
-    pdf_data: Dict,
-    sql_data: Dict,
+    data: Dict,
     model,
 ):
     logger.debug(
@@ -245,8 +256,7 @@ def enviar_pdf(
         id,
         persona=persona,
         format_func=format_func,
-        pdf_data=pdf_data,
-        sql_data=sql_data,
+        data=data,
         previous_context=web_context,
     )
 
@@ -263,12 +273,14 @@ Nombre: {web_context['persona']['Nombre']}
 
     try:
         response = requests.post(f"{base_url}/send-media", json=payload)
-        data = response.json()
-        logger.debug(f"Respuesta del microservicio: {data}")
+        response_data = response.json()
+        logger.debug(f"Respuesta del microservicio: {response_data}")
 
         estado = "enviado" if response.status_code == 200 else "fallido"
         detalle_error = (
-            None if estado == "enviado" else data.get("error", "Error desconocido")
+            None
+            if estado == "enviado"
+            else response_data.get("error", "Error desconocido")
         )
 
         model.objects.create(
@@ -283,7 +295,7 @@ Nombre: {web_context['persona']['Nombre']}
 
         if estado == "enviado":
             logger.info("Mensaje enviado correctamente")
-            return JsonResponse({"status": "enviado", "detalles": data})
+            return JsonResponse({"status": "enviado", "detalles": response_data})
         else:
             logger.error(f"Error enviando mensaje: {detalle_error}")
             return JsonResponse(
