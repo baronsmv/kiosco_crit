@@ -67,6 +67,9 @@
 {% endif %}
 
 <!-- Scripts -->
+<script>
+    const autoBorrado = {{ auto_borrado|yesno:"true,false" }};
+</script>
 <script defer src="{% static 'kiosco/js/error_form_handler.js' %}"></script>
 <script defer src="{% static 'kiosco/js/buscar.js' %}"></script>
 <script defer src="{% static 'kiosco/js/enviar_pdf_whatsapp.js' %}"></script>

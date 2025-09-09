@@ -136,8 +136,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 setTimeout(() => {
                     nuevoModal.classList.add("show");
                     nuevoModal.focus();
-                    idInput.value = "";
-                    fechaInput.value = "";
+                    if (autoBorrado) {
+                        idInput.value = "";
+                        fechaInput.value = "";
+                    }
                 }, 20);
 
                 activarListenersModal(nuevoModal);

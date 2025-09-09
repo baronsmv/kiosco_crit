@@ -13,12 +13,6 @@ default_config: Dict = {
             "header": "Administración de WhatsApp",
         }
     },
-    "mapeo_estatus": {
-        "A": "Activo",
-        "I": "Inasistencia",
-        "P": "Pospuesta",
-        "T": "Tomada",
-    },
     "citas": {
         "carnet": {
             "web": {
@@ -27,7 +21,7 @@ default_config: Dict = {
                     "fe_cita",
                     "nombre_colaborador",
                     "ds_clinica",
-                    "cl_estatus_cita",
+                    "estatus",
                 ],
                 "context": {
                     "title": "Búsqueda de citas",
@@ -48,7 +42,7 @@ default_config: Dict = {
                     "nb_servicio",
                     "fe_cita",
                     "nombre_colaborador",
-                    "cl_estatus_cita",
+                    "estatus",
                 ],
                 "context": {
                     "title": "Ficha del Paciente",
@@ -66,8 +60,7 @@ default_config: Dict = {
                     },
                     "fe_cita": {
                         "nombre": "Fecha y hora",
-                        "sql": "kc.FE_CITA",
-                        "tipo": "fecha",
+                        "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy hh:mm')",
                     },
                     "nombre_colaborador": {
                         "nombre": "Colaborador",
@@ -77,10 +70,9 @@ default_config: Dict = {
                         "nombre": "Clínica",
                         "sql": "cc.DS_CLINICA",
                     },
-                    "cl_estatus_cita": {
+                    "estatus": {
                         "nombre": "Estatus",
-                        "sql": "kpc.CL_ESTATUS_CITA",
-                        "tipo": "estatus",
+                        "sql": "cec.NB_ESTATUS_CITA",
                     },
                 },
             },
@@ -132,9 +124,8 @@ default_config: Dict = {
                         "sql": "cs.NB_SERVICIO",
                     },
                     "fe_cita": {
-                        "nombre": "Fecha",
-                        "sql": "kc.FE_CITA",
-                        "tipo": "fecha",
+                        "nombre": "Fecha y hora",
+                        "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy hh:mm')",
                     },
                     "nombre_paciente": {
                         "nombre": "Paciente",
@@ -172,7 +163,6 @@ else:
         config = safe_load(f) or {}
 
 cfg_whatsapp_admin = config.get("admin_whatsapp", {})
-cfg_mapeo_estatus = config.get("mapeo_estatus", {})
 
 cfg_citas = config.get("citas", {})
 cfg_citas_carnet = cfg_citas.get("carnet", {})

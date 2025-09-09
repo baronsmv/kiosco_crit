@@ -3,28 +3,9 @@ from typing import Dict, Optional, Callable, Tuple, Any, List
 
 from django.db import connections
 
-from ..config import cfg_mapeo_estatus
 from ..logger import get_logger
 
 logger = get_logger(__name__)
-
-
-def formatear_dato(dato, tipo: Optional[str] = None) -> str:
-    logger.debug(f"Formateando dato: {dato} con tipo: {tipo}")
-
-    if tipo == "fecha":
-        resultado = (
-            dato.strftime("%d/%m/%Y %H:%M") if isinstance(dato, datetime) else str(dato)
-        )
-        logger.debug(f"Resultado formateado (fecha): {resultado}")
-        return resultado
-
-    if tipo == "estatus":
-        resultado = cfg_mapeo_estatus.get(dato, dato)
-        logger.debug(f"Resultado formateado (estatus): {resultado}")
-        return resultado
-
-    return str(dato)
 
 
 def obtener_filas(
@@ -76,13 +57,9 @@ def obtener_datos(
     )
 
     objetos_formateados = [
-        {
-            campo: formatear_dato(cita[i], sql_campos[campo].get("tipo"))
-            for i, campo in enumerate(sql_campos.keys())
-        }
+        {campo: cita[i] for i, campo in enumerate(sql_campos.keys())}
         for cita in objetos
     ]
-
     logger.info(f"Datos procesados correctamente para ID: {id}")
 
     return {
