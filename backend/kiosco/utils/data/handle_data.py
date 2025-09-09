@@ -4,16 +4,27 @@ from typing import Dict, Optional, Callable, Tuple, Any, List
 from django.db import connections
 
 from ..config import cfg_mapeo_estatus
+from ..logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def formatear_dato(dato, tipo: Optional[str] = None) -> str:
+    logger.debug(f"Formateando dato: {dato} con tipo: {tipo}")
+
     if tipo == "fecha":
-        return (
+        resultado = (
             dato.strftime("%d/%m/%Y %H:%M") if isinstance(dato, datetime) else str(dato)
         )
+        logger.debug(f"Resultado formateado (fecha): {resultado}")
+        return resultado
+
     if tipo == "estatus":
-        return cfg_mapeo_estatus.get(dato, dato)
-    return dato
+        resultado = cfg_mapeo_estatus.get(dato, dato)
+        logger.debug(f"Resultado formateado (estatus): {resultado}")
+        return resultado
+
+    return str(dato)
 
 
 def obtener_filas(
@@ -23,12 +34,26 @@ def obtener_filas(
     fecha: Optional[datetime] = None,
     db_name: str = "crit",
 ) -> Optional[Tuple]:
-    with connections[db_name].cursor() as cursor:
-        persona = exist_func(id, cursor)
-        if not persona:
-            return
-        cursor.execute(*query_func(id, fecha=fecha))
-        return persona, cursor.fetchall()
+    logger.info(f"Buscando filas para ID: {id} en base de datos: {db_name}")
+    try:
+        with connections[db_name].cursor() as cursor:
+            persona = exist_func(id, cursor)
+            if not persona:
+                logger.warning(f"No se encontró persona con ID: '{id}'.")
+                return None
+
+            query, params = query_func(id, fecha=fecha)
+            logger.debug(
+                f"Ejecutando consulta: '{query}',\ncon parámetros: '{params}'."
+            )
+            cursor.execute(query, params)
+
+            resultados = cursor.fetchall()
+            logger.info(f"Se encontraron {len(resultados)} filas para ID: '{id}'")
+            return persona, resultados
+    except Exception as e:
+        logger.exception(f"Error al obtener filas para ID: '{id}': {str(e)}")
+        return None
 
 
 def obtener_datos(
@@ -38,20 +63,31 @@ def obtener_datos(
     query_func: Callable,
     fecha: Optional[datetime] = None,
 ) -> Optional[Dict[str, Any]]:
+    logger.info(f"Iniciando obtención de datos para ID: {id}")
+
     filas = obtener_filas(id, exist_func=exist_func, query_func=query_func, fecha=fecha)
     if not filas:
+        logger.warning(f"No se encontraron datos para ID: {id}")
         return None
+
     persona, objetos = filas
+    logger.debug(
+        f"Procesando {len(objetos)} objetos para: {persona.get('nombre', 'Desconocido')}"
+    )
+
+    objetos_formateados = [
+        {
+            campo: formatear_dato(cita[i], sql_campos[campo].get("tipo"))
+            for i, campo in enumerate(sql_campos.keys())
+        }
+        for cita in objetos
+    ]
+
+    logger.info(f"Datos procesados correctamente para ID: {id}")
 
     return {
         "persona_sf": persona,
-        "objetos_sf": [
-            {
-                campo: formatear_dato(cita[i], sql_campos[campo].get("tipo"))
-                for i, campo in enumerate(sql_campos.keys())
-            }
-            for cita in objetos
-        ],
+        "objetos_sf": objetos_formateados,
     }
 
 
@@ -60,7 +96,9 @@ def formatear_datos(
     objetos_sf: List[Dict[str, Any]],
     campos: List[str],
 ) -> Dict[str, Dict[str, str] | Tuple[Tuple]]:
-    return {
+    logger.debug(f"Formateando datos finales. Campos: {campos}")
+
+    resultado = {
         "persona": {
             "Nombre": persona_sf.get("nombre", ""),
             "Carnet": persona_sf.get("id", ""),
@@ -69,3 +107,6 @@ def formatear_datos(
             tuple(objeto.get(campo, "") for campo in campos) for objeto in objetos_sf
         ),
     }
+
+    logger.info("Formato final completado.")
+    return resultado

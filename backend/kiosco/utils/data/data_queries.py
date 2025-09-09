@@ -2,20 +2,34 @@ from datetime import datetime
 from typing import Tuple, Optional
 
 from ..config import cfg_citas_carnet, cfg_citas_colaborador
+from ..logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def select(campos):
-    return ", ".join(campos[c]["sql"] + f" AS {c}" for c in campos.keys())
+    seleccion = ", ".join(campos[c]["sql"] + f" AS {c}" for c in campos.keys())
+    logger.debug(f"Campos seleccionados para query: {seleccion}")
+    return seleccion
 
 
 def citas(query, id, fecha, if_fecha: Tuple[str, str]):
-    params: Tuple = (id,)
-    query += if_fecha[0 if fecha else 1]
+    logger.info(f"Generando consulta para ID: {id} con fecha: {fecha}")
+
+    params: Tuple = (id, fecha) if fecha else (id,)
+    filtro = if_fecha[0 if fecha else 1]
+    query += filtro
+    logger.debug(f"Filtro aplicado según si se proporciona fecha: {filtro}")
+
     if fecha:
         query += " AND CAST(kc.FE_CITA AS DATE) = %s"
-        params += (fecha,)
+        logger.debug("Agregado filtro adicional por fecha exacta.")
 
     query += " ORDER BY kc.FE_CITA ASC"
+
+    logger.debug(f"Query final generado: {query}")
+    logger.debug(f"Parámetros: {params}")
+
     return query, params
 
 
@@ -23,6 +37,7 @@ def citas_carnet(
     carnet: str,
     fecha: Optional[datetime],
 ) -> Tuple[str, Tuple]:
+    logger.info(f"Construyendo query de citas por carnet: {carnet}, fecha: {fecha}")
     query = f"""
         SELECT {select(cfg_citas_carnet["sql"]["campos"])}
         FROM SCRITS2.C_PACIENTE cp
@@ -45,6 +60,7 @@ def citas_carnet(
 
 
 def citas_colaborador(id: str, fecha: Optional[datetime]) -> Tuple[str, Tuple]:
+    logger.info(f"Construyendo query de citas por colaborador ID: {id}, fecha: {fecha}")
     query = f"""
         SELECT {select(cfg_citas_colaborador["sql"]["campos"])}
         FROM SCRITS2.K_CITA kc

@@ -2,35 +2,34 @@ async function activarEnvioWhatsApp(modal) {
     if (!modal) return;
 
     const formEnviarPDF = modal.querySelector("#form-enviar-pdf");
+    if (!formEnviarPDF) return;
+
     const input = formEnviarPDF.querySelector("input[name=numero]");
     const mensajeDiv = modal.querySelector("#mensaje-envio");
 
-    // Verifica si el servicio de WhatsApp está listo
+    // Obtener estado de WhatsApp desde el JSON embebido en el HTML
+    let whatsappStatus;
     try {
-        const resp = await fetch("/whatsapp/status");
-        const data = await resp.json();
+        whatsappStatus = JSON.parse(document.getElementById('whatsapp-status').textContent);
+    } catch (e) {
+        console.warn("Error leyendo estado WhatsApp:", e);
+        whatsappStatus = null;
+    }
 
-        const noDisponible = !data || data.status !== "listo" || !data.connected;
-
-        if (noDisponible && formEnviarPDF) {
-            formEnviarPDF.classList.add("hidden");
-            if (mensajeDiv) {
-                mensajeDiv.textContent = "⚠️ Servicio de WhatsApp no disponible en este momento.";
-                mensajeDiv.style.display = "block";
-            }
-            return;
-        }
-    } catch (err) {
-        console.warn("No se pudo verificar el estado de WhatsApp:", err);
-        if (formEnviarPDF) formEnviarPDF.classList.add("hidden");
+    if (!whatsappStatus || whatsappStatus.status !== "listo" || !whatsappStatus.connected) {
+        formEnviarPDF.classList.add("hidden");
         if (mensajeDiv) {
-            mensajeDiv.textContent = "⚠️ Error al verificar el servicio de WhatsApp.";
+            mensajeDiv.textContent = "⚠️ Servicio de WhatsApp no disponible en este momento.";
             mensajeDiv.style.display = "block";
         }
         return;
+    } else {
+        formEnviarPDF.classList.remove("hidden");
+        if (mensajeDiv) {
+            mensajeDiv.textContent = "";
+            mensajeDiv.style.display = "none";
+        }
     }
-
-    if (!formEnviarPDF) return;
 
     formEnviarPDF.addEventListener("submit", async function (e) {
         e.preventDefault();

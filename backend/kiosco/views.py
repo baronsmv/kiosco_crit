@@ -15,7 +15,7 @@ from .utils.data import data_queries, exist_queries, handle_data
 from .utils.logger import get_logger
 from .utils.parsers import buscar, enviar_pdf
 
-logger = get_logger("backend_views")
+logger = get_logger(__name__)
 
 base_url = settings.WHATSAPP_API_BASE_URL
 

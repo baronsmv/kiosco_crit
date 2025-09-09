@@ -42,6 +42,7 @@
     <button class="btn" name="reset" type="submit">🔄 Reiniciar sesión de WhatsApp</button>
 </form>
 
+{{ whatsapp_status|json_script:"whatsapp-status" }}
 <script>
     const NODE_BASE_URL = "http://localhost:3000";
 </script>

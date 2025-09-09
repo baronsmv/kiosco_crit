@@ -1,13 +1,28 @@
 from typing import Optional, Dict
 
+from ..logger import get_logger
+
+logger = get_logger(__name__)
+
 
 def existe(query: str, id: str, cursor) -> Optional[Dict[str, str]]:
+    logger.debug(f"Ejecutando búsqueda con ID: {id}")
+    logger.debug(f"Query:\n{query.strip()}")
+
     cursor.execute(query, (id,))
     row = cursor.fetchone()
-    return {"nombre": " ".join(row), "id": id} if row else None
+
+    if row:
+        nombre = " ".join(row)
+        logger.info(f"Registro encontrado: {nombre}")
+        return {"nombre": nombre, "id": id}
+    else:
+        logger.warning(f"No se encontró registro para ID: {id}")
+        return None
 
 
 def paciente(carnet: str, cursor) -> Optional[Dict[str, str]]:
+    logger.info(f"Buscando paciente con carnet: {carnet}")
     return existe(
         query="""
               SELECT NB_PACIENTE, NB_PATERNO, NB_MATERNO
@@ -20,6 +35,7 @@ def paciente(carnet: str, cursor) -> Optional[Dict[str, str]]:
 
 
 def colaborador(id: str, cursor) -> Optional[Dict[str, str]]:
+    logger.info(f"Buscando colaborador con login: {id}")
     return existe(
         query="""
               SELECT NB_USUARIO, NB_PATERNO, NB_MATERNO

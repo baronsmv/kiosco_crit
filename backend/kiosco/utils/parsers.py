@@ -13,7 +13,7 @@ from weasyprint import HTML
 from .get_client import ip
 from .logger import get_logger
 
-logger = get_logger("parsers")
+logger = get_logger(__name__)
 
 base_url = settings.WHATSAPP_API_BASE_URL
 
@@ -22,11 +22,16 @@ def mapear_columnas(data: Dict[str, Dict], mapeo: Dict[str, Dict]):
     campos = data.get("campos", {})
     mapeo_campos = mapeo["campos"]
 
+    logger.debug(f"Mapeando columnas: {list(campos)}")
+
     for campo in campos:
         if campo not in mapeo_campos:
+            logger.error(f"Campo desconocido en mapeo: {campo}")
             raise ValueError(f"Campo desconocido: {campo}")
 
-    return tuple(mapeo_campos[campo]["nombre"] for campo in campos)
+    columnas = tuple(mapeo_campos[campo]["nombre"] for campo in campos)
+    logger.debug(f"Columnas mapeadas: {columnas}")
+    return columnas
 
 
 def parse_result(
@@ -46,9 +51,9 @@ def parse_result(
                 "mensaje_error": f"❌ No se encontró ningún {persona} con ese {identificador}.",
             }
         )
-        logger.warning(context["mensaje_error"])
+        logger.warning(f"ID inválido: {identificador} - No se encontró {persona}")
 
-    elif not resultado.get(f"{objetos}_sf"):
+    elif not resultado.get(f"objetos_sf"):
         error_context = {
             "mensaje_error": (
                 f"❌ No se encontraron {objetos} con la fecha especificada."
@@ -60,10 +65,13 @@ def parse_result(
 
         context.update(error_context)
         context[error_context["error_target"] + "_error"] = True
-        logger.info(error_context["mensaje_error"])
+        logger.info(f"Sin resultados para {objetos} con ID {identificador}")
 
     elif success_dict:
         context.update(**success_dict, **resultado)
+        logger.info(
+            f"{objetos.capitalize()} encontrados exitosamente para ID {identificador}"
+        )
 
 
 def parse_form(
@@ -83,6 +91,7 @@ def parse_form(
     pdf_url: str,
 ):
     if form.is_valid():
+        logger.debug(f"Formulario válido. Procesando ID: {form.cleaned_data['id']}")
         id = form.cleaned_data["id"]
         fecha = form.cleaned_data["fecha"]
         context.update(
@@ -115,6 +124,7 @@ def parse_form(
         model.objects.create(
             identificador=id, fecha_especificada=fecha, ip_cliente=ip(request)
         )
+        logger.info(f"{persona.capitalize()} encontrado y datos almacenados en sesión")
     else:
         context.update(
             {
@@ -122,7 +132,7 @@ def parse_form(
                 "date_error": bool(form["fecha"].errors),
             }
         )
-        logger.warning(f"Formulario inválido:\n{form.errors.as_json()}")
+        logger.warning(f"Errores de validación en formulario: {form.errors.as_json()}")
 
 
 def ajax(
@@ -134,6 +144,7 @@ def ajax(
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         template = "kiosco/partials/"
         template += partial if context["persona"] else partial_error
+        logger.debug(f"Renderizando plantilla parcial: {template}")
         html = render_to_string(template, context, request=request)
         return HttpResponse(html)
 
@@ -158,8 +169,15 @@ def buscar(
     web_data = data["web"]
     sql_data = data["sql"]
 
+    try:
+        status_resp = requests.get(f"{base_url}/status")
+        client_status = status_resp.json()
+    except Exception as e:
+        client_status = {"status": "desconocido", "connected": False}
+
     context = {
         **web_data.get("context", {}),
+        "whatsapp_status": client_status,
         "tabla_columnas": mapear_columnas(web_data, mapeo=sql_data),
         "id": "",
         "persona": None,
@@ -192,8 +210,10 @@ def buscar(
             context,
             partial=f"modal_buscar.html",
         ):
+            logger.debug("Respuesta AJAX enviada")
             return respuesta_ajax
 
+    logger.debug("Renderizando vista completa con contexto inicial")
     return render(request, f"kiosco/buscar.html", context)
 
 
