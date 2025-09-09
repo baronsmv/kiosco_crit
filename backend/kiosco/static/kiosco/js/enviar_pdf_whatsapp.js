@@ -18,10 +18,10 @@ async function activarEnvioWhatsApp(modal) {
 
     if (!whatsappStatus || whatsappStatus.status !== "listo" || !whatsappStatus.connected) {
         formEnviarPDF.classList.add("hidden");
-        if (mensajeDiv) {
+        /*if (mensajeDiv) {
             mensajeDiv.textContent = "⚠️ Servicio de WhatsApp no disponible en este momento.";
             mensajeDiv.style.display = "block";
-        }
+        }*/
         return;
     } else {
         formEnviarPDF.classList.remove("hidden");

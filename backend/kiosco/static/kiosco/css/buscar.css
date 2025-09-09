@@ -241,7 +241,8 @@ button[style] {
 
 /* Tabla scrollable */
 .tabla-scrollable {
-    max-height: 35vh;
+    max-height: 40vh;
+    overflow-x: auto;
     overflow-y: auto;
     border: 1px solid #ccc;
     margin-top: 0;
@@ -412,6 +413,16 @@ p[style] {
         padding: 2rem 1.5rem;
     }
 
+    .dato span {
+        display: block;
+        font-weight: 600;
+        color: #4b0082;
+    }
+
+    .dato {
+        margin-bottom: 1rem;
+    }
+
     .input-button-row {
         flex-direction: column;
         align-items: stretch;
@@ -422,5 +433,47 @@ p[style] {
     .btn-whatsapp {
         text-align: left;
         width: 100%;
+    }
+
+    .tabla-scrollable table,
+    .tabla-scrollable thead,
+    .tabla-scrollable tbody,
+    .tabla-scrollable th,
+    .tabla-scrollable td,
+    .tabla-scrollable tr {
+        display: block;
+        width: 100%;
+    }
+
+    .tabla-scrollable thead {
+        display: none;
+    }
+
+    .tabla-scrollable tr {
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 0.5rem;
+        background: #fff;
+    }
+
+    .tabla-scrollable td {
+        position: relative;
+        padding-left: 50%;
+        margin-top: 0.3rem;
+        text-align: left;
+        border: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .tabla-scrollable td::before {
+        content: attr(data-label);
+        top: 0.5rem;
+        left: 1rem;
+        width: 45%;
+        padding-right: 1rem;
+        white-space: nowrap;
+        font-weight: bold;
+        color: #4b0082;
     }
 }

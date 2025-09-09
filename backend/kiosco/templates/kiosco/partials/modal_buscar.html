@@ -1,3 +1,5 @@
+{% load custom_filters %}
+
 <div
         aria-labelledby="modal-title"
         aria-modal="true"
@@ -31,7 +33,7 @@
                     {% for fila in tabla %}
                     <tr>
                         {% for dato in fila %}
-                        <td>{{ dato|default_if_none:"" }}</td>
+                        <td data-label="{{ tabla_columnas|index:forloop.counter0 }}">{{ dato|default_if_none:"" }}</td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
