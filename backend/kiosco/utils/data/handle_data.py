@@ -8,6 +8,18 @@ from ..logger import get_logger
 logger = get_logger(__name__)
 
 
+def formatear_dato(dato: str, formatear: Optional[str] = None) -> str:
+    if not formatear:
+        return dato
+    if formatear == "nombre":
+        return dato.title()
+    if formatear == "fecha":
+        return (
+            dato.strftime("%d/%m/%Y %H:%M") if isinstance(dato, datetime) else str(dato)
+        )
+    return dato
+
+
 def obtener_filas(
     id: str,
     exist_func: Callable,
@@ -57,7 +69,10 @@ def obtener_datos(
     )
 
     objetos_formateados = [
-        {campo: cita[i] for i, campo in enumerate(sql_campos.keys())}
+        {
+            campo: formatear_dato(cita[i], sql_campos[campo].get("formatear"))
+            for i, campo in enumerate(sql_campos.keys())
+        }
         for cita in objetos
     ]
     logger.info(f"Datos procesados correctamente para ID: {id}")
@@ -72,13 +87,15 @@ def formatear_datos(
     persona_sf: Dict[str, str],
     objetos_sf: List[Dict[str, Any]],
     campos: List[str],
+    persona: str,
+    identificador: str,
 ) -> Dict[str, Dict[str, str] | Tuple[Tuple]]:
     logger.debug(f"Formateando datos finales. Campos: {campos}")
 
     resultado = {
         "persona": {
-            "Nombre": persona_sf.get("nombre", ""),
-            "Carnet": persona_sf.get("id", ""),
+            f"Nombre de {persona.capitalize()}": persona_sf.get("nombre", "").title(),
+            identificador.capitalize(): persona_sf.get("id", ""),
         },
         "tabla": tuple(
             tuple(objeto.get(campo, "") for campo in campos) for objeto in objetos_sf

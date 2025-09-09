@@ -64,7 +64,8 @@ default_config: Dict = {
                     },
                     "nombre_colaborador": {
                         "nombre": "Colaborador",
-                        "sql": "CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO)",
+                        "sql": "CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO, ' ', cu.NB_MATERNO)",
+                        "tipo": "nombre",
                     },
                     "ds_clinica": {
                         "nombre": "Clínica",
@@ -130,6 +131,7 @@ default_config: Dict = {
                     "nombre_paciente": {
                         "nombre": "Paciente",
                         "sql": "CONCAT(cp.NB_PACIENTE,' ',cp.NB_PATERNO,' ',cp.NB_MATERNO)",
+                        "formatear": "nombre",
                     },
                     "no_carnet": {
                         "nombre": "Carnet",

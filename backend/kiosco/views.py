@@ -110,7 +110,7 @@ def buscar_citas_por_colaborador(request):
         get_func=handle_data.obtener_datos,
         query_func=data_queries.citas_colaborador,
         format_func=handle_data.formatear_datos,
-        identificador="ID",
+        identificador="nombre de usuario",
         persona="colaborador",
         objetos="citas",
         pdf_url="pdf_citas_carnet",
@@ -124,7 +124,7 @@ def pdf_citas_por_colaborador(request, id):
     return enviar_pdf(
         request,
         id,
-        identificador="ID",
+        identificador="nombre de usuario",
         persona="colaborador",
         format_func=handle_data.formatear_datos,
         data=config.cfg_citas_colaborador,

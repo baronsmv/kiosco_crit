@@ -114,7 +114,16 @@ def parse_form(
             resultado,
             context,
             fecha,
-            success_dict=format_func(**resultado, campos=campos) if resultado else None,
+            success_dict=(
+                format_func(
+                    **resultado,
+                    campos=campos,
+                    persona=persona,
+                    identificador=identificador,
+                )
+                if resultado
+                else None
+            ),
             identificador=identificador,
             persona=persona,
             objetos=objetos,
