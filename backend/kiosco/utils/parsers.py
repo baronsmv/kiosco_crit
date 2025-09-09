@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from typing import Dict, Optional, Callable
 
 import requests
@@ -162,6 +163,7 @@ def buscar(
     persona: str,
     objetos: str,
     pdf_url: str,
+    fecha_inicial: Optional[datetime.date] = None,
 ):
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
@@ -177,6 +179,7 @@ def buscar(
 
     context = {
         **web_data.get("context", {}),
+        "fecha_inicial": fecha_inicial,
         "whatsapp_status": client_status,
         "tabla_columnas": mapear_columnas(web_data, mapeo=sql_data),
         "id": "",

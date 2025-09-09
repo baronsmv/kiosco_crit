@@ -1,3 +1,5 @@
+from datetime import date
+
 import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -103,6 +105,7 @@ def buscar_citas_por_colaborador(request):
         request,
         data=config.cfg_citas_colaborador,
         form=BuscarIdFechaForm,
+        fecha_inicial=date.today(),
         model=CitasColaboradorConsulta,
         exist_func=exist_queries.colaborador,
         get_func=handle_data.obtener_datos,
