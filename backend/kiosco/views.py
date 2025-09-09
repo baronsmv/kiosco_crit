@@ -9,6 +9,7 @@ from .models import (
     CitasCarnetWhatsapp,
     CitasCarnetConsulta,
     CitasColaboradorConsulta,
+    CitasColaboradorWhatsapp,
 )
 from .utils import config
 from .utils.data import data_queries, exist_queries, handle_data
@@ -122,6 +123,6 @@ def pdf_citas_por_colaborador(request, id):
         identificador="ID",
         persona="colaborador",
         format_func=handle_data.formatear_datos,
-        data=config.cfg_citas_carnet,
-        model=CitasCarnetWhatsapp,
+        data=config.cfg_citas_colaborador,
+        model=CitasColaboradorWhatsapp,
     )

@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     "X-Requested-With": "XMLHttpRequest",
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
-                body: new URLSearchParams({id}),
+                body: new URLSearchParams({id, fecha}),
             });
 
             const html = await response.text();

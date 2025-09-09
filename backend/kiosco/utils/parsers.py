@@ -172,7 +172,7 @@ def buscar(
     try:
         status_resp = requests.get(f"{base_url}/status")
         client_status = status_resp.json()
-    except Exception as e:
+    except Exception:
         client_status = {"status": "desconocido", "connected": False}
 
     context = {
