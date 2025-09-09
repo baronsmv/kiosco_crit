@@ -40,7 +40,7 @@
                 {% for fila in tabla %}
                 <tr>
                     {% for dato in fila %}
-                    <td>{{ dato }}</td>
+                    <td>{{ dato|default_if_none:"" }}</td>
                     {% endfor %}
                 </tr>
                 {% endfor %}
