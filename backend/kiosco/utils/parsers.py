@@ -234,6 +234,9 @@ def buscar(
     return render(request, f"kiosco/buscar.html", context)
 
 
+import hashlib
+
+
 def generar_pdf(
     id: str,
     format_func: Callable,
@@ -245,14 +248,8 @@ def generar_pdf(
     pdf_data = data["pdf"]
     sql_data = data["sql"]
 
-    filename = f"{persona}_{id}.pdf"
     output_dir = os.path.join(settings.MEDIA_ROOT, "pdfs")
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, filename)
-    logger.debug(f"Generando PDF en: {output_path}")
-
-    css_path = finders.find(f"kiosco/css/pdf.css")
-    css_files = [css_path] if css_path else []
 
     if not previous_context:
         logger.error("previous_context está vacío. No se puede generar PDF.")
@@ -272,6 +269,7 @@ def generar_pdf(
         logger.exception("Error al aplicar format_func en generar_pdf")
         raise
 
+    # Render HTML
     try:
         html = render_to_string(
             "kiosco/pdf.html",
@@ -281,10 +279,25 @@ def generar_pdf(
                 "tabla_columnas": mapear_columnas(pdf_data, mapeo=sql_data),
             },
         )
+    except Exception:
+        logger.exception("Error al renderizar HTML")
+        raise
+
+    # Calcular hash del contenido HTML
+    content_hash = hashlib.sha1(html.encode("utf-8")).hexdigest()[:10]
+    filename = f"{persona}_{id}_{content_hash}.pdf"
+    output_path = os.path.join(output_dir, filename)
+    logger.debug(f"Generando PDF en: {output_path}")
+
+    # Buscar CSS
+    css_path = finders.find(f"kiosco/css/pdf.css")
+    css_files = [css_path] if css_path else []
+
+    try:
         HTML(string=html).write_pdf(output_path, stylesheets=css_files)
         logger.debug("PDF generado correctamente")
     except Exception as e:
-        logger.exception("Error al renderizar o generar el PDF")
+        logger.exception("Error al generar el PDF")
         raise
 
     if not os.path.exists(output_path):

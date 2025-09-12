@@ -68,6 +68,19 @@ services:
       timeout: 5s
       retries: 5
 
+  cleaner:
+    image: alpine
+    container_name: pdf_cleaner_kiosco
+    volumes:
+      - ./backend/media:/media
+      - ./backend/scripts:/scripts
+    env_file:
+      - .env
+    command: [ "/scripts/clean_pdfs.sh" ]
+    networks:
+      - app_net
+    restart: unless-stopped
+
 volumes:
   static_volume:
   media_volume:
