@@ -249,6 +249,7 @@ def generar_pdf(
     previous_context: Dict,
     persona: str,
     identificador: str,
+    color: bool = False,
 ) -> str:
     pdf_data = data["pdf"]
     sql_data = data["sql"]
@@ -295,7 +296,7 @@ def generar_pdf(
     logger.debug(f"Generando PDF en: {output_path}")
 
     # Buscar CSS
-    css_path = finders.find(f"kiosco/css/pdf.css")
+    css_path = finders.find(f"kiosco/css/pdf{"-color" if color else ""}.css")
     css_files = [css_path] if css_path else []
 
     try:
@@ -343,6 +344,7 @@ def enviar_pdf(
         previous_context=web_context,
         persona=persona,
         identificador=identificador,
+        color=True,
     )
 
     # Mensaje WhatsApp
