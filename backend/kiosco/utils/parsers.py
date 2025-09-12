@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime
 from typing import Callable, Dict
 from typing import Optional
@@ -6,6 +7,7 @@ from typing import Optional
 import requests
 from django.conf import settings
 from django.contrib.staticfiles import finders
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -77,6 +79,17 @@ def parse_result(
         )
 
 
+def validar_id(
+    input_str: str,
+    max_length: int = 50,
+    pattern: str = r"^[a-zA-Z0-9. -]+$",
+):
+    if len(input_str) > max_length:
+        raise ValidationError("El ID es demasiado largo.")
+    if not re.match(pattern, input_str):
+        raise ValidationError("El ID contiene caracteres inválidos.")
+
+
 def parse_form(
     request,
     context: Dict,
@@ -96,6 +109,7 @@ def parse_form(
     if form.is_valid():
         logger.debug(f"Formulario válido. Procesando ID: {form.cleaned_data['id']}")
         id = form.cleaned_data["id"]
+        validar_id(id)
         fecha = form.cleaned_data["fecha"]
         context.update(
             {

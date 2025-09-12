@@ -32,6 +32,8 @@
                         required
                         type="text"
                         value="{{ id|default:'' }}"
+                        maxlength="50"
+                        pattern="[a-zA-Z0-9. -]+"
                 />
             </div>
 
@@ -74,7 +76,6 @@
 <script>
     const autoBorrado = {{ auto_borrado|yesno:"true,false" }};
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script defer src="{% static 'kiosco/js/error_form_handler.js' %}"></script>
 <script defer src="{% static 'kiosco/js/buscar.js' %}"></script>
 <script defer src="{% static 'kiosco/js/enviar_pdf_whatsapp.js' %}"></script>
