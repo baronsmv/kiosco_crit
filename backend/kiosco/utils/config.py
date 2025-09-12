@@ -15,8 +15,8 @@ default_config: Dict = {
     },
     "inicio": {
         "context": {
-            "title": "Inicio - Citas",
-            "header": "Gestión de Citas",
+            "title": "Kiosco de Información",
+            "header": "Kiosco de Información",
             "select_text": "Selecciona una opción para continuar:",
         },
         "options": {
