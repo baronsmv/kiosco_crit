@@ -42,6 +42,15 @@
             </div>
         </div>
 
+        <!-- Modal de impresión -->
+        <button
+                class="btn btn-outline-primary"
+                onclick="abrirVistaPrevia('{{ tipo }}', '{{ id }}')"
+                type="button"
+        >
+            Vista previa e impresión
+        </button>
+
         <form action="{{ pdf_url }}" id="form-enviar-pdf" method="POST">
             {% csrf_token %}
             <div class="input-button-row">

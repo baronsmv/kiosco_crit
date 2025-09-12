@@ -84,6 +84,11 @@ function limpiarErrores() {
     }
 }
 
+function abrirVistaPrevia(tipo, id) {
+    const url = `/pdf/${tipo}/${id}/?abrir=1`;
+    window.open(url, "_blank");
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const anterior = document.getElementById("modal");
     if (anterior) anterior.remove();

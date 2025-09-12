@@ -13,6 +13,23 @@ default_config: Dict = {
             "header": "Administración de WhatsApp",
         }
     },
+    "inicio": {
+        "context": {
+            "title": "Inicio - Citas",
+            "header": "Gestión de Citas",
+            "select_text": "Selecciona una opción para continuar:",
+        },
+        "options": {
+            "buscar_citas_por_carnet": {
+                "title": "⎘ Citas por Carnet",
+                "description": "Busca citas con el carnet de un paciente.",
+            },
+            "buscar_citas_por_colaborador": {
+                "title": "👤 Citas por Colaborador",
+                "description": "Busca citas de colaboradores.",
+            },
+        },
+    },
     "citas": {
         "carnet": {
             "web": {
@@ -106,9 +123,10 @@ default_config: Dict = {
                 "campos": [
                     "nb_servicio",
                     "fe_cita",
-                    "hora",
                     "nombre_paciente",
                     "no_carnet",
+                    "clinica_abrev",
+                    "estatus",
                 ],
                 "context": {
                     "title": "Agenda del Colaborador",
@@ -165,6 +183,7 @@ else:
         config = safe_load(f) or {}
 
 cfg_whatsapp_admin = config.get("admin_whatsapp", {})
+cfg_home = config.get("inicio", {})
 
 cfg_citas = config.get("citas", {})
 cfg_citas_carnet = cfg_citas.get("carnet", {})

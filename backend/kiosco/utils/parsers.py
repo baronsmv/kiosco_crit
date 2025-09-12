@@ -1,11 +1,13 @@
 import os
 from datetime import datetime
-from typing import Dict, Optional, Callable
+from typing import Callable, Dict
+from typing import Optional
 
 import requests
 from django.conf import settings
 from django.contrib.staticfiles import finders
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -129,7 +131,7 @@ def parse_form(
             objetos=objetos,
         )
         request.session["context_data"] = {
-            c: context.get(c) for c in (f"{persona}_sf", f"{objetos}_sf")
+            c: context.get(c) for c in ("persona_sf", "objetos_sf")
         }
         model.objects.create(
             identificador=id, fecha_especificada=fecha, ip_cliente=ip(request)
@@ -145,7 +147,7 @@ def parse_form(
         logger.warning(f"Errores de validación en formulario: {form.errors.as_json()}")
 
 
-def ajax(
+def ajax_buscar(
     request,
     context: Dict,
     partial: str,
@@ -189,6 +191,7 @@ def buscar(
 
     context = {
         **web_data.get("context", {}),
+        "tipo": persona,
         "fecha_inicial": fecha_inicial,
         "auto_borrado": auto_borrado,
         "whatsapp_status": client_status,
@@ -219,7 +222,7 @@ def buscar(
             objetos=objetos,
             pdf_url=pdf_url,
         )
-        if respuesta_ajax := ajax(
+        if respuesta_ajax := ajax_buscar(
             request,
             context,
             partial=f"modal_buscar.html",
@@ -232,16 +235,17 @@ def buscar(
 
 
 def generar_pdf(
-    identificador: str,
+    id: str,
     format_func: Callable,
     data: Dict[str, Dict],
     previous_context: Dict,
     persona: str,
+    identificador: str,
 ) -> str:
     pdf_data = data["pdf"]
     sql_data = data["sql"]
 
-    filename = f"{persona}_{identificador}.pdf"
+    filename = f"{persona}_{id}.pdf"
     output_dir = os.path.join(settings.MEDIA_ROOT, "pdfs")
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, filename)
@@ -250,20 +254,42 @@ def generar_pdf(
     css_path = finders.find(f"kiosco/css/pdf.css")
     css_files = [css_path] if css_path else []
 
-    previous_context.update(
-        format_func(**previous_context, campos=pdf_data.get("campos", ())),
-    )
+    if not previous_context:
+        logger.error("previous_context está vacío. No se puede generar PDF.")
+        raise ValueError("No hay datos de contexto en sesión.")
 
-    html = render_to_string(
-        f"kiosco/pdf.html",
-        {
-            **pdf_data.get("context", {}),
+    logger.debug(f"Contexto recibido en generar_pdf: {previous_context.keys()}")
+
+    try:
+        formatted_context = format_func(
             **previous_context,
-            "tabla_columnas": mapear_columnas(pdf_data, mapeo=sql_data),
-        },
-    )
-    HTML(string=html).write_pdf(output_path, stylesheets=css_files)
-    logger.debug("PDF generado correctamente")
+            campos=pdf_data.get("campos", ()),
+            persona=persona,
+            identificador=identificador,
+        )
+        previous_context.update(formatted_context)
+    except Exception:
+        logger.exception("Error al aplicar format_func en generar_pdf")
+        raise
+
+    try:
+        html = render_to_string(
+            "kiosco/pdf.html",
+            {
+                **pdf_data.get("context", {}),
+                **previous_context,
+                "tabla_columnas": mapear_columnas(pdf_data, mapeo=sql_data),
+            },
+        )
+        HTML(string=html).write_pdf(output_path, stylesheets=css_files)
+        logger.debug("PDF generado correctamente")
+    except Exception as e:
+        logger.exception("Error al renderizar o generar el PDF")
+        raise
+
+    if not os.path.exists(output_path):
+        logger.error(f"El archivo PDF no fue creado: {output_path}")
+        raise FileNotFoundError("No se pudo generar el archivo PDF.")
 
     return filename
 
@@ -293,11 +319,12 @@ def enviar_pdf(
 
     web_context = request.session.get("context_data", {})
     filename = generar_pdf(
-        id,
-        persona=persona,
+        id=id,
         format_func=format_func,
         data=data,
         previous_context=web_context,
+        persona=persona,
+        identificador=identificador,
     )
 
     # Mensaje WhatsApp

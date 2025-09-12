@@ -7,6 +7,8 @@ from .views import (
     pdf_citas_por_carnet,
     buscar_citas_por_colaborador,
     pdf_citas_por_colaborador,
+    vista_previa_pdf,
+    home,
 )
 
 
@@ -19,6 +21,11 @@ urlpatterns = [
         "whatsapp/admin/",
         user_passes_test(is_staff)(admin_whatsapp),
         name="admin_whatsapp",
+    ),
+    path(
+        "pdf/<str:tipo>/<str:id>/",
+        vista_previa_pdf,
+        name="vista_previa_pdf",
     ),
     path(
         "citas/carnet",
@@ -40,4 +47,5 @@ urlpatterns = [
         pdf_citas_por_colaborador,
         name="pdf_citas_colaborador",
     ),
+    path("", home, name="home"),
 ]
