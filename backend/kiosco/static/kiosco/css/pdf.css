@@ -28,6 +28,8 @@ h1, h2 {
 /* Información */
 dl {
     margin-bottom: 1em;
+    column-count: 2;
+    column-gap: 20px;
 }
 
 dt {
