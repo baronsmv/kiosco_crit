@@ -79,7 +79,7 @@ default_config: Dict = {
                     },
                     "fe_cita": {
                         "nombre": "Fecha y hora",
-                        "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy hh:mm')",
+                        "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy HH:mm')",
                     },
                     "nombre_colaborador": {
                         "nombre": "Colaborador",
@@ -148,7 +148,7 @@ default_config: Dict = {
                     },
                     "fe_cita": {
                         "nombre": "Fecha y hora",
-                        "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy hh:mm')",
+                        "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy HH:mm')",
                     },
                     "nombre_paciente": {
                         "nombre": "Paciente",
