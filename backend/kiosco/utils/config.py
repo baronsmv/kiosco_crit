@@ -51,7 +51,9 @@ default_config: Dict = {
                     "data_title": "Datos del Paciente",
                     "table_title": "Citas",
                     "number_label": "Número telefónico:",
+                    "preview_label": "Vista previa e impresión",
                     "send_button_label": "📤 Enviar por WhatsApp",
+                    "home_label": "Inicio",
                 },
             },
             "pdf": {
@@ -116,7 +118,9 @@ default_config: Dict = {
                     "data_title": "Datos del Colaborador",
                     "table_title": "Citas del Día",
                     "number_label": "Número telefónico:",
+                    "preview_label": "Vista previa e impresión",
                     "send_button_label": "📤 Enviar por WhatsApp",
+                    "home_label": "Inicio",
                 },
             },
             "pdf": {

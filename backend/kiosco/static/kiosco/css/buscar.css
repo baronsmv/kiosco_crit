@@ -52,6 +52,21 @@ button {
     animation: fadeInUp 0.6s ease forwards;
 }
 
+/* Enlace a inicio */
+.home-link {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.home-link:hover {
+    text-decoration: underline;
+}
+
+
 /* Títulos */
 h1 {
     text-align: center;
@@ -546,7 +561,7 @@ p[style] {
         font-weight: bold;
         color: #4b0082;
     }
-    
+
     .menu-options {
         gap: 1rem;
     }

@@ -10,6 +10,10 @@
 <body>
 
 <div aria-labelledby="main-title" class="container" role="main">
+    {% if mostrar_inicio %}
+    <a href="{{ home_url }}" class="home-link">{{ home_label }}</a>
+    {% endif %}
+
     <h1 id="main-title">{{ header }}</h1>
 
     <form id="buscar-form" method="POST" novalidate>

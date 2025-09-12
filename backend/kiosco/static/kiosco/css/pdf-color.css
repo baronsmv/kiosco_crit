@@ -1,0 +1,135 @@
+/* Reset básico */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Myriad Pro", sans-serif;
+    color: #2b2b2b;
+    background-color: #fff;
+    margin: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Encabezado y pie */
+header,
+footer {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+h1#titulo-principal {
+    font-size: 2.4em;
+    color: #4b0082;
+    margin-bottom: 0.4em;
+    border-bottom: 2px solid #8a2be2;
+    padding-bottom: 0.3em;
+}
+
+.section-title {
+    font-size: 1.6em;
+    color: #6a0dad;
+    margin-bottom: 0.6em;
+    border-bottom: 1px solid #d1b3ff;
+    padding-bottom: 0.2em;
+}
+
+/* Información general */
+.info dl {
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    padding: 14px 20px;
+    background: #f5f3fa;
+}
+
+.info .dato {
+    display: flex;
+    margin-bottom: 12px;
+}
+
+.info dt {
+    flex: 0 0 160px;
+    font-weight: 700;
+    color: #6a0dad;
+}
+
+.info dd {
+    flex: 1;
+    margin: 0;
+    padding-left: 12px;
+    color: #333;
+}
+
+/* Sección de tabla */
+.tabla-seccion {
+    margin-top: 30px;
+}
+
+.tabla-scrollable {
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    background: #4b0082;
+    color: #ffffff;
+    padding: 9px 12px;
+    border-bottom: 2px solid #6a0dad;
+    text-align: left;
+    font-weight: 600;
+}
+
+tbody td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #eee;
+    color: #2f2f2f;
+}
+
+tbody tr:nth-child(even) {
+    background: #f3f0fb;
+}
+
+tbody tr:hover {
+    background: #e0d5ff;
+}
+
+/* Pie de página */
+.footer-text {
+    font-size: 0.85em;
+    color: #777;
+    margin-top: 2em;
+}
+
+/* Impresión */
+@media print {
+    body {
+        margin: 10mm;
+        font-size: 12pt;
+    }
+
+    .tabla-scrollable {
+        max-height: none;
+        overflow: visible;
+        box-shadow: none;
+        border: none;
+    }
+}
+
+/* Evita cortes feos en PDF */
+tr {
+    page-break-inside: avoid;
+}

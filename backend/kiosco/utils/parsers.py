@@ -175,7 +175,9 @@ def buscar(
     objetos: str,
     pdf_url: str,
     fecha_inicial: Optional[datetime.date] = None,
-    auto_borrado: bool = True,
+    auto_borrado: bool = False,
+    mostrar_imprimir: bool = True,
+    mostrar_inicio: bool = True,
 ):
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
@@ -191,9 +193,12 @@ def buscar(
 
     context = {
         **web_data.get("context", {}),
+        "home_url": reverse("home"),
         "tipo": persona,
         "fecha_inicial": fecha_inicial,
         "auto_borrado": auto_borrado,
+        "mostrar_imprimir": mostrar_imprimir,
+        "mostrar_inicio": mostrar_inicio,
         "whatsapp_status": client_status,
         "tabla_columnas": mapear_columnas(web_data, mapeo=sql_data),
         "id": "",

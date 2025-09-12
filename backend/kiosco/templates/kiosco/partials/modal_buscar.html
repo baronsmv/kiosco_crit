@@ -43,13 +43,15 @@
         </div>
 
         <!-- Modal de impresión -->
+        {% if mostrar_imprimir %}
         <button
                 class="btn btn-outline-primary"
                 onclick="abrirVistaPrevia('{{ tipo }}', '{{ id }}')"
                 type="button"
         >
-            Vista previa e impresión
+            {{ preview_label }}
         </button>
+        {% endif %}
 
         <form action="{{ pdf_url }}" id="form-enviar-pdf" method="POST">
             {% csrf_token %}

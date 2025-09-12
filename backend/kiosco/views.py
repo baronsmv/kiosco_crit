@@ -138,6 +138,10 @@ def buscar_citas_por_carnet(request):
         persona="paciente",
         objetos="citas",
         pdf_url="pdf_citas_carnet",
+        fecha_inicial=None,
+        auto_borrado=True,
+        mostrar_imprimir=True,
+        mostrar_inicio=True,
     )
 
 
@@ -170,6 +174,8 @@ def buscar_citas_por_colaborador(request):
         pdf_url="pdf_citas_carnet",
         fecha_inicial=date.today(),
         auto_borrado=False,
+        mostrar_imprimir=True,
+        mostrar_inicio=True,
     )
 
 
