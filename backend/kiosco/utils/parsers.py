@@ -107,10 +107,26 @@ def parse_form(
     pdf_url: str,
 ):
     if form.is_valid():
-        logger.debug(f"Formulario válido. Procesando ID: {form.cleaned_data['id']}")
+        logger.debug(
+            f"Formulario válido. Procesando {identificador}: {form.cleaned_data['id']}"
+        )
+
         id = form.cleaned_data["id"]
-        validar_id(id)
+        try:
+            validar_id(id)
+        except ValidationError as e:
+            form.add_error("id", e)
+            context.update(
+                {
+                    "id_error": True,
+                    "date_error": bool(form["fecha"].errors),
+                }
+            )
+            logger.warning(f"Error de validación en ID: {e}")
+            return
+
         fecha = form.cleaned_data["fecha"]
+
         context.update(
             {
                 "id": id,
