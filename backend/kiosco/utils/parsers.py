@@ -224,7 +224,7 @@ def buscar(
     context = {
         **web_data.get("context", {}),
         "home_url": reverse("home"),
-        "tipo": persona,
+        "tipo": f"{objetos}_{persona}",
         "fecha_inicial": fecha_inicial,
         "auto_borrado": auto_borrado,
         "mostrar_imprimir": mostrar_imprimir,
@@ -279,6 +279,7 @@ def generar_pdf(
     previous_context: Dict,
     persona: str,
     identificador: str,
+    objetos: str,
     color: bool = False,
 ) -> str:
     pdf_data = data["pdf"]
@@ -321,7 +322,7 @@ def generar_pdf(
 
     # Calcular hash del contenido HTML
     content_hash = hashlib.sha1(html.encode("utf-8")).hexdigest()[:10]
-    filename = f"{persona}_{id}_{content_hash}.pdf"
+    filename = f"{objetos}_{persona}_{id}_{content_hash}.pdf"
     output_path = os.path.join(output_dir, filename)
     logger.debug(f"Generando PDF en: {output_path}")
 
@@ -348,6 +349,7 @@ def enviar_pdf(
     id: str,
     identificador: str,
     persona: str,
+    objetos: str,
     format_func: Callable,
     data: Dict,
     model,
@@ -374,6 +376,7 @@ def enviar_pdf(
         previous_context=web_context,
         persona=persona,
         identificador=identificador,
+        objetos=objetos,
         color=True,
     )
 

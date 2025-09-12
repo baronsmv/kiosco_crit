@@ -91,12 +91,14 @@ def home(request):
 def vista_previa_pdf(request, tipo, id):
     abrir = request.GET.get("abrir") == "1"
 
-    if tipo == "colaborador":
+    if tipo == "citas_colaborador":
         persona = "colaborador"
+        objetos = "citas"
         identificador = "nombre de usuario"
         data = config.cfg_citas_colaborador
-    elif tipo == "paciente":
+    elif tipo == "citas_paciente":
         persona = "paciente"
+        objetos = "citas"
         identificador = "carnet"
         data = config.cfg_citas_carnet
     else:
@@ -109,6 +111,7 @@ def vista_previa_pdf(request, tipo, id):
         previous_context=request.session.get("context_data", {}),
         identificador=identificador,
         persona=persona,
+        objetos=objetos,
     )
 
     file_url = f"/media/pdfs/{filename}"
@@ -152,6 +155,7 @@ def pdf_citas_por_carnet(request, carnet):
         carnet,
         identificador="carnet",
         persona="paciente",
+        objetos="citas",
         format_func=handle_data.formatear_datos,
         data=config.cfg_citas_carnet,
         model=CitasCarnetWhatsapp,
@@ -186,6 +190,7 @@ def pdf_citas_por_colaborador(request, id):
         id,
         identificador="nombre de usuario",
         persona="colaborador",
+        objetos="citas",
         format_func=handle_data.formatear_datos,
         data=config.cfg_citas_colaborador,
         model=CitasColaboradorWhatsapp,
