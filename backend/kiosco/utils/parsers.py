@@ -327,7 +327,7 @@ def generar_pdf(
     logger.debug(f"Generando PDF en: {output_path}")
 
     # Buscar CSS
-    css_path = finders.find(f"kiosco/css/pdf{"-color" if color else ""}.css")
+    css_path = finders.find(f"kiosco/css/pdf{'-color' if color else ''}.css")
     css_files = [css_path] if css_path else []
 
     try:
