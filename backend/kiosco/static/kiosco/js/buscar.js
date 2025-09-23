@@ -100,7 +100,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const processingMessage = document.getElementById("processing-message");
         if (processingMessage) {
-            processingMessage.style.display = "block";
+            processingMessage.classList.add("visible");
+            processingMessage.setAttribute("aria-hidden", "false");
         }
 
         limpiarErrores();
@@ -112,7 +113,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const fecha = fechaInput.value.trim();
 
         if (!id) {
-            if (processingMessage) processingMessage.style.display = "none";
+            if (processingMessage) {
+                processingMessage.classList.remove("visible");
+                processingMessage.setAttribute("aria-hidden", "false");
+            }
             idInput.focus();
             idInput.select();
             return;
@@ -180,7 +184,8 @@ document.addEventListener("DOMContentLoaded", function () {
             idInput.select();
         } finally {
             if (processingMessage) {
-                processingMessage.style.display = "none";
+                processingMessage.classList.remove("visible");
+                processingMessage.setAttribute("aria-hidden", "true");
             }
         }
     });
