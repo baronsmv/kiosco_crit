@@ -391,6 +391,7 @@ button[style] {
 /* Mensajes de error */
 .error-message {
     color: #e63946;
+    text-align: center;
     font-weight: 600;
     font-size: 0.86rem;
     margin-top: 1rem;
