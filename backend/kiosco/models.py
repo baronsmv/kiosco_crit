@@ -5,6 +5,16 @@ class ConsultaBase(models.Model):
     identificador = models.CharField(max_length=20)
     fecha_especificada = models.DateField(null=True, blank=True)
     fecha_consulta = models.DateTimeField(auto_now_add=True)
+    estado = models.CharField(
+        max_length=20,
+        choices=(
+            ("exitoso", "Exitoso"),
+            ("inexistente", "ID Inexistente"),
+            ("sin_objetos", "Sin citas"),
+            ("invalido", "ID Inválido"),
+            ("error_conexion", "Error de conexión"),
+        ),
+    )
     ip_cliente = models.GenericIPAddressField(null=True, blank=True)
 
     class Meta:
@@ -16,12 +26,13 @@ class ConsultaBase(models.Model):
 
 class WhatsappBase(models.Model):
     identificador = models.CharField(max_length=20)
+    fecha_especificada = models.DateField(null=True, blank=True)
+    fecha_envio = models.DateTimeField(auto_now_add=True)
     numero_destino = models.CharField(max_length=20)
     mensaje = models.TextField()
     archivo_pdf = models.CharField(max_length=255)
-    fecha_envio = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(
-        max_length=20, choices=[("enviado", "Enviado"), ("fallido", "Fallido")]
+        max_length=20, choices=(("enviado", "Enviado"), ("fallido", "Fallido"))
     )
     detalle_error = models.TextField(blank=True, null=True)
     ip_cliente = models.GenericIPAddressField(null=True, blank=True)

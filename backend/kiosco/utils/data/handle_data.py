@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Dict, Optional, Callable, Tuple, Any, List
 
 from django.db import connections
+from django.db.utils import OperationalError
 
 from ..logger import get_logger
 
@@ -44,6 +45,9 @@ def obtener_filas(
             resultados = cursor.fetchall()
             logger.info(f"Se encontraron {len(resultados)} filas para ID: '{id}'")
             return persona, resultados
+    except OperationalError as e:
+        logger.error(f"Error al obtener filas para ID: '{id}': {e}")
+        raise
     except Exception as e:
         logger.exception(f"Error al obtener filas para ID: '{id}': {str(e)}")
         return None

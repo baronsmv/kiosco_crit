@@ -1,3 +1,4 @@
+import hashlib
 import os
 import re
 from datetime import datetime
@@ -8,6 +9,7 @@ import requests
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core.exceptions import ValidationError
+from django.db.utils import OperationalError
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -123,6 +125,12 @@ def parse_form(
                 }
             )
             logger.warning(f"Error de validación en ID: {e}")
+            model.objects.create(
+                identificador=id,
+                fecha_especificada=form.cleaned_data.get("fecha"),
+                ip_cliente=ip(request),
+                estado="invalido",
+            )
             return
 
         fecha = form.cleaned_data["fecha"]
@@ -135,13 +143,38 @@ def parse_form(
                 "pdf_url": reverse(pdf_url, args=(id,)),
             }
         )
-        resultado = get_func(
-            id,
-            sql_campos=sql_campos,
-            exist_func=exist_func,
-            query_func=query_func,
-            fecha=fecha,
-        )
+        try:
+            resultado = get_func(
+                id,
+                sql_campos=sql_campos,
+                exist_func=exist_func,
+                query_func=query_func,
+                fecha=fecha,
+            )
+        except OperationalError as e:
+            logger.error(f"Error de conexión a la base de datos: {e}")
+            model.objects.create(
+                identificador=id,
+                fecha_especificada=fecha,
+                ip_cliente=ip(request),
+                estado="error_conexion",
+            )
+            context.update(
+                {
+                    "mensaje_error": "❌ No se pudo conectar con la base de datos.",
+                    "id_error": True,
+                    "error_target": "id",
+                }
+            )
+            return
+
+        if not resultado:
+            estado = "inexistente"
+        elif not resultado.get("objetos_sf"):
+            estado = "no tiene citas"
+        else:
+            estado = "exitoso"
+
         parse_result(
             resultado,
             context,
@@ -161,10 +194,13 @@ def parse_form(
             objetos=objetos,
         )
         request.session["context_data"] = {
-            c: context.get(c) for c in ("persona_sf", "objetos_sf")
+            c: context.get(c) for c in ("persona_sf", "objetos_sf", "fecha")
         }
         model.objects.create(
-            identificador=id, fecha_especificada=fecha, ip_cliente=ip(request)
+            identificador=id,
+            fecha_especificada=fecha,
+            ip_cliente=ip(request),
+            estado=estado,
         )
         logger.info(f"{persona.capitalize()} encontrado y datos almacenados en sesión")
     else:
@@ -269,9 +305,6 @@ def buscar(
     return render(request, f"kiosco/buscar.html", context)
 
 
-import hashlib
-
-
 def generar_pdf(
     id: str,
     format_func: Callable,
@@ -369,6 +402,7 @@ def enviar_pdf(
         return JsonResponse({"error": "Número de WhatsApp requerido"}, status=400)
 
     web_context = request.session.get("context_data", {})
+    fecha_especificada = web_context.pop("fecha", None)
     filename = generar_pdf(
         id=id,
         format_func=format_func,
@@ -405,6 +439,7 @@ Nombre: {web_context['persona']['Nombre']}
 
         model.objects.create(
             identificador=id,
+            fecha_especificada=fecha_especificada,
             numero_destino=numero,
             mensaje=mensaje,
             archivo_pdf=payload["image_path"],

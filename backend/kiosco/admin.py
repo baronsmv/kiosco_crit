@@ -8,10 +8,7 @@ from .models import (
 )
 
 
-class BaseConsultaAdmin(admin.ModelAdmin):
-    list_filter = ("fecha_especificada", "fecha_consulta", "ip_cliente")
-    search_fields = ("identificador",)
-
+class BaseAdmin(admin.ModelAdmin):
     @admin.display(description="IP de cliente", ordering="ip_cliente")
     def mostrar_ip_cliente(self, obj):
         return obj.ip_cliente or "IP no identificada"
@@ -21,13 +18,14 @@ class BaseConsultaAdmin(admin.ModelAdmin):
         return obj.fecha_especificada or "Fecha no especificada"
 
 
-class BaseWhatsappAdmin(admin.ModelAdmin):
-    list_filter = ("estado", "fecha_envio", "ip_cliente")
-    search_fields = ("identificador", "numero_destino")
+class BaseConsultaAdmin(BaseAdmin):
+    list_filter = ("fecha_especificada", "fecha_consulta", "ip_cliente", "estado")
+    search_fields = ("identificador",)
 
-    @admin.display(description="IP de cliente", ordering="ip_cliente")
-    def mostrar_ip_cliente(self, obj):
-        return obj.ip_cliente or "IP no identificada"
+
+class BaseWhatsappAdmin(BaseAdmin):
+    list_filter = ("fecha_especificada", "fecha_envio", "ip_cliente", "estado")
+    search_fields = ("identificador", "numero_destino")
 
 
 @admin.register(CitasCarnetConsulta)
@@ -37,6 +35,7 @@ class CitasCarnetConsultaAdmin(BaseConsultaAdmin):
         "mostrar_fecha_especificada",
         "fecha_consulta",
         "mostrar_ip_cliente",
+        "estado",
     )
 
 
@@ -44,10 +43,11 @@ class CitasCarnetConsultaAdmin(BaseConsultaAdmin):
 class CitasCarnetWhatsappAdmin(BaseWhatsappAdmin):
     list_display = (
         "carnet",
+        "mostrar_fecha_especificada",
         "numero_destino",
-        "estado",
         "fecha_envio",
         "mostrar_ip_cliente",
+        "estado",
     )
 
 
@@ -58,6 +58,7 @@ class CitasColaboradorConsultaAdmin(BaseConsultaAdmin):
         "mostrar_fecha_especificada",
         "fecha_consulta",
         "mostrar_ip_cliente",
+        "estado",
     )
 
 
@@ -65,8 +66,9 @@ class CitasColaboradorConsultaAdmin(BaseConsultaAdmin):
 class CitasColaboradorWhatsappAdmin(BaseWhatsappAdmin):
     list_display = (
         "identificador",
+        "mostrar_fecha_especificada",
         "numero_destino",
-        "estado",
         "fecha_envio",
         "mostrar_ip_cliente",
+        "estado",
     )

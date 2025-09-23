@@ -55,7 +55,7 @@ default_config: Dict = {
                     "send_button_label": "📤 Enviar por WhatsApp",
                     "home_label": "Inicio",
                     "id_pattern": "[a-zA-Z0-9. -]+",
-                    "id_max_length": 50,
+                    "id_max_length": 20,
                 },
             },
             "pdf": {
@@ -124,7 +124,7 @@ default_config: Dict = {
                     "send_button_label": "📤 Enviar por WhatsApp",
                     "home_label": "Inicio",
                     "id_pattern": "[a-zA-Z0-9. -]+",
-                    "id_max_length": 50,
+                    "id_max_length": 20,
                 },
             },
             "pdf": {
@@ -184,7 +184,7 @@ if not path.exists(CONFIG_FILE):
         f"Aviso: No se encontró el archivo de configuración: {CONFIG_FILE}. Se usarán valores por defecto."
     )
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        dump(default_config, f, allow_unicode=True)
+        dump(default_config, f, allow_unicode=True, sort_keys=False)
     config = default_config
 else:
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
