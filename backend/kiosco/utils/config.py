@@ -21,7 +21,7 @@ default_config: Dict = {
         },
         "options": {
             "buscar_citas_carnet": {
-                "title": "⎘ Citas por Carnet",
+                "title": "🪪 Citas por Carnet",
                 "description": "Busca citas con el carnet de un paciente.",
             },
             "buscar_citas_colaborador": {
