@@ -54,6 +54,8 @@ default_config: Dict = {
                     "preview_label": "Vista previa e impresión",
                     "send_button_label": "📤 Enviar por WhatsApp",
                     "home_label": "Inicio",
+                    "id_pattern": "[a-zA-Z0-9. -]+",
+                    "id_max_length": 50,
                 },
             },
             "pdf": {
@@ -121,6 +123,8 @@ default_config: Dict = {
                     "preview_label": "Vista previa e impresión",
                     "send_button_label": "📤 Enviar por WhatsApp",
                     "home_label": "Inicio",
+                    "id_pattern": "[a-zA-Z0-9. -]+",
+                    "id_max_length": 50,
                 },
             },
             "pdf": {

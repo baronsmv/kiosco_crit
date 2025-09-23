@@ -27,13 +27,13 @@
                         aria-invalid="{% if id_error %}true{% else %}false{% endif %}"
                         class="{% if id_error %}error{% endif %}"
                         id="id"
+                        maxlength="{{ id_max_length|default:50 }}"
                         name="id"
-                        placeholder="{{ form_placeholder }}"
+                        pattern="{{ id_pattern|default:'' }}"
+                        placeholder="{{ form_placeholder|default:'' }}"
                         required
                         type="text"
                         value="{{ id|default:'' }}"
-                        maxlength="50"
-                        pattern="[a-zA-Z0-9. -]+"
                 />
             </div>
 
