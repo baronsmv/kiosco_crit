@@ -3,8 +3,8 @@ from django.urls import path
 
 from .views import (
     admin_whatsapp,
-    buscar_citas_carnet,
-    pdf_citas_carnet,
+    buscar_citas_paciente,
+    pdf_citas_paciente,
     buscar_citas_colaborador,
     pdf_citas_colaborador,
     vista_previa_pdf,
@@ -28,14 +28,14 @@ urlpatterns = [
         name="vista_previa_pdf",
     ),
     path(
-        "citas/carnet/pdf/<str:carnet>/",
-        pdf_citas_carnet,
-        name="pdf_citas_carnet",
+        "citas/paciente/pdf/<str:carnet>/",
+        pdf_citas_paciente,
+        name="pdf_citas_paciente",
     ),
     path(
-        "citas/carnet",
-        buscar_citas_carnet,
-        name="buscar_citas_carnet",
+        "citas/paciente",
+        buscar_citas_paciente,
+        name="buscar_citas_paciente",
     ),
     path(
         "citas/colaborador/pdf/<str:id>/",

@@ -68,7 +68,10 @@
 </div>
 
 <!-- Mensaje de 'Procesando...' -->
-<div id="processing-message">Procesando...</div>
+<div id="processing-message">
+    <div class="spinner"></div>
+    <div>{{ processing_message|default:"Procesando..." }}</div>
+</div>
 
 <!-- Modal de persona si hay resultados -->
 {% if persona and id %}

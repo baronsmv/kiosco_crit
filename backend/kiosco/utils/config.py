@@ -20,13 +20,13 @@ default_config: Dict = {
             "select_text": "Selecciona una opción para continuar:",
         },
         "options": {
-            "buscar_citas_carnet": {
-                "title": "🪪 Citas por Carnet",
+            "buscar_citas_paciente": {
+                "title": "🪪 Citas por Paciente",
                 "description": "Busca citas con el carnet de un paciente.",
             },
             "buscar_citas_colaborador": {
                 "title": "👤 Citas por Colaborador",
-                "description": "Busca citas de colaboradores.",
+                "description": "Busca citas de un colaborador.",
             },
         },
     },
@@ -48,6 +48,7 @@ default_config: Dict = {
                     "date_label": "Fecha:",
                     "date_sublabel": "(Dejar vacío para mostrar todas)",
                     "button_label": "Buscar",
+                    "processing_message": "Procesando...",
                     "data_title": "Datos del Paciente",
                     "table_title": "Citas",
                     "number_label": "Número telefónico:",
@@ -121,6 +122,7 @@ default_config: Dict = {
                     "date_label": "Fecha:",
                     "date_sublabel": "(Dejar vacío para mostrar todas)",
                     "button_label": "Buscar",
+                    "processing_message": "Procesando...",
                     "data_title": "Datos del Colaborador",
                     "table_title": "Citas del Día",
                     "number_label": "Número telefónico:",

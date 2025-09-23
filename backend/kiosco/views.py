@@ -124,7 +124,7 @@ def vista_previa_pdf(request: HttpRequest, tipo: str, id: str):
     return JsonResponse({"html": iframe_html, "filename": filename})
 
 
-def buscar_citas_carnet(request: HttpRequest):
+def buscar_citas_paciente(request: HttpRequest):
     return buscar(
         request,
         data=config.cfg_citas_carnet,
@@ -138,7 +138,7 @@ def buscar_citas_carnet(request: HttpRequest):
 
 
 @csrf_exempt
-def pdf_citas_carnet(request: HttpRequest, carnet: str):
+def pdf_citas_paciente(request: HttpRequest, carnet: str):
     return enviar_pdf(
         request,
         carnet,
