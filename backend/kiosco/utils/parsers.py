@@ -289,7 +289,7 @@ def buscar(
             identificador=identificador,
             persona=persona,
             objetos=objetos,
-            pdf_url=pdf_url if pdf_url else f"pdf_{objetos}_{identificador}",
+            pdf_url=pdf_url if pdf_url else f"pdf_{objetos}_{persona}",
         )
         if respuesta_ajax := ajax_buscar(
             request,
