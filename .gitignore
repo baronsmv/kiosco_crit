@@ -62,6 +62,7 @@ docker-compose.override.yml
 
 # Sesión de WhatsApp
 whatsapp_node
+!whatsapp_node/.dockerignore
 !whatsapp_node/Dockerfile
 !whatsapp_node/index.js
 !whatsapp_node/package.json

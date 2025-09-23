@@ -1,7 +1,17 @@
 @echo off
 setlocal
 
-set interface="Ethernet"
+:: Detectar si el script tiene permisos de administrador
+whoami /groups | find "S-1-5-32-544" >nul 2>&1
+if errorlevel 1 (
+    echo No se tienen privilegios de administrador. Elevando...
+    powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    exit /b
+)
+
+:: Ya con privilegios de administrador, continúa el script
+
+set interface=Ethernet
 
 netsh interface ip set address name=%interface% static 10.7.20.23 255.255.255.0 10.7.20.1
 netsh interface ip set dns name=%interface% static 8.8.8.8
