@@ -1,14 +1,11 @@
-from datetime import date
-
 import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpRequest
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 
-from .forms import BuscarIdFechaForm
 from .models import (
     CitasCarnetWhatsapp,
     CitasCarnetConsulta,
@@ -26,7 +23,7 @@ base_url = settings.WHATSAPP_API_BASE_URL
 
 
 @login_required
-def admin_whatsapp(request):
+def admin_whatsapp(request: HttpRequest):
     qr_data_url = None
     error_qr = None
     status_message = ""
@@ -72,7 +69,7 @@ def admin_whatsapp(request):
     )
 
 
-def home(request):
+def home(request: HttpRequest):
     menu_options = tuple(
         (
             reverse_lazy(key),
@@ -88,7 +85,7 @@ def home(request):
     )
 
 
-def vista_previa_pdf(request, tipo, id):
+def vista_previa_pdf(request: HttpRequest, tipo: str, id: str):
     abrir = request.GET.get("abrir") == "1"
 
     if tipo == "citas_colaborador":
@@ -127,71 +124,53 @@ def vista_previa_pdf(request, tipo, id):
     return JsonResponse({"html": iframe_html, "filename": filename})
 
 
-def buscar_citas_por_carnet(request):
+def buscar_citas_carnet(request: HttpRequest):
     return buscar(
         request,
         data=config.cfg_citas_carnet,
-        form=BuscarIdFechaForm,
         model=CitasCarnetConsulta,
         exist_func=exist_queries.paciente,
-        get_func=handle_data.obtener_datos,
         query_func=data_queries.citas_carnet,
-        format_func=handle_data.formatear_datos,
         identificador="carnet",
         persona="paciente",
         objetos="citas",
-        pdf_url="pdf_citas_carnet",
-        fecha_inicial=None,
-        auto_borrado=True,
-        mostrar_imprimir=True,
-        mostrar_inicio=True,
     )
 
 
 @csrf_exempt
-def pdf_citas_por_carnet(request, carnet):
+def pdf_citas_carnet(request: HttpRequest, carnet: str):
     return enviar_pdf(
         request,
         carnet,
         identificador="carnet",
         persona="paciente",
         objetos="citas",
-        format_func=handle_data.formatear_datos,
         data=config.cfg_citas_carnet,
         model=CitasCarnetWhatsapp,
     )
 
 
-def buscar_citas_por_colaborador(request):
+def buscar_citas_colaborador(request: HttpRequest):
     return buscar(
         request,
         data=config.cfg_citas_colaborador,
-        form=BuscarIdFechaForm,
         model=CitasColaboradorConsulta,
         exist_func=exist_queries.colaborador,
-        get_func=handle_data.obtener_datos,
         query_func=data_queries.citas_colaborador,
-        format_func=handle_data.formatear_datos,
         identificador="nombre de usuario",
         persona="colaborador",
         objetos="citas",
-        pdf_url="pdf_citas_carnet",
-        fecha_inicial=date.today(),
-        auto_borrado=False,
-        mostrar_imprimir=True,
-        mostrar_inicio=True,
     )
 
 
 @csrf_exempt
-def pdf_citas_por_colaborador(request, id):
+def pdf_citas_colaborador(request: HttpRequest, id: str):
     return enviar_pdf(
         request,
         id,
         identificador="nombre de usuario",
         persona="colaborador",
         objetos="citas",
-        format_func=handle_data.formatear_datos,
         data=config.cfg_citas_colaborador,
         model=CitasColaboradorWhatsapp,
     )

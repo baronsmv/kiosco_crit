@@ -1,24 +1,28 @@
 import hashlib
 import os
 import re
-from datetime import datetime
-from typing import Callable, Dict
+from datetime import date
+from typing import Callable, Dict, Type
 from typing import Optional
 
 import requests
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core.exceptions import ValidationError
+from django.db.models import Model
 from django.db.utils import OperationalError
-from django.http import HttpResponse
+from django.forms.forms import Form
+from django.http import HttpResponse, HttpRequest
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from weasyprint import HTML
 
+from .data import handle_data
 from .get_client import ip
 from .logger import get_logger
+from ..forms import BuscarIdFechaForm
 
 logger = get_logger(__name__)
 
@@ -93,12 +97,12 @@ def validar_id(
 
 
 def parse_form(
-    request,
+    request: HttpRequest,
     context: Dict,
     campos: Dict,
     sql_campos: Dict,
-    form,
-    model,
+    form: Form,
+    model: Type[Model],
     exist_func: Callable,
     get_func: Callable,
     query_func: Callable,
@@ -214,36 +218,33 @@ def parse_form(
 
 
 def ajax_buscar(
-    request,
+    request: HttpRequest,
     context: Dict,
     partial: str,
     partial_error: str = "mensaje_error.html",
-):
+) -> Optional[HttpResponse]:
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         template = "kiosco/partials/"
         template += partial if context["persona"] else partial_error
         logger.debug(f"Renderizando plantilla parcial: {template}")
         html = render_to_string(template, context, request=request)
         return HttpResponse(html)
+    return None
 
 
 def buscar(
-    request,
+    request: HttpRequest,
     data: Dict,
-    form,
-    model,
+    model: Type[Model],
     exist_func: Callable,
-    get_func: Callable,
     query_func: Callable,
-    format_func: Callable,
     identificador: str,
     persona: str,
     objetos: str,
-    pdf_url: str,
-    fecha_inicial: Optional[datetime.date] = None,
-    auto_borrado: bool = False,
-    mostrar_imprimir: bool = True,
-    mostrar_inicio: bool = True,
+    form: Type[Form] = BuscarIdFechaForm,
+    get_func: Callable = handle_data.obtener_datos,
+    format_func: Callable = handle_data.formatear_datos,
+    pdf_url: Optional[str] = None,
 ):
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
@@ -261,10 +262,6 @@ def buscar(
         **web_data.get("context", {}),
         "home_url": reverse("home"),
         "tipo": f"{objetos}_{persona}",
-        "fecha_inicial": fecha_inicial,
-        "auto_borrado": auto_borrado,
-        "mostrar_imprimir": mostrar_imprimir,
-        "mostrar_inicio": mostrar_inicio,
         "whatsapp_status": client_status,
         "tabla_columnas": mapear_columnas(web_data, mapeo=sql_data),
         "id": "",
@@ -275,6 +272,7 @@ def buscar(
         "mensaje_error": "",
         "error_target": "",
     }
+    context["fecha_inicial"] = date.today() if context.get("fecha_inicial") else ""
 
     if request.method == "POST":
         parse_form(
@@ -291,7 +289,7 @@ def buscar(
             identificador=identificador,
             persona=persona,
             objetos=objetos,
-            pdf_url=pdf_url,
+            pdf_url=pdf_url if pdf_url else f"pdf_{objetos}_{identificador}",
         )
         if respuesta_ajax := ajax_buscar(
             request,
@@ -366,7 +364,7 @@ def generar_pdf(
     try:
         HTML(string=html).write_pdf(output_path, stylesheets=css_files)
         logger.debug("PDF generado correctamente")
-    except Exception as e:
+    except Exception:
         logger.exception("Error al generar el PDF")
         raise
 
@@ -378,14 +376,14 @@ def generar_pdf(
 
 
 def enviar_pdf(
-    request,
+    request: HttpRequest,
     id: str,
     identificador: str,
     persona: str,
     objetos: str,
-    format_func: Callable,
     data: Dict,
-    model,
+    model: Type[Model],
+    format_func: Callable = handle_data.formatear_datos,
 ):
     logger.debug(
         f"enviar_pdf_whatsapp called with method {request.method} and {identificador} {id}"

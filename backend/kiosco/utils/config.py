@@ -20,11 +20,11 @@ default_config: Dict = {
             "select_text": "Selecciona una opción para continuar:",
         },
         "options": {
-            "buscar_citas_por_carnet": {
+            "buscar_citas_carnet": {
                 "title": "⎘ Citas por Carnet",
                 "description": "Busca citas con el carnet de un paciente.",
             },
-            "buscar_citas_por_colaborador": {
+            "buscar_citas_colaborador": {
                 "title": "👤 Citas por Colaborador",
                 "description": "Busca citas de colaboradores.",
             },
@@ -54,7 +54,11 @@ default_config: Dict = {
                     "preview_label": "Vista previa e impresión",
                     "send_button_label": "📤 Enviar por WhatsApp",
                     "home_label": "Inicio",
-                    "id_pattern": "[a-zA-Z0-9. -]+",
+                    "fecha_inicial": False,
+                    "auto_borrado": True,
+                    "mostrar_imprimir": True,
+                    "mostrar_inicio": True,
+                    "id_pattern": r"[a-zA-Z0-9. -]+",
                     "id_max_length": 20,
                 },
             },
@@ -123,7 +127,11 @@ default_config: Dict = {
                     "preview_label": "Vista previa e impresión",
                     "send_button_label": "📤 Enviar por WhatsApp",
                     "home_label": "Inicio",
-                    "id_pattern": "[a-zA-Z0-9. -]+",
+                    "fecha_inicial": True,
+                    "auto_borrado": False,
+                    "mostrar_imprimir": True,
+                    "mostrar_inicio": True,
+                    "id_pattern": r"[a-zA-Z0-9. -]+",
                     "id_max_length": 20,
                 },
             },
