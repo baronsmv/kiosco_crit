@@ -159,6 +159,22 @@ button[style] {
     margin-bottom: 0.5rem;
 }
 
+/* Mensaje de 'Procesando...' */
+#processing-message {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    z-index: 9999;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
 /* Modal */
 .modal {
     position: fixed;

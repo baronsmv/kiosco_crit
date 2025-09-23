@@ -98,6 +98,11 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", async function (e) {
         e.preventDefault();
 
+        const processingMessage = document.getElementById("processing-message");
+        if (processingMessage) {
+            processingMessage.style.display = "block";
+        }
+
         limpiarErrores();
 
         const idInput = document.getElementById("id");
@@ -107,6 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const fecha = fechaInput.value.trim();
 
         if (!id) {
+            if (processingMessage) processingMessage.style.display = "none";
             idInput.focus();
             idInput.select();
             return;
@@ -172,6 +178,10 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Error al buscar:", error);
             idInput.focus();
             idInput.select();
+        } finally {
+            if (processingMessage) {
+                processingMessage.style.display = "none";
+            }
         }
     });
 
