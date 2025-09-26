@@ -28,6 +28,10 @@ default_config: Dict = {
                 "title": "👤 Citas por Colaborador",
                 "description": "Busca citas de un colaborador.",
             },
+            "buscar_espacios_disponibles": {
+                "title": "Espacios disponibles",
+                "description": "Busca espacios disponibles para agendar.",
+            },
         },
     },
     "citas": {
@@ -209,4 +213,3 @@ cfg_citas_carnet = cfg_citas.get("carnet", {})
 cfg_citas_colaborador = cfg_citas.get("colaborador", {})
 
 cfg_espacios = config.get("espacios", {})
-cfg_espacios_vacios = cfg_espacios.get("vacíos", {})

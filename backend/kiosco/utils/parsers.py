@@ -155,7 +155,7 @@ def parse_form(
         try:
             if has_id:
                 resultado = get_func(
-                    id,
+                    id=id,
                     sql_campos=sql_campos,
                     exist_func=exist_func,
                     query_func=query_func,
@@ -200,9 +200,9 @@ def parse_form(
         )
 
         parse_result(
-            resultado,
-            context,
-            fecha,
+            resultado=resultado,
+            context=context,
+            fecha=fecha,
             success_dict=formatted,
             identificador=identificador or "fecha",
             persona=persona,
@@ -301,8 +301,8 @@ def buscar(
         has_id = "id" in bound_form.fields
 
         parse_form(
-            request,
-            context,
+            request=request,
+            context=context,
             campos=web_data.get("campos", {}),
             sql_campos=sql_data.get("campos", {}),
             form=bound_form,
@@ -334,13 +334,13 @@ def buscar(
 
 
 def generar_pdf(
-    id: str,
     format_func: Callable,
     data: Dict[str, Dict],
     previous_context: Dict,
-    persona: str,
-    identificador: str,
     objetos: str,
+    id: Optional[str] = None,
+    persona: Optional[str] = None,
+    identificador: Optional[str] = None,
     color: bool = False,
 ) -> str:
     pdf_data = data["pdf"]
@@ -412,12 +412,12 @@ def generar_pdf(
 
 def enviar_pdf(
     request: HttpRequest,
-    id: str,
-    identificador: str,
-    persona: str,
     objetos: str,
     data: Dict,
     model: Type[Model],
+    id: Optional[str] = None,
+    identificador: Optional[str] = None,
+    persona: Optional[str] = None,
     format_func: Callable = handle_data.formatear_datos,
 ):
     logger.debug(

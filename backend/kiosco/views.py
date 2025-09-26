@@ -13,6 +13,7 @@ from .models import (
     CitasColaboradorConsulta,
     CitasColaboradorWhatsapp,
     EspaciosVaciosConsulta,
+    EspaciosVaciosWhatsapp,
 )
 from .utils import config
 from .utils.data import data_queries, exist_queries, handle_data
@@ -100,6 +101,11 @@ def vista_previa_pdf(request: HttpRequest, tipo: str, id: str):
         objetos = "citas"
         identificador = "carnet"
         data = config.cfg_citas_carnet
+    elif tipo == "espacios":
+        persona = None
+        objetos = "espacios"
+        identificador = None
+        data = config.cfg_espacios
     else:
         return JsonResponse({"error": "Tipo inválido"}, status=400)
 
@@ -128,7 +134,7 @@ def vista_previa_pdf(request: HttpRequest, tipo: str, id: str):
 
 def buscar_citas_paciente(request: HttpRequest):
     return buscar(
-        request,
+        request=request,
         data=config.cfg_citas_carnet,
         model=CitasCarnetConsulta,
         form=BuscarIdFechaForm,
@@ -143,8 +149,8 @@ def buscar_citas_paciente(request: HttpRequest):
 @csrf_exempt
 def pdf_citas_paciente(request: HttpRequest, carnet: str):
     return enviar_pdf(
-        request,
-        carnet,
+        request=request,
+        id=carnet,
         identificador="carnet",
         persona="paciente",
         objetos="citas",
@@ -155,7 +161,7 @@ def pdf_citas_paciente(request: HttpRequest, carnet: str):
 
 def buscar_citas_colaborador(request: HttpRequest):
     return buscar(
-        request,
+        request=request,
         data=config.cfg_citas_colaborador,
         model=CitasColaboradorConsulta,
         form=BuscarIdFechaForm,
@@ -170,8 +176,8 @@ def buscar_citas_colaborador(request: HttpRequest):
 @csrf_exempt
 def pdf_citas_colaborador(request: HttpRequest, id: str):
     return enviar_pdf(
-        request,
-        id,
+        request=request,
+        id=id,
         identificador="nombre de usuario",
         persona="colaborador",
         objetos="citas",
@@ -180,10 +186,10 @@ def pdf_citas_colaborador(request: HttpRequest, id: str):
     )
 
 
-def buscar_espacios_vacios(request: HttpRequest):
+def buscar_espacios_disponibles(request: HttpRequest):
     return buscar(
-        request,
-        data=config.cfg_espacios_vacios,
+        request=request,
+        data=config.cfg_espacios,
         model=EspaciosVaciosConsulta,
         form=BuscarFechaForm,
         query_func=data_queries.citas_colaborador,
@@ -192,12 +198,10 @@ def buscar_espacios_vacios(request: HttpRequest):
 
 
 @csrf_exempt
-def pdf_citas_colaborador(request: HttpRequest):
+def pdf_espacios_disponibles(request: HttpRequest):
     return enviar_pdf(
-        request,
-        identificador="nombre de usuario",
-        persona="colaborador",
-        objetos="citas",
-        data=config.cfg_citas_colaborador,
-        model=CitasColaboradorWhatsapp,
+        request=request,
+        data=config.cfg_espacios,
+        model=EspaciosVaciosWhatsapp,
+        objetos="espacios",
     )
