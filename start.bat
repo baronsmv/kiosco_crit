@@ -1,24 +1,6 @@
 @echo off
 setlocal
 
-:: Detectar si el script tiene permisos de administrador
-whoami /groups | find "S-1-5-32-544" >nul 2>&1
-if errorlevel 1 (
-    echo No se tienen privilegios de administrador. Elevando...
-    powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
-    exit /b
-)
-
-:: Ya con privilegios de administrador, continúa el script
-
-set interface=Ethernet
-
-netsh interface ip set address name=%interface% static 10.7.20.23 255.255.255.0 10.7.20.1
-netsh interface ip set dns name=%interface% static 8.8.8.8
-netsh interface ip add dns name=%interface% 8.8.4.4 index=2
-
-echo Network settings updated.
-
 echo [INFO] Verificando si Docker está corriendo...
 docker info >nul 2>&1
 
@@ -38,5 +20,16 @@ if %ERRORLEVEL% neq 0 (
     echo [INFO] Docker ya está en ejecución.
 )
 
+set sessionPath=whatsapp_node\sessions\session
+
+if exist "%sessionPath%\SingletonLock" del "%sessionPath%\SingletonLock"
+if exist "%sessionPath%\SingletonCookie" del "%sessionPath%\SingletonCookie"
+if exist "%sessionPath%\SingletonSocket" del "%sessionPath%\SingletonSocket"
+
+echo [INFO] Deteniendo contenedores previos (si existen)...
+docker compose down
+
 echo [INFO] Levantando servicios Docker...
-start "Docker Compose" cmd /k docker compose up --build
+docker compose up --build
+
+pause
