@@ -291,8 +291,9 @@ def buscar(
         "mensaje_error": "",
         "error_target": "",
     }
-
-    context["fecha_inicial"] = date.today()
+    context["fecha_inicial"] = (
+        date.today() if context.get("fecha_inicial", False) else ""
+    )
 
     if request.method == "POST":
         bound_form = form(request.POST)
