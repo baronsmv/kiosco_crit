@@ -185,6 +185,7 @@ default_config: Dict = {
             },
         },
     },
+    "espacios": {"vacíos": {}},
 }
 
 # Si no existe el archivo, crear uno con valores por defecto
@@ -206,3 +207,6 @@ cfg_home = config.get("inicio", {})
 cfg_citas = config.get("citas", {})
 cfg_citas_carnet = cfg_citas.get("carnet", {})
 cfg_citas_colaborador = cfg_citas.get("colaborador", {})
+
+cfg_espacios = config.get("espacios", {})
+cfg_espacios_vacios = cfg_espacios.get("vacíos", {})

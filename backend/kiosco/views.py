@@ -6,11 +6,13 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 
+from .forms import BuscarIdFechaForm, BuscarFechaForm
 from .models import (
     CitasCarnetWhatsapp,
     CitasCarnetConsulta,
     CitasColaboradorConsulta,
     CitasColaboradorWhatsapp,
+    EspaciosVaciosConsulta,
 )
 from .utils import config
 from .utils.data import data_queries, exist_queries, handle_data
@@ -129,6 +131,7 @@ def buscar_citas_paciente(request: HttpRequest):
         request,
         data=config.cfg_citas_carnet,
         model=CitasCarnetConsulta,
+        form=BuscarIdFechaForm,
         exist_func=exist_queries.paciente,
         query_func=data_queries.citas_carnet,
         identificador="carnet",
@@ -155,6 +158,7 @@ def buscar_citas_colaborador(request: HttpRequest):
         request,
         data=config.cfg_citas_colaborador,
         model=CitasColaboradorConsulta,
+        form=BuscarIdFechaForm,
         exist_func=exist_queries.colaborador,
         query_func=data_queries.citas_colaborador,
         identificador="nombre de usuario",
@@ -168,6 +172,29 @@ def pdf_citas_colaborador(request: HttpRequest, id: str):
     return enviar_pdf(
         request,
         id,
+        identificador="nombre de usuario",
+        persona="colaborador",
+        objetos="citas",
+        data=config.cfg_citas_colaborador,
+        model=CitasColaboradorWhatsapp,
+    )
+
+
+def buscar_espacios_vacios(request: HttpRequest):
+    return buscar(
+        request,
+        data=config.cfg_espacios_vacios,
+        model=EspaciosVaciosConsulta,
+        form=BuscarFechaForm,
+        query_func=data_queries.citas_colaborador,
+        objetos="espacios",
+    )
+
+
+@csrf_exempt
+def pdf_citas_colaborador(request: HttpRequest):
+    return enviar_pdf(
+        request,
         identificador="nombre de usuario",
         persona="colaborador",
         objetos="citas",

@@ -22,7 +22,6 @@ from weasyprint import HTML
 from .data import handle_data
 from .get_client import ip
 from .logger import get_logger
-from ..forms import BuscarIdFechaForm
 
 logger = get_logger(__name__)
 
@@ -103,62 +102,71 @@ def parse_form(
     sql_campos: Dict,
     form: Form,
     model: Type[Model],
-    exist_func: Callable,
-    get_func: Callable,
-    query_func: Callable,
-    format_func: Callable,
-    identificador: str,
-    persona: str,
-    objetos: str,
-    pdf_url: str,
+    exist_func: Optional[Callable] = None,
+    get_func: Optional[Callable] = None,
+    query_func: Callable = None,
+    format_func: Callable = None,
+    identificador: str = "",
+    persona: str = "",
+    objetos: str = "",
+    pdf_url: str = "",
 ):
+    form_fields = form.fields.keys()
+
+    has_id = "id" in form_fields
+    has_fecha = "fecha" in form_fields
+
     if form.is_valid():
-        logger.debug(
-            f"Formulario válido. Procesando {identificador}: {form.cleaned_data['id']}"
-        )
+        id = form.cleaned_data.get("id") if has_id else None
+        fecha = form.cleaned_data.get("fecha") if has_fecha else None
 
-        id = form.cleaned_data["id"]
-        try:
-            validar_id(id)
-        except ValidationError as e:
-            form.add_error("id", e)
-            context.update(
-                {
-                    "id_error": True,
-                    "date_error": bool(form["fecha"].errors),
-                }
-            )
-            logger.warning(f"Error de validación en ID: {e}")
-            model.objects.create(
-                identificador=id,
-                fecha_especificada=form.cleaned_data.get("fecha"),
-                ip_cliente=ip(request),
-                estado="invalido",
-            )
-            return
-
-        fecha = form.cleaned_data["fecha"]
+        if has_id:
+            try:
+                validar_id(id)
+            except ValidationError as e:
+                form.add_error("id", e)
+                context.update(
+                    {
+                        "id_error": True,
+                        "date_error": has_fecha and bool(form["fecha"].errors),
+                    }
+                )
+                logger.warning(f"Error de validación en ID: {e}")
+                model.objects.create(
+                    identificador=id,
+                    fecha_especificada=fecha,
+                    ip_cliente=ip(request),
+                    estado="invalido",
+                )
+                return
 
         context.update(
             {
-                "id": id,
-                "id_proporcionado": True,
+                "id": id or "",
+                "id_proporcionado": bool(id),
                 "fecha": fecha,
-                "pdf_url": reverse(pdf_url, args=(id,)),
+                "pdf_url": reverse(
+                    pdf_url, args=(id if id else fecha.strftime("%Y-%m-%d"),)
+                ),
             }
         )
+
+        resultado = None
         try:
-            resultado = get_func(
-                id,
-                sql_campos=sql_campos,
-                exist_func=exist_func,
-                query_func=query_func,
-                fecha=fecha,
-            )
+            if has_id:
+                resultado = get_func(
+                    id,
+                    sql_campos=sql_campos,
+                    exist_func=exist_func,
+                    query_func=query_func,
+                    fecha=fecha,
+                )
+            elif has_fecha:
+                resultado = query_func(fecha=fecha)
         except OperationalError as e:
             logger.error(f"Error de conexión a la base de datos: {e}")
             model.objects.create(
-                identificador=id,
+                identificador=id if id else None,
                 fecha_especificada=fecha,
                 ip_cliente=ip(request),
                 estado="error_conexion",
@@ -166,8 +174,9 @@ def parse_form(
             context.update(
                 {
                     "mensaje_error": "❌ No se pudo conectar con la base de datos.",
-                    "id_error": True,
-                    "error_target": "id",
+                    "id_error": has_id,
+                    "date_error": has_fecha,
+                    "error_target": "id" if has_id else "fecha",
                 }
             )
             return
@@ -179,39 +188,49 @@ def parse_form(
         else:
             estado = "exitoso"
 
+        formatted = (
+            format_func(
+                **resultado,
+                campos=campos,
+                persona=persona,
+                identificador=identificador or "fecha",
+            )
+            if resultado
+            else None
+        )
+
         parse_result(
             resultado,
             context,
             fecha,
-            success_dict=(
-                format_func(
-                    **resultado,
-                    campos=campos,
-                    persona=persona,
-                    identificador=identificador,
-                )
-                if resultado
-                else None
-            ),
-            identificador=identificador,
+            success_dict=formatted,
+            identificador=identificador or "fecha",
             persona=persona,
             objetos=objetos,
         )
+
         request.session["context_data"] = {
-            c: context.get(c) for c in ("persona_sf", "objetos_sf", "fecha")
+            "persona_sf": context.get("persona_sf"),
+            "objetos_sf": context.get("objetos_sf"),
+            "fecha": (
+                context.get("fecha").isoformat()
+                if isinstance(context.get("fecha"), date)
+                else context.get("fecha")
+            ),
         }
+
         model.objects.create(
-            identificador=id,
+            identificador=id if id else None,
             fecha_especificada=fecha,
             ip_cliente=ip(request),
             estado=estado,
         )
-        logger.info(f"{persona.capitalize()} encontrado y datos almacenados en sesión")
+
     else:
         context.update(
             {
-                "id_error": bool(form[identificador].errors),
-                "date_error": bool(form["fecha"].errors),
+                "id_error": has_id and bool(form["id"].errors),
+                "date_error": has_fecha and bool(form["fecha"].errors),
             }
         )
         logger.warning(f"Errores de validación en formulario: {form.errors.as_json()}")
@@ -236,12 +255,12 @@ def buscar(
     request: HttpRequest,
     data: Dict,
     model: Type[Model],
-    exist_func: Callable,
+    form: Type[Form],
     query_func: Callable,
-    identificador: str,
-    persona: str,
-    objetos: str,
-    form: Type[Form] = BuscarIdFechaForm,
+    identificador: Optional[str] = None,
+    persona: Optional[str] = None,
+    objetos: Optional[str] = None,
+    exist_func: Optional[Callable] = None,
     get_func: Callable = handle_data.obtener_datos,
     format_func: Callable = handle_data.formatear_datos,
     pdf_url: Optional[str] = None,
@@ -261,7 +280,7 @@ def buscar(
     context = {
         **web_data.get("context", {}),
         "home_url": reverse("home"),
-        "tipo": f"{objetos}_{persona}",
+        "tipo": "_".join(filter(None, (objetos, persona))),
         "whatsapp_status": client_status,
         "tabla_columnas": mapear_columnas(web_data, mapeo=sql_data),
         "id": "",
@@ -272,29 +291,39 @@ def buscar(
         "mensaje_error": "",
         "error_target": "",
     }
-    context["fecha_inicial"] = date.today() if context.get("fecha_inicial") else ""
+
+    context["fecha_inicial"] = date.today()
 
     if request.method == "POST":
+        bound_form = form(request.POST)
+
+        has_id = "id" in bound_form.fields
+
         parse_form(
             request,
             context,
             campos=web_data.get("campos", {}),
             sql_campos=sql_data.get("campos", {}),
-            form=form(request.POST),
+            form=bound_form,
             model=model,
-            exist_func=exist_func,
-            get_func=get_func,
+            exist_func=exist_func if has_id else None,
+            get_func=get_func if has_id else None,
             query_func=query_func,
             format_func=format_func,
             identificador=identificador,
             persona=persona,
             objetos=objetos,
-            pdf_url=pdf_url if pdf_url else f"pdf_{objetos}_{persona}",
+            pdf_url=(
+                pdf_url
+                if pdf_url
+                else "_".join(filter(None, ("pdf", objetos, persona)))
+            ),
         )
+
         if respuesta_ajax := ajax_buscar(
             request,
             context,
-            partial=f"modal_buscar.html",
+            partial="modal_buscar.html",
         ):
             logger.debug("Respuesta AJAX enviada")
             return respuesta_ajax
@@ -325,6 +354,8 @@ def generar_pdf(
 
     logger.debug(f"Contexto recibido en generar_pdf: {previous_context.keys()}")
 
+    fecha_especificada = previous_context.pop("fecha", None)
+
     try:
         formatted_context = format_func(
             **previous_context,
@@ -353,7 +384,10 @@ def generar_pdf(
 
     # Calcular hash del contenido HTML
     content_hash = hashlib.sha1(html.encode("utf-8")).hexdigest()[:10]
-    filename = f"{objetos}_{persona}_{id}_{content_hash}.pdf"
+    filename = (
+        "_".join(filter(None, (objetos, persona, id, fecha_especificada, content_hash)))
+        + ".pdf"
+    )
     output_path = os.path.join(output_dir, filename)
     logger.debug(f"Generando PDF en: {output_path}")
 
@@ -400,7 +434,8 @@ def enviar_pdf(
         return JsonResponse({"error": "Número de WhatsApp requerido"}, status=400)
 
     web_context = request.session.get("context_data", {})
-    fecha_especificada = web_context.pop("fecha", None)
+    fecha_especificada = web_context.get("fecha", None)
+
     filename = generar_pdf(
         id=id,
         format_func=format_func,
