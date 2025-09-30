@@ -11,6 +11,8 @@ from .views import (
     pdf_citas_colaborador,
     buscar_espacios_disponibles,
     pdf_espacios_disponibles,
+    menu_paciente,
+    menu_colaborador,
 )
 
 
@@ -30,34 +32,36 @@ urlpatterns = [
         name="vista_previa_pdf",
     ),
     path(
-        route="espacios/disponibles/pdf/<str:carnet>/",
-        view=pdf_espacios_disponibles,
-        name="pdf_espacios_disponibles",
-    ),
-    path(
-        route="espacios/disponibles",
-        view=buscar_espacios_disponibles,
-        name="buscar_espacios_disponibles",
-    ),
-    path(
-        route="citas/paciente/pdf/<str:carnet>/",
+        route="paciente/citas/pdf/<str:carnet>/",
         view=pdf_citas_paciente,
         name="pdf_citas_paciente",
     ),
     path(
-        route="citas/paciente",
+        route="paciente/citas/",
         view=buscar_citas_paciente,
         name="buscar_citas_paciente",
     ),
     path(
-        route="citas/colaborador/pdf/<str:id>/",
+        route="colaborador/espacios/disponibles/pdf/<str:carnet>/",
+        view=pdf_espacios_disponibles,
+        name="pdf_espacios_disponibles",
+    ),
+    path(
+        route="colaborador/espacios/disponibles/",
+        view=buscar_espacios_disponibles,
+        name="buscar_espacios_disponibles",
+    ),
+    path(
+        route="colaborador/citas/pdf/<str:id>/",
         view=pdf_citas_colaborador,
         name="pdf_citas_colaborador",
     ),
     path(
-        route="citas/colaborador",
+        route="colaborador/citas/",
         view=buscar_citas_colaborador,
         name="buscar_citas_colaborador",
     ),
+    path(route="paciente/", view=menu_paciente, name="menu_paciente"),
+    path(route="colaborador/", view=menu_colaborador, name="menu_colaborador"),
     path(route="", view=home, name="home"),
 ]

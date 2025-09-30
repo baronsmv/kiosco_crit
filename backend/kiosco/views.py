@@ -1,9 +1,8 @@
 import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseRedirect, HttpRequest
+from django.http import JsonResponse, HttpResponseRedirect, HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 
 from .forms import BuscarIdFechaForm, BuscarFechaForm
@@ -18,7 +17,7 @@ from .models import (
 from .utils import config
 from .utils.data import data_queries, exist_queries, handle_data
 from .utils.logger import get_logger
-from .utils.parsers import buscar, enviar_pdf, generar_pdf
+from .utils.parsers import buscar, enviar_pdf, generar_pdf, menu
 
 logger = get_logger(__name__)
 
@@ -72,23 +71,19 @@ def admin_whatsapp(request: HttpRequest):
     )
 
 
-def home(request: HttpRequest):
-    menu_options = tuple(
-        (
-            reverse_lazy(key),
-            option.get("title", ""),
-            option.get("description", ""),
-        )
-        for key, option in config.cfg_home.get("options", {}).items()
-    )
-    return render(
-        request,
-        "kiosco/home.html",
-        config.cfg_home.get("context", {}) | {"menu_options": menu_options},
-    )
+def home(request: HttpRequest) -> HttpResponse:
+    return menu(request=request, config=config.cfg_home)
 
 
-def vista_previa_pdf(request: HttpRequest, tipo: str, id: str):
+def menu_paciente(request: HttpRequest) -> HttpResponse:
+    return menu(request=request, config=config.cfg_menu_paciente)
+
+
+def menu_colaborador(request: HttpRequest) -> HttpResponse:
+    return menu(request=request, config=config.cfg_menu_colaborador)
+
+
+def vista_previa_pdf(request: HttpRequest, tipo: str, id: str) -> HttpResponse:
     abrir = request.GET.get("abrir") == "1"
 
     if tipo == "citas_colaborador":
@@ -132,7 +127,7 @@ def vista_previa_pdf(request: HttpRequest, tipo: str, id: str):
     return JsonResponse({"html": iframe_html, "filename": filename})
 
 
-def buscar_citas_paciente(request: HttpRequest):
+def buscar_citas_paciente(request: HttpRequest) -> HttpResponse:
     return buscar(
         request=request,
         data=config.cfg_citas_carnet,
@@ -147,7 +142,7 @@ def buscar_citas_paciente(request: HttpRequest):
 
 
 @csrf_exempt
-def pdf_citas_paciente(request: HttpRequest, carnet: str):
+def pdf_citas_paciente(request: HttpRequest, carnet: str) -> HttpResponse:
     return enviar_pdf(
         request=request,
         id=carnet,
@@ -159,7 +154,7 @@ def pdf_citas_paciente(request: HttpRequest, carnet: str):
     )
 
 
-def buscar_citas_colaborador(request: HttpRequest):
+def buscar_citas_colaborador(request: HttpRequest) -> HttpResponse:
     return buscar(
         request=request,
         data=config.cfg_citas_colaborador,
@@ -174,7 +169,7 @@ def buscar_citas_colaborador(request: HttpRequest):
 
 
 @csrf_exempt
-def pdf_citas_colaborador(request: HttpRequest, id: str):
+def pdf_citas_colaborador(request: HttpRequest, id: str) -> HttpResponse:
     return enviar_pdf(
         request=request,
         id=id,
@@ -186,7 +181,7 @@ def pdf_citas_colaborador(request: HttpRequest, id: str):
     )
 
 
-def buscar_espacios_disponibles(request: HttpRequest):
+def buscar_espacios_disponibles(request: HttpRequest) -> HttpResponse:
     return buscar(
         request=request,
         data=config.cfg_espacios,
@@ -198,7 +193,7 @@ def buscar_espacios_disponibles(request: HttpRequest):
 
 
 @csrf_exempt
-def pdf_espacios_disponibles(request: HttpRequest):
+def pdf_espacios_disponibles(request: HttpRequest) -> HttpResponse:
     return enviar_pdf(
         request=request,
         data=config.cfg_espacios,

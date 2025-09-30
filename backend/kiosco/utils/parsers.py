@@ -2,8 +2,7 @@ import hashlib
 import os
 import re
 from datetime import date
-from typing import Callable, Dict, Type
-from typing import Optional
+from typing import Callable, Dict, Optional, Type
 
 import requests
 from django.conf import settings
@@ -12,11 +11,10 @@ from django.core.exceptions import ValidationError
 from django.db.models import Model
 from django.db.utils import OperationalError
 from django.forms.forms import Form
-from django.http import HttpResponse, HttpRequest
-from django.http import JsonResponse
+from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from weasyprint import HTML
 
 from .data import handle_data
@@ -26,6 +24,23 @@ from .logger import get_logger
 logger = get_logger(__name__)
 
 base_url = settings.WHATSAPP_API_BASE_URL
+
+
+def menu(request: HttpRequest, config: Dict[str, Dict]) -> HttpResponse:
+    menu_options = tuple(
+        (
+            reverse_lazy(key),
+            option.get("title", ""),
+            option.get("description", ""),
+        )
+        for key, option in config.get("options", {}).items()
+    )
+    return render(
+        request,
+        "kiosco/home.html",
+        config.get("context", {})
+        | {"home_url": reverse_lazy("home"), "menu_options": menu_options},
+    )
 
 
 def mapear_columnas(data: Dict[str, Dict], mapeo: Dict[str, Dict]):
@@ -279,7 +294,7 @@ def buscar(
 
     context = {
         **web_data.get("context", {}),
-        "home_url": reverse("home"),
+        "home_url": reverse_lazy("home"),
         "tipo": "_".join(filter(None, (objetos, persona))),
         "whatsapp_status": client_status,
         "tabla_columnas": mapear_columnas(web_data, mapeo=sql_data),

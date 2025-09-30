@@ -19,23 +19,23 @@ services:
     networks:
       - app_net
 
-  node:
-    build: ./whatsapp_node
-    container_name: node_whatsapp_kiosco
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./whatsapp_node:/app
-      - ./backend/media:/app/media
-      - node_modules:/app/node_modules
-    restart: unless-stopped
-    shm_size: '1gb'
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - seccomp:unconfined
-    networks:
-      - app_net
+  # node:
+  #   build: ./whatsapp_node
+  #   container_name: node_whatsapp_kiosco
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./whatsapp_node:/app
+  #     - ./backend/media:/app/media
+  #     - node_modules:/app/node_modules
+  #   restart: unless-stopped
+  #   shm_size: '1gb'
+  #   cap_add:
+  #     - SYS_ADMIN
+  #   security_opt:
+  #     - seccomp:unconfined
+  #   networks:
+  #     - app_net
 
   nginx:
     image: nginx:latest
@@ -49,7 +49,7 @@ services:
       - ./backend/media:/app/media
     depends_on:
       - django
-      - node
+    #     - node
     networks:
       - app_net
 

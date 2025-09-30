@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Tuple, Optional, Sequence
+from typing import Tuple, Optional, Dict
 
-from ..config import cfg_citas_carnet, cfg_citas_colaborador
+from ..config import cfg_citas_carnet, cfg_citas_colaborador, cfg_espacios
 from ..logger import get_logger
 
 logger = get_logger(__name__)
@@ -13,27 +13,31 @@ def select(campos):
     return seleccion
 
 
-def citas(
-    query,
-    id,
-    fecha,
-    estatus_cita: Optional[Tuple[Sequence[str], Sequence[str]] | Sequence[str]] = None,
+def parse_query(
+    query: str,
+    id: Optional[str] = None,
+    fecha: Optional[datetime] = None,
+    filters: Optional[Dict] = None,
+    order_by: Optional[str] = None,
 ):
     logger.info(f"Generando consulta para ID: {id} con fecha: {fecha}")
-
-    params: Tuple = (id, fecha) if fecha else (id,)
-
-    if estatus_cita:
-        if not isinstance(estatus_cita[0], str):
-            estatus_cita = estatus_cita[0 if fecha else 1]
-        query += " AND kpc.CL_ESTATUS_CITA IN ('" + "', '".join(estatus_cita) + "')"
-        logger.debug(f"Filtro aplicado según si se proporciona fecha: {estatus_cita}")
+    params: Tuple = tuple(filter(None, (id, fecha)))
 
     if fecha:
         query += " AND CAST(kc.FE_CITA AS DATE) = %s"
         logger.debug("Agregado filtro adicional por fecha exacta.")
 
-    query += " ORDER BY kc.FE_CITA ASC"
+    if filters:
+        for k, v in filters.items():
+            if fecha:
+                valores = v.get("con_fecha")
+            else:
+                valores = v.get("sin_fecha")
+            if valores:
+                query += f" AND {k} IN ('" + "', '".join(valores) + "')"
+
+    if order_by:
+        query += f" ORDER BY {order_by}"
 
     logger.debug(f"Query final generado: {query}")
     logger.debug(f"Parámetros: {params}")
@@ -46,8 +50,9 @@ def citas_carnet(
     fecha: Optional[datetime],
 ) -> Tuple[str, Tuple]:
     logger.info(f"Construyendo query de citas por carnet: {carnet}, fecha: {fecha}")
+    cfg = cfg_citas_carnet.get("sql", {})
     query = f"""
-        SELECT {select(cfg_citas_carnet["sql"]["campos"])}
+        SELECT {select(cfg.get("campos", {}))}
         FROM SCRITS2.C_PACIENTE cp
         INNER JOIN SCRITS2.K_PACIENTE_CITA kpc ON cp.FL_PACIENTE = kpc.FL_PACIENTE
         INNER JOIN SCRITS2.K_CITA kc ON kpc.FL_CITA = kc.FL_CITA
@@ -57,18 +62,20 @@ def citas_carnet(
         LEFT JOIN SCRITS2.C_ESTATUS_CITA cec ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
         WHERE cp.NO_CARNET = %s
     """
-    return citas(
-        query,
-        carnet,
-        fecha,
-        estatus_cita=(("A", "N"), ("A",)),
+    return parse_query(
+        query=query,
+        id=carnet,
+        fecha=fecha,
+        filters=cfg.get("filtros", {}),
+        order_by="kc.FE_CITA ASC",
     )
 
 
 def citas_colaborador(id: str, fecha: Optional[datetime]) -> Tuple[str, Tuple]:
     logger.info(f"Construyendo query de citas por colaborador ID: {id}, fecha: {fecha}")
+    cfg = cfg_citas_colaborador.get("sql", {})
     query = f"""
-        SELECT {select(cfg_citas_colaborador["sql"]["campos"])}
+        SELECT {select(cfg.get("campos", {}))}
         FROM SCRITS2.K_CITA kc
         INNER JOIN SCRITS2.C_USUARIO cu ON kc.FL_USUARIO = cu.FL_USUARIO
         INNER JOIN SCRITS2.C_SERVICIO cs ON kc.FL_SERVICIO = cs.FL_SERVICIO
@@ -78,9 +85,30 @@ def citas_colaborador(id: str, fecha: Optional[datetime]) -> Tuple[str, Tuple]:
         LEFT JOIN SCRITS2.C_ESTATUS_CITA cec ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
         WHERE cu.CL_LOGIN= %s
     """
-    return citas(
-        query,
-        id,
-        fecha,
-        # estatus_cita=("A", "I", "N"),
+    return parse_query(
+        query=query,
+        id=id,
+        fecha=fecha,
+        filters=cfg.get("filtros", {}),
+        order_by="kc.FE_CITA ASC",
+    )
+
+
+def espacios_disponibles(fecha: Optional[datetime]) -> Tuple[str, Tuple]:
+    logger.info(f"Construyendo query de espacios disponibles por fecha: {fecha}")
+    cfg = cfg_espacios.get("sql", {})
+    query = f"""
+        SELECT {select(cfg.get("campos", {}))}
+        FROM SCRITS2.K_CITA kc
+        INNER JOIN SCRITS2.C_SERVICIO cs
+        ON kc.FL_SERVICIO = cs.FL_SERVICIO
+        INNER JOIN SCRITS2.C_USUARIO cu
+        ON kc.FL_USUARIO = cu.FL_USUARIO
+        WHERE kc.NO_DISPONIBLES > 0
+    """
+    return parse_query(
+        query=query,
+        fecha=fecha,
+        filters=cfg.get("filtros", {}),
+        order_by="kc.FE_CITA ASC",
     )

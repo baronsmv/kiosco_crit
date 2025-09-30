@@ -16,11 +16,12 @@
 
     <h1 id="main-title">{{ header }}</h1>
 
-    <form id="buscar-form" method="POST" novalidate>
+    <form id="buscar-form" method="POST">
         {% csrf_token %}
         <div class="form-group">
-
-            <label for="id">{{ form_label }}</label>
+            <!-- ID -->
+            {% if id_label %}
+            <label for="id">{{ id_label }}</label>
             <div class="input-group {% if id_error %}error{% endif %}">
                 <input
                         aria-describedby="{% if id_error %}id-error{% endif %}"
@@ -30,16 +31,19 @@
                         maxlength="{{ id_max_length|default:50 }}"
                         name="id"
                         pattern="{{ id_pattern|default:'' }}"
-                        placeholder="{{ form_placeholder|default:'' }}"
-                        required
+                        placeholder="{{ id_placeholder|default:'' }}"
+                        {% if id_required %}required{% endif %}
                         type="text"
                         value="{{ id|default:'' }}"
                 />
             </div>
-
+            {% endif %}
             <!-- Fecha -->
+            {% if date_label %}
             <label class="fecha-label" for="fecha">{{ date_label }}</label>
+            {% if date_sublabel %}
             <p class="form-sublabel">{{ date_sublabel }}</p>
+            {% endif %}
             <div class="input-group {% if date_error %}error{% endif %}">
                 <input
                         aria-describedby="{% if date_error %}fecha-error{% endif %}"
@@ -47,11 +51,12 @@
                         class="{% if date_error %}error{% endif %}"
                         id="fecha"
                         name="fecha"
+                        {% if date_required %}required{% endif %}
                         type="date"
                         value="{{ fecha_inicial|date:'Y-m-d' }}"
                 />
             </div>
-
+            {% endif %}
         </div>
 
         <button aria-label="{{ button_label }}" type="submit">
