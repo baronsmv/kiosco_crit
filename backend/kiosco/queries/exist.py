@@ -1,11 +1,11 @@
 from typing import Optional, Dict
 
-from ..logger import get_logger
+from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 
-def existe(query: str, id: str, cursor) -> Optional[Dict[str, str]]:
+def _exists(query: str, id: str, cursor) -> Optional[Dict[str, str]]:
     logger.debug(f"Ejecutando búsqueda con ID: {id}")
     logger.debug(f"Query:\n{query.strip()}")
 
@@ -23,7 +23,7 @@ def existe(query: str, id: str, cursor) -> Optional[Dict[str, str]]:
 
 def paciente(carnet: str, cursor) -> Optional[Dict[str, str]]:
     logger.info(f"Buscando paciente con carnet: {carnet}")
-    return existe(
+    return _exists(
         query="""
               SELECT NB_PACIENTE, NB_PATERNO, NB_MATERNO
               FROM SCRITS2.C_PACIENTE
@@ -36,7 +36,7 @@ def paciente(carnet: str, cursor) -> Optional[Dict[str, str]]:
 
 def colaborador(id: str, cursor) -> Optional[Dict[str, str]]:
     logger.info(f"Buscando colaborador con login: {id}")
-    return existe(
+    return _exists(
         query="""
               SELECT NB_USUARIO, NB_PATERNO, NB_MATERNO
               FROM SCRITS2.C_USUARIO

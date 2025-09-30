@@ -13,7 +13,7 @@ default_config: Dict = {
             "header": "Administración de WhatsApp",
         }
     },
-    "menús": {
+    "menus": {
         "inicio": {
             "context": {
                 "title": "Kiosco de Información",
@@ -153,7 +153,7 @@ default_config: Dict = {
                     "fecha_inicial": False,
                     "auto_borrado": True,
                     "mostrar_imprimir": True,
-                    "id_pattern": r"[a-zA-Z0-9. -]+",
+                    "id_pattern": r"^[a-zA-Z0-9. \-]+$",
                     "id_max_length": 20,
                 },
             },
@@ -216,7 +216,7 @@ default_config: Dict = {
                     "fecha_inicial": True,
                     "auto_borrado": False,
                     "mostrar_imprimir": True,
-                    "id_pattern": r"[a-zA-Z0-9. -]+",
+                    "id_pattern": r"^[a-zA-Z0-9. \-]+$",
                     "id_max_length": 20,
                 },
             },
@@ -332,7 +332,7 @@ def parse_campos(
 
 cfg_whatsapp_admin = config.get("admin_whatsapp", {})
 
-cfg_menus = config.get("menús", {})
+cfg_menus = config.get("menus", {})
 cfg_home = cfg_menus.get("inicio", {})
 cfg_menu_paciente = cfg_menus.get("paciente", {})
 cfg_menu_colaborador = cfg_menus.get("colaborador", {})
