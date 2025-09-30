@@ -67,15 +67,63 @@ default_config: Dict = {
             },
         },
     },
+    "common_resources": {
+        "sql": {
+            "campos": {
+                "nombre_paciente": {
+                    "nombre": "Paciente",
+                    "sql": "CONCAT(cp.NB_PACIENTE,' ',cp.NB_PATERNO,' ',cp.NB_MATERNO)",
+                    "formatear": "nombre",
+                },
+                "nombre_colaborador": {
+                    "nombre": "Colaborador",
+                    "sql": "CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO, ' ', cu.NB_MATERNO)",
+                    "tipo": "nombre",
+                },
+                "no_carnet": {
+                    "nombre": "Carnet",
+                    "sql": "cp.NO_CARNET",
+                },
+                "nombre_servicio": {
+                    "nombre": "Servicio",
+                    "sql": "cs.NB_SERVICIO",
+                },
+                "fecha_cita": {
+                    "nombre": "Fecha y hora",
+                    "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy HH:mm')",
+                },
+                "clinica": {
+                    "nombre": "Clínica",
+                    "sql": "cc.DS_CLINICA",
+                },
+                "clinica_abrev": {
+                    "nombre": "Clínica",
+                    "sql": "cc.NB_ABREVIADO",
+                },
+                "estatus_cita": {
+                    "nombre": "Estatus",
+                    "sql": "cec.NB_ESTATUS_CITA",
+                },
+                "espacios_disponibles": {
+                    "nombre": "Espacios disponibles",
+                    "sql": "kc.NO_DISPONIBLES",
+                },
+                "duracion_servicio": {
+                    "nombre": "Duración de servicio",
+                    "sql": "CONCAT(kc.NO_DURACION,' min')",
+                },
+            },
+        },
+    },
     "citas": {
         "carnet": {
             "web": {
                 "campos": [
-                    "nb_servicio",
-                    "fe_cita",
+                    "nombre_servicio",
+                    "fecha_cita",
                     "nombre_colaborador",
-                    "ds_clinica",
-                    "estatus",
+                    "clinica",
+                    "estatus_cita",
                 ],
                 "filtros": {
                     "kpc.CL_ESTATUS_CITA": {
@@ -110,10 +158,10 @@ default_config: Dict = {
             },
             "pdf": {
                 "campos": [
-                    "nb_servicio",
-                    "fe_cita",
+                    "nombre_servicio",
+                    "fecha_cita",
                     "nombre_colaborador",
-                    "estatus",
+                    "estatus_cita",
                 ],
                 "context": {
                     "title": "Ficha del Paciente",
@@ -124,40 +172,24 @@ default_config: Dict = {
                 },
             },
             "sql": {
-                "campos": {
-                    "nb_servicio": {
-                        "nombre": "Servicio",
-                        "sql": "cs.NB_SERVICIO",
-                    },
-                    "fe_cita": {
-                        "nombre": "Fecha y hora",
-                        "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy HH:mm')",
-                    },
-                    "nombre_colaborador": {
-                        "nombre": "Colaborador",
-                        "sql": "CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO, ' ', cu.NB_MATERNO)",
-                        "tipo": "nombre",
-                    },
-                    "ds_clinica": {
-                        "nombre": "Clínica",
-                        "sql": "cc.DS_CLINICA",
-                    },
-                    "estatus": {
-                        "nombre": "Estatus",
-                        "sql": "cec.NB_ESTATUS_CITA",
-                    },
-                },
+                "campos": [
+                    "nombre_servicio",
+                    "fecha_cita",
+                    "nombre_colaborador",
+                    "clinica",
+                    "estatus_cita",
+                ],
             },
         },
         "colaborador": {
             "web": {
                 "campos": [
-                    "nb_servicio",
-                    "fe_cita",
+                    "nombre_servicio",
+                    "fecha_cita",
                     "nombre_paciente",
                     "no_carnet",
                     "clinica_abrev",
-                    "estatus",
+                    "estatus_cita",
                 ],
                 "context": {
                     "title": "Citas por Colaborador",
@@ -186,12 +218,12 @@ default_config: Dict = {
             },
             "pdf": {
                 "campos": [
-                    "nb_servicio",
-                    "fe_cita",
+                    "nombre_servicio",
+                    "fecha_cita",
                     "nombre_paciente",
                     "no_carnet",
                     "clinica_abrev",
-                    "estatus",
+                    "estatus_cita",
                 ],
                 "context": {
                     "title": "Agenda del Colaborador",
@@ -202,44 +234,25 @@ default_config: Dict = {
                 },
             },
             "sql": {
-                "campos": {
-                    "nb_servicio": {
-                        "nombre": "Servicio",
-                        "sql": "cs.NB_SERVICIO",
-                    },
-                    "fe_cita": {
-                        "nombre": "Fecha y hora",
-                        "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy HH:mm')",
-                    },
-                    "nombre_paciente": {
-                        "nombre": "Paciente",
-                        "sql": "CONCAT(cp.NB_PACIENTE,' ',cp.NB_PATERNO,' ',cp.NB_MATERNO)",
-                        "formatear": "nombre",
-                    },
-                    "no_carnet": {
-                        "nombre": "Carnet",
-                        "sql": "cp.NO_CARNET",
-                    },
-                    "clinica_abrev": {
-                        "nombre": "Clínica",
-                        "sql": "cc.NB_ABREVIADO",
-                    },
-                    "estatus": {
-                        "nombre": "Estatus",
-                        "sql": "cec.NB_ESTATUS_CITA",
-                    },
-                },
+                "campos": [
+                    "nombre_servicio",
+                    "fecha_cita",
+                    "nombre_paciente",
+                    "no_carnet",
+                    "clinica_abrev",
+                    "estatus_cita",
+                ],
             },
         },
     },
     "espacios": {
         "web": {
             "campos": [
-                "nb_servicio",
-                "fe_cita",
+                "nombre_servicio",
+                "fecha_cita",
                 "no_carnet",
                 "clinica_abrev",
-                "estatus",
+                "estatus_cita",
             ],
             "context": {
                 "title": "Espacios Disponibles",
@@ -262,11 +275,11 @@ default_config: Dict = {
         },
         "pdf": {
             "campos": [
-                "nb_servicio",
-                "fe_cita",
+                "nombre_servicio",
+                "fecha_cita",
                 "no_carnet",
                 "clinica_abrev",
-                "estatus",
+                "estatus_cita",
             ],
             "context": {
                 "title": "Espacios Disponibles",
@@ -277,29 +290,13 @@ default_config: Dict = {
             },
         },
         "sql": {
-            "campos": {
-                "nb_servicio": {
-                    "nombre": "Servicio",
-                    "sql": "cs.NB_SERVICIO",
-                },
-                "fe_cita": {
-                    "nombre": "Fecha y hora",
-                    "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy HH:mm')",
-                },
-                "nombre_colaborador": {
-                    "nombre": "Colaborador",
-                    "sql": "CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO, ' ', cu.NB_MATERNO)",
-                    "tipo": "nombre",
-                },
-                "no_disponibles": {
-                    "nombre": "Espacios disponibles",
-                    "sql": "kc.NO_DISPONIBLES",
-                },
-                "no_duracion": {
-                    "nombre": "Duración de servicio",
-                    "sql": "CONCAT(kc.NO_DURACION,' min')",
-                },
-            },
+            "campos": [
+                "nombre_servicio",
+                "fecha_cita",
+                "nombre_colaborador",
+                "espacios_disponibles",
+                "duracion_servicio",
+            ],
         },
     },
 }
@@ -317,6 +314,17 @@ else:
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         config = safe_load(f) or {}
 
+
+def parse_campos(
+    config: Dict,
+    common: Dict[str, str] = config["common_resources"]["sql"]["campos"],
+) -> Dict:
+    if "sql" not in config or "campos" not in config["sql"]:
+        return config
+    config["sql"]["campos"] = {k: common[k] for k in config["sql"]["campos"]}
+    return config
+
+
 cfg_whatsapp_admin = config.get("admin_whatsapp", {})
 
 cfg_menus = config.get("menús", {})
@@ -325,7 +333,7 @@ cfg_menu_paciente = cfg_menus.get("paciente", {})
 cfg_menu_colaborador = cfg_menus.get("colaborador", {})
 
 cfg_citas = config.get("citas", {})
-cfg_citas_carnet = cfg_citas.get("carnet", {})
-cfg_citas_colaborador = cfg_citas.get("colaborador", {})
+cfg_citas_carnet = parse_campos(cfg_citas.get("carnet", {}))
+cfg_citas_colaborador = parse_campos(cfg_citas.get("colaborador", {}))
 
 cfg_espacios = config.get("espacios", {})
