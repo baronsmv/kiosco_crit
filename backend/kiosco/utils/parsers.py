@@ -37,7 +37,7 @@ def menu(request: HttpRequest, config: Dict[str, Dict]) -> HttpResponse:
     )
     return render(
         request,
-        "kiosco/home.html",
+        "kiosco/menu.html",
         config.get("context", {})
         | {"home_url": reverse_lazy("home"), "menu_options": menu_options},
     )
@@ -294,7 +294,6 @@ def buscar(
 
     context = {
         **web_data.get("context", {}),
-        "home_url": reverse_lazy("home"),
         "tipo": "_".join(filter(None, (objetos, persona))),
         "whatsapp_status": client_status,
         "tabla_columnas": mapear_columnas(web_data, mapeo=sql_data),
@@ -306,13 +305,13 @@ def buscar(
         "mensaje_error": "",
         "error_target": "",
     }
+    context["home_url"] = reverse_lazy(context.get("home_url", "home"))
     context["fecha_inicial"] = (
         date.today() if context.get("fecha_inicial", False) else ""
     )
 
     if request.method == "POST":
         bound_form = form(request.POST)
-
         has_id = "id" in bound_form.fields
 
         parse_form(

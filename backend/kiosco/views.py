@@ -187,7 +187,7 @@ def buscar_espacios_disponibles(request: HttpRequest) -> HttpResponse:
         data=config.cfg_espacios,
         model=EspaciosVaciosConsulta,
         form=BuscarFechaForm,
-        query_func=data_queries.citas_colaborador,
+        query_func=data_queries.espacios_disponibles,
         objetos="espacios",
     )
 

@@ -42,7 +42,7 @@ urlpatterns = [
         name="buscar_citas_paciente",
     ),
     path(
-        route="colaborador/espacios/disponibles/pdf/<str:carnet>/",
+        route="colaborador/espacios/disponibles/pdf/",
         view=pdf_espacios_disponibles,
         name="pdf_espacios_disponibles",
     ),
