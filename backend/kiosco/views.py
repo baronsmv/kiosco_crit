@@ -95,7 +95,7 @@ def vista_previa_pdf(request: HttpRequest, tipo: str, id: str) -> HttpResponse:
         persona = "paciente"
         objetos = "citas"
         identificador = "carnet"
-        data = config.cfg_citas_carnet
+        data = config.cfg_citas_paciente
     elif tipo == "espacios":
         persona = None
         objetos = "espacios"
@@ -130,7 +130,7 @@ def vista_previa_pdf(request: HttpRequest, tipo: str, id: str) -> HttpResponse:
 def buscar_citas_paciente(request: HttpRequest) -> HttpResponse:
     return buscar(
         request=request,
-        data=config.cfg_citas_carnet,
+        data=config.cfg_citas_paciente,
         model=CitasCarnetConsulta,
         form=BuscarIdFechaForm,
         exist_func=exist_queries.paciente,
@@ -149,7 +149,7 @@ def pdf_citas_paciente(request: HttpRequest, carnet: str) -> HttpResponse:
         identificador="carnet",
         persona="paciente",
         objetos="citas",
-        data=config.cfg_citas_carnet,
+        data=config.cfg_citas_paciente,
         model=CitasCarnetWhatsapp,
     )
 

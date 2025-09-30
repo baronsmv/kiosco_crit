@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Tuple, Optional, Dict
 
-from ..config import cfg_citas_carnet, cfg_citas_colaborador, cfg_espacios
+from ..config import cfg_citas_paciente, cfg_citas_colaborador, cfg_espacios
 from ..logger import get_logger
 
 logger = get_logger(__name__)
@@ -50,7 +50,7 @@ def citas_carnet(
     fecha: Optional[datetime],
 ) -> Tuple[str, Tuple]:
     logger.info(f"Construyendo query de citas por carnet: {carnet}, fecha: {fecha}")
-    cfg = cfg_citas_carnet.get("sql", {})
+    cfg = cfg_citas_paciente.get("sql", {})
     query = f"""
         SELECT {select(cfg.get("campos", {}))}
         FROM SCRITS2.C_PACIENTE cp

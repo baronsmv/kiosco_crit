@@ -115,8 +115,8 @@ default_config: Dict = {
             },
         },
     },
-    "citas": {
-        "carnet": {
+    "paciente": {
+        "citas": {
             "web": {
                 "campos": [
                     "nombre_servicio",
@@ -181,7 +181,9 @@ default_config: Dict = {
                 ],
             },
         },
-        "colaborador": {
+    },
+    "colaborador": {
+        "citas": {
             "web": {
                 "campos": [
                     "nombre_servicio",
@@ -244,59 +246,59 @@ default_config: Dict = {
                 ],
             },
         },
-    },
-    "espacios": {
-        "web": {
-            "campos": [
-                "nombre_servicio",
-                "fecha_cita",
-                "no_carnet",
-                "clinica_abrev",
-                "estatus_cita",
-            ],
-            "context": {
-                "title": "Espacios Disponibles",
-                "header": "Espacios Disponibles",
-                "date_label": "Fecha:",
-                "date_required": True,
-                "button_label": "Buscar",
-                "processing_message": "Procesando...",
-                "data_title": "Espacios Disponibles",
-                "table_title": "Espacios Disponibles",
-                "number_label": "Número telefónico:",
-                "preview_label": "Vista previa e impresión",
-                "send_button_label": "📤 Enviar por WhatsApp",
-                "home_label": "Inicio",
-                "fecha_inicial": True,
-                "auto_borrado": False,
-                "mostrar_imprimir": True,
-                "mostrar_inicio": True,
+        "espacios": {
+            "web": {
+                "campos": [
+                    "nombre_servicio",
+                    "fecha_cita",
+                    "no_carnet",
+                    "clinica_abrev",
+                    "estatus_cita",
+                ],
+                "context": {
+                    "title": "Espacios Disponibles",
+                    "header": "Espacios Disponibles",
+                    "date_label": "Fecha:",
+                    "date_required": True,
+                    "button_label": "Buscar",
+                    "processing_message": "Procesando...",
+                    "data_title": "Espacios Disponibles",
+                    "table_title": "Espacios Disponibles",
+                    "number_label": "Número telefónico:",
+                    "preview_label": "Vista previa e impresión",
+                    "send_button_label": "📤 Enviar por WhatsApp",
+                    "home_label": "Inicio",
+                    "fecha_inicial": True,
+                    "auto_borrado": False,
+                    "mostrar_imprimir": True,
+                    "mostrar_inicio": True,
+                },
             },
-        },
-        "pdf": {
-            "campos": [
-                "nombre_servicio",
-                "fecha_cita",
-                "no_carnet",
-                "clinica_abrev",
-                "estatus_cita",
-            ],
-            "context": {
-                "title": "Espacios Disponibles",
-                "header": "Espacios Disponibles",
-                "data_title": "Espacios Disponibles",
-                "table_title": "Espacios Disponibles",
-                "footer": "Fundación Teletón México A.C.",
+            "pdf": {
+                "campos": [
+                    "nombre_servicio",
+                    "fecha_cita",
+                    "no_carnet",
+                    "clinica_abrev",
+                    "estatus_cita",
+                ],
+                "context": {
+                    "title": "Espacios Disponibles",
+                    "header": "Espacios Disponibles",
+                    "data_title": "Espacios Disponibles",
+                    "table_title": "Espacios Disponibles",
+                    "footer": "Fundación Teletón México A.C.",
+                },
             },
-        },
-        "sql": {
-            "campos": [
-                "nombre_servicio",
-                "fecha_cita",
-                "nombre_colaborador",
-                "espacios_disponibles",
-                "duracion_servicio",
-            ],
+            "sql": {
+                "campos": [
+                    "nombre_servicio",
+                    "fecha_cita",
+                    "nombre_colaborador",
+                    "espacios_disponibles",
+                    "duracion_servicio",
+                ],
+            },
         },
     },
 }
@@ -332,8 +334,9 @@ cfg_home = cfg_menus.get("inicio", {})
 cfg_menu_paciente = cfg_menus.get("paciente", {})
 cfg_menu_colaborador = cfg_menus.get("colaborador", {})
 
-cfg_citas = config.get("citas", {})
-cfg_citas_carnet = parse_campos(cfg_citas.get("carnet", {}))
-cfg_citas_colaborador = parse_campos(cfg_citas.get("colaborador", {}))
+cfg_paciente = config.get("paciente", {})
+cfg_citas_paciente = parse_campos(cfg_paciente.get("citas", {}))
 
-cfg_espacios = parse_campos(config.get("espacios", {}))
+cfg_colaborador = config.get("colaborador", {})
+cfg_citas_colaborador = parse_campos(cfg_colaborador.get("citas", {}))
+cfg_espacios = parse_campos(cfg_colaborador.get("espacios", {}))
