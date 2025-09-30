@@ -336,4 +336,4 @@ cfg_citas = config.get("citas", {})
 cfg_citas_carnet = parse_campos(cfg_citas.get("carnet", {}))
 cfg_citas_colaborador = parse_campos(cfg_citas.get("colaborador", {}))
 
-cfg_espacios = config.get("espacios", {})
+cfg_espacios = parse_campos(config.get("espacios", {}))
