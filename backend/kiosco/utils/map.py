@@ -5,9 +5,9 @@ from .logger import get_logger
 logger = get_logger(__name__)
 
 
-def columns(data: Dict[str, Dict], mapeo: Dict[str, Dict]) -> Tuple:
-    campos = data.get("campos", {})
-    mapeo_campos = mapeo["campos"]
+def columns(render_data: Dict[str, Dict], sql_data: Dict[str, Dict]) -> Tuple[str, ...]:
+    campos = render_data.get("campos", {})
+    mapeo_campos = sql_data["campos"]
 
     logger.debug(f"Mapeando columnas: {list(campos)}")
 

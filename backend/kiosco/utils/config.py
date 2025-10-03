@@ -342,4 +342,4 @@ cfg_citas_paciente = parse_campos(cfg_paciente.get("citas", {}))
 
 cfg_colaborador = config.get("colaborador", {})
 cfg_citas_colaborador = parse_campos(cfg_colaborador.get("citas", {}))
-cfg_espacios = parse_campos(cfg_colaborador.get("espacios", {}))
+cfg_espacios_disponibles = parse_campos(cfg_colaborador.get("espacios", {}))

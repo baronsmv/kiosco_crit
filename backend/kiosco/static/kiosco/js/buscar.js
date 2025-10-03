@@ -94,6 +94,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (anterior) anterior.remove();
 
     const form = document.getElementById("buscar-form");
+    console.log(window.FormConfig);
+
+    const idRequired = window.FormConfig?.idRequired ?? false;
+    const dateRequired = window.FormConfig?.dateRequired ?? false;
+    const autoBorrado = window.FormConfig?.autoBorrado ?? false;
 
     form.addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -109,16 +114,31 @@ document.addEventListener("DOMContentLoaded", function () {
         const idInput = document.getElementById("id");
         const fechaInput = document.getElementById("fecha");
 
-        const id = idInput.value.trim();
-        const fecha = fechaInput.value.trim();
+        const id = idInput?.value.trim() ?? "";
+        const fecha = fechaInput?.value.trim() ?? "";
 
-        if (!id) {
+        if (idRequired && !id) {
             if (processingMessage) {
                 processingMessage.classList.remove("visible");
                 processingMessage.setAttribute("aria-hidden", "false");
             }
-            idInput.focus();
-            idInput.select();
+            mostrarErrorCampo("id");
+            if (idInput) {
+                idInput.focus();
+                idInput.select();
+            }
+            return;
+        }
+        if (dateRequired && !fecha) {
+            if (processingMessage) {
+                processingMessage.classList.remove("visible");
+                processingMessage.setAttribute("aria-hidden", "false");
+            }
+            mostrarErrorCampo("fecha");
+            if (fechaInput) {
+                fechaInput.focus();
+                fechaInput.select();
+            }
             return;
         }
 
@@ -175,13 +195,17 @@ document.addEventListener("DOMContentLoaded", function () {
                         input.select();
                     }
                 }
-                idInput.focus();
-                idInput.select();
+                if (idInput) {
+                    idInput.focus();
+                    idInput.select();
+                }
             }
         } catch (error) {
             console.error("Error al buscar:", error);
-            idInput.focus();
-            idInput.select();
+            if (idInput) {
+                idInput.focus();
+                idInput.select();
+            }
         } finally {
             if (processingMessage) {
                 processingMessage.classList.remove("visible");

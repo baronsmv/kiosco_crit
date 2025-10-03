@@ -1,6 +1,6 @@
 import hashlib
 import os
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict
 
 from django.conf import settings
 from django.contrib.staticfiles import finders
@@ -15,16 +15,15 @@ logger = get_logger(__name__)
 
 def pdf(
     format_func: Callable,
-    data: Dict[str, Dict],
     previous_context: Dict,
-    objetos: str,
-    id: Optional[str] = None,
-    persona: Optional[str] = None,
-    identificador: Optional[str] = None,
-    color: bool = False,
+    salida_a_color: bool = False,
 ) -> str:
-    pdf_data = data["pdf"]
-    sql_data = data["sql"]
+    id = previous_context.get("id", "")
+    pdf_data = previous_context.get("pdf_data")
+    sql_data = previous_context.get("sql_data")
+    nombre_id = previous_context.get("nombre_id")
+    nombre_persona = previous_context.get("nombre_persona")
+    nombre_objetos = previous_context.get("nombre_objetos")
 
     output_dir = os.path.join(settings.MEDIA_ROOT, "pdfs")
     os.makedirs(output_dir, exist_ok=True)
@@ -41,8 +40,8 @@ def pdf(
         formatted_context = format_func(
             **previous_context,
             campos=pdf_data.get("campos", ()),
-            persona=persona,
-            identificador=identificador,
+            persona=nombre_persona,
+            identificador=nombre_id,
         )
         previous_context.update(formatted_context)
     except Exception:
@@ -56,7 +55,7 @@ def pdf(
             {
                 **pdf_data.get("context", {}),
                 **previous_context,
-                "tabla_columnas": map.columns(pdf_data, mapeo=sql_data),
+                "tabla_columnas": map.columns(pdf_data, sql_data=sql_data),
             },
         )
     except Exception:
@@ -66,14 +65,19 @@ def pdf(
     # Calcular hash del contenido HTML
     content_hash = hashlib.sha1(html.encode("utf-8")).hexdigest()[:10]
     filename = (
-        "_".join(filter(None, (objetos, persona, id, fecha_especificada, content_hash)))
+        "_".join(
+            filter(
+                None,
+                (nombre_objetos, nombre_persona, id, fecha_especificada, content_hash),
+            )
+        )
         + ".pdf"
     )
     output_path = os.path.join(output_dir, filename)
     logger.debug(f"Generando PDF en: {output_path}")
 
     # Buscar CSS
-    css_path = finders.find(f"kiosco/css/pdf{'-color' if color else ''}.css")
+    css_path = finders.find(f"kiosco/css/pdf{'-color' if salida_a_color else ''}.css")
     css_files = [css_path] if css_path else []
 
     try:

@@ -17,14 +17,16 @@ def _parse_query(
     query: str,
     id: Optional[str] = None,
     fecha: Optional[datetime] = None,
+    *,
     filters: Optional[Dict] = None,
     order_by: Optional[str] = None,
+    fecha_query: str = " AND CAST(kc.FE_CITA AS DATE) = %s",
 ) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Generando consulta para ID: {id} con fecha: {fecha}")
     params = tuple(filter(None, (id, fecha)))
 
     if fecha:
-        query += " AND CAST(kc.FE_CITA AS DATE) = %s"
+        query += fecha_query
         logger.debug("Agregado filtro adicional por fecha exacta.")
 
     if filters:
@@ -45,11 +47,8 @@ def _parse_query(
     return query, params
 
 
-def citas_carnet(
-    carnet: str,
-    fecha: Optional[datetime],
-) -> Tuple[str, Tuple[str, ...]]:
-    logger.info(f"Construyendo query de citas por carnet: {carnet}, fecha: {fecha}")
+def citas_paciente(id: str, fecha: Optional[datetime]) -> Tuple[str, Tuple[str, ...]]:
+    logger.info(f"Construyendo query de citas por carnet: {id}, fecha: {fecha}")
     cfg = config.cfg_citas_paciente.get("sql", {})
     query = f"""
         SELECT {_select(cfg.get("campos", {}))}
@@ -64,7 +63,7 @@ def citas_carnet(
     """
     return _parse_query(
         query=query,
-        id=carnet,
+        id=id,
         fecha=fecha,
         filters=cfg.get("filtros", {}),
         order_by="kc.FE_CITA ASC",
@@ -98,7 +97,7 @@ def citas_colaborador(
 
 def espacios_disponibles(fecha: datetime) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de espacios disponibles por fecha: {fecha}")
-    cfg = config.cfg_espacios.get("sql", {})
+    cfg = config.cfg_espacios_disponibles.get("sql", {})
     query = f"""
         SELECT {_select(cfg.get("campos", {}))}
         FROM SCRITS2.K_CITA kc
@@ -107,6 +106,10 @@ def espacios_disponibles(fecha: datetime) -> Tuple[str, Tuple[str, ...]]:
         INNER JOIN SCRITS2.C_USUARIO cu
         ON kc.FL_USUARIO = cu.FL_USUARIO
         WHERE kc.NO_DISPONIBLES > 0
+        AND cs.NB_SERVICIO NOT LIKE '%dummy%'
+        AND cs.NB_SERVICIO NOT LIKE '%análisis%'
+        AND cs.NB_SERVICIO NOT LIKE '%EEG%'
+        AND kc.FG_BLOQUEADA = 0
     """
     return _parse_query(
         query=query,

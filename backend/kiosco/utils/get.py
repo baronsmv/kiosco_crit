@@ -1,6 +1,6 @@
 import inspect
 from datetime import datetime
-from typing import Optional, Callable, Tuple, Dict, Any
+from typing import Any, Callable, Dict, Optional, Tuple
 
 from django.db import connections, OperationalError
 from django.http import HttpRequest
@@ -19,6 +19,11 @@ def client_ip(request: HttpRequest) -> str:
     return ip
 
 
+def _eval_query(func: Callable, **kwargs) -> Tuple[str, Tuple[str, ...]]:
+    sig = inspect.signature(func)
+    return func(**{k: v for k, v in kwargs.items() if k in sig.parameters})
+
+
 def _obtener_filas(
     id: Optional[str],
     fecha: Optional[datetime],
@@ -26,16 +31,11 @@ def _obtener_filas(
     query_func: Callable,
     db_name: str = "crit",
 ) -> Optional[Tuple]:
-    logger.info(f"Buscando filas para ID: {id} en base de datos: {db_name}")
-
-    sig = inspect.signature(query_func)
-    kwargs = {}
-    if "id" in sig.parameters:
-        kwargs["id"] = id
-    if "fecha" in sig.parameters:
-        kwargs["fecha"] = fecha
-    query, params = query_func(**kwargs)
-
+    logger.info(
+        f"Buscando filas para ID: '{id}' con fecha '{fecha}'"
+        + f" en base de datos: '{db_name}'"
+    )
+    query, params = _eval_query(query_func, id=id, fecha=fecha)
     try:
         with connections[db_name].cursor() as cursor:
             persona = exist_func(id, cursor) if exist_func else None
@@ -82,13 +82,13 @@ def datos(
     else:
         logger.debug(f"Procesando {len(objetos)} objetos sin persona asociada")
 
-    objetos_formateados = [
+    objetos_formateados = tuple(
         {
             campo: campo(cita[i], sql_campos[campo].get("formatear"))
             for i, campo in enumerate(sql_campos.keys())
         }
         for cita in objetos
-    ]
+    )
     logger.info("Datos procesados correctamente.")
 
     return {

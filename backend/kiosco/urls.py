@@ -15,12 +15,12 @@ urlpatterns = [
         name="admin_whatsapp",
     ),
     path(
-        route="pdf/<str:tipo>/<str:id>/",
+        route="pdf/",
         view=previews.pdf,
         name="vista_previa_pdf",
     ),
     path(
-        route="paciente/citas/pdf/<str:carnet>/",
+        route="paciente/citas/pdf/",
         view=send_pdf.citas_paciente,
         name="pdf_citas_paciente",
     ),
@@ -40,7 +40,7 @@ urlpatterns = [
         name="buscar_espacios_disponibles",
     ),
     path(
-        route="colaborador/citas/pdf/<str:id>/",
+        route="colaborador/citas/pdf/",
         view=send_pdf.citas_colaborador,
         name="pdf_citas_colaborador",
     ),

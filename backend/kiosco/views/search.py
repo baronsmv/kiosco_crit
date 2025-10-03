@@ -21,12 +21,12 @@ base_url = settings.WHATSAPP_API_BASE_URL
 def _render_ajax(
     request: HttpRequest,
     context: Dict,
-    partial: str,
+    partial_filename: str,
     partial_error: str = "mensaje_error.html",
 ) -> Optional[HttpResponse]:
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         template = "kiosco/partials/"
-        template += partial if context["persona"] else partial_error
+        template += partial_filename if context["persona"] else partial_error
         logger.debug(f"Renderizando plantilla parcial: {template}")
         html = render_to_string(template, context, request=request)
         return HttpResponse(html)
@@ -35,23 +35,23 @@ def _render_ajax(
 
 def _render_search(
     request: HttpRequest,
-    data: Dict,
-    model: Type[Model],
-    form: Type[Form],
+    config_data: Dict,
+    RegModel: Type[Model],
+    RegForm: Type[Form],
     query_func: Callable,
-    objetos: str,
+    nombre_objetos: str,
     get_func: Callable = get.datos,
     format_func: Callable = format.campos,
-    identificador: Optional[str] = None,
-    persona: Optional[str] = None,
+    nombre_id: Optional[str] = None,
+    nombre_sujeto: Optional[str] = None,
     exist_func: Optional[Callable] = None,
     pdf_url: Optional[str] = None,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
 
-    web_data = data["web"]
-    sql_data = data["sql"]
+    web_data = config_data["web"]
+    sql_data = config_data["sql"]
 
     try:
         status_resp = requests.get(f"{base_url}/status")
@@ -61,9 +61,9 @@ def _render_search(
 
     context = {
         **web_data.get("context", {}),
-        "tipo": "_".join(filter(None, (objetos, persona))),
+        "tipo": "_".join(filter(None, (nombre_objetos, nombre_sujeto))),
         "whatsapp_status": client_status,
-        "tabla_columnas": map.columns(web_data, mapeo=sql_data),
+        "tabla_columnas": map.columns(web_data, sql_data=sql_data),
         "id": "",
         "persona": None,
         "id_proporcionado": False,
@@ -80,29 +80,30 @@ def _render_search(
     if request.method == "POST":
         validate.form(
             request=request,
+            config_data=config_data,
             context=context,
-            campos=web_data.get("campos", {}),
-            sql_campos=sql_data.get("campos", {}),
-            form=form(request.POST),
-            model=model,
+            reg_form=RegForm(request.POST),
+            RegModel=RegModel,
             exist_func=exist_func,
             get_func=get_func,
             query_func=query_func,
             format_func=format_func,
-            identificador=identificador,
-            persona=persona,
-            objetos=objetos,
+            nombre_id=nombre_id,
+            nombre_persona=nombre_sujeto,
+            nombre_objetos=nombre_objetos,
             pdf_url=(
                 pdf_url
                 if pdf_url
-                else "_".join(filter(None, ("pdf", objetos, persona)))
+                else "_".join(
+                    filter(None, ("pdf", nombre_objetos, nombre_sujeto))
+                ).replace(" ", "_")
             ),
         )
 
         if respuesta_ajax := _render_ajax(
             request,
             context,
-            partial="modal_buscar.html",
+            partial_filename="modal_buscar.html",
         ):
             logger.debug("Respuesta AJAX enviada")
             return respuesta_ajax
@@ -111,40 +112,40 @@ def _render_search(
     return render(request, f"kiosco/buscar.html", context)
 
 
-def espacios_disponibles(request: HttpRequest) -> HttpResponse:
+def citas_paciente(request: HttpRequest) -> HttpResponse:
     return _render_search(
         request=request,
-        data=config.cfg_espacios,
-        model=models.EspaciosVaciosConsulta,
-        form=forms.BuscarFechaForm,
-        query_func=queries.data.espacios_disponibles,
-        objetos="espacios",
+        config_data=config.cfg_citas_paciente,
+        RegModel=models.CitasCarnetConsulta,
+        RegForm=forms.BuscarIdFechaForm,
+        exist_func=queries.exist.paciente,
+        query_func=queries.data.citas_paciente,
+        nombre_id="carnet",
+        nombre_sujeto="paciente",
+        nombre_objetos="citas",
     )
 
 
 def citas_colaborador(request: HttpRequest) -> HttpResponse:
     return _render_search(
         request=request,
-        data=config.cfg_citas_colaborador,
-        model=models.CitasColaboradorConsulta,
-        form=forms.BuscarIdFechaForm,
+        config_data=config.cfg_citas_colaborador,
+        RegModel=models.CitasColaboradorConsulta,
+        RegForm=forms.BuscarIdFechaForm,
         exist_func=queries.exist.colaborador,
         query_func=queries.data.citas_colaborador,
-        identificador="nombre de usuario",
-        persona="colaborador",
-        objetos="citas",
+        nombre_id="nombre de usuario",
+        nombre_sujeto="colaborador",
+        nombre_objetos="citas",
     )
 
 
-def citas_paciente(request: HttpRequest) -> HttpResponse:
+def espacios_disponibles(request: HttpRequest) -> HttpResponse:
     return _render_search(
         request=request,
-        data=config.cfg_citas_paciente,
-        model=models.CitasCarnetConsulta,
-        form=forms.BuscarIdFechaForm,
-        exist_func=queries.exist.paciente,
-        query_func=queries.data.citas_carnet,
-        identificador="carnet",
-        persona="paciente",
-        objetos="citas",
+        config_data=config.cfg_espacios_disponibles,
+        RegModel=models.EspaciosVaciosConsulta,
+        RegForm=forms.BuscarFechaForm,
+        query_func=queries.data.espacios_disponibles,
+        nombre_objetos="espacios disponibles",
     )

@@ -1,5 +1,5 @@
 import re
-from typing import Dict, Type, Optional, Callable
+from typing import Type, Callable
 
 import requests
 from django.conf import settings
@@ -8,7 +8,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .. import models
-from ..utils import config, format, generate, get
+from ..utils import format, generate, get
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -18,16 +18,17 @@ base_url = settings.WHATSAPP_API_BASE_URL
 
 def _send_pdf(
     request: HttpRequest,
-    objetos: str,
-    data: Dict,
-    model: Type[Model],
-    id: Optional[str] = None,
-    identificador: Optional[str] = None,
-    persona: Optional[str] = None,
+    RegModel: Type[Model],
     format_func: Callable = format.campos,
 ) -> JsonResponse:
+    previous_context = request.session.get("context_data", {})
+    id = previous_context.get("id", "")
+    nombre_id = previous_context.get("nombre_id")
+    nombre_persona = previous_context.get("nombre_persona")
+    fecha_especificada = previous_context.get("fecha", None)
+
     logger.debug(
-        f"enviar_pdf_whatsapp called with method {request.method} and {identificador} {id}"
+        f"enviar_pdf_whatsapp called with method {request.method} and {nombre_id} {id}"
     )
 
     if request.method != "POST":
@@ -40,24 +41,16 @@ def _send_pdf(
         logger.error("Número de WhatsApp requerido no proporcionado")
         return JsonResponse({"error": "Número de WhatsApp requerido"}, status=400)
 
-    web_context = request.session.get("context_data", {})
-    fecha_especificada = web_context.get("fecha", None)
-
     filename = generate.pdf(
-        id=id,
         format_func=format_func,
-        data=data,
-        previous_context=web_context,
-        persona=persona,
-        identificador=identificador,
-        objetos=objetos,
-        color=True,
+        previous_context=previous_context,
+        salida_a_color=True,
     )
 
     # Mensaje WhatsApp
-    mensaje = f"""Datos del {persona}:
-Nombre: {web_context['persona']['Nombre']}
-{identificador.title()}: {web_context['persona'][identificador.title()]}"""
+    mensaje = f"""Datos del {nombre_persona}:
+Nombre: {previous_context['persona']['Nombre']}
+{nombre_id.title()}: {previous_context['persona'][nombre_id.title()]}"""
 
     payload = {
         "number": "521" + re.sub(r"\D", "", numero) + "@c.us",
@@ -77,8 +70,8 @@ Nombre: {web_context['persona']['Nombre']}
             else response_data.get("error", "Error desconocido")
         )
 
-        model.objects.create(
-            identificador=id,
+        RegModel.objects.create(
+            **({"identificador": id} if id else {}),
             fecha_especificada=fecha_especificada,
             numero_destino=numero,
             mensaje=mensaje,
@@ -99,8 +92,8 @@ Nombre: {web_context['persona']['Nombre']}
 
     except requests.exceptions.RequestException as e:
         logger.error(f"Error de conexión con microservicio: {str(e)}", exc_info=True)
-        model.objects.create(
-            identificador=id,
+        RegModel.objects.create(
+            **({"identificador": id} if id else {}),
             numero_destino=numero,
             mensaje=mensaje,
             archivo_pdf=payload["image_path"],
@@ -113,36 +106,15 @@ Nombre: {web_context['persona']['Nombre']}
 
 
 @csrf_exempt
-def citas_paciente(request: HttpRequest, carnet: str) -> HttpResponse:
-    return _send_pdf(
-        request=request,
-        id=carnet,
-        identificador="carnet",
-        persona="paciente",
-        objetos="citas",
-        data=config.cfg_citas_paciente,
-        model=models.CitasCarnetWhatsapp,
-    )
+def citas_paciente(request: HttpRequest) -> HttpResponse:
+    return _send_pdf(request, RegModel=models.CitasCarnetWhatsapp)
 
 
 @csrf_exempt
-def citas_colaborador(request: HttpRequest, id: str) -> HttpResponse:
-    return _send_pdf(
-        request=request,
-        id=id,
-        identificador="nombre de usuario",
-        persona="colaborador",
-        objetos="citas",
-        data=config.cfg_citas_colaborador,
-        model=models.CitasColaboradorWhatsapp,
-    )
+def citas_colaborador(request: HttpRequest) -> HttpResponse:
+    return _send_pdf(request, RegModel=models.CitasColaboradorWhatsapp)
 
 
 @csrf_exempt
 def espacios_disponibles(request: HttpRequest) -> HttpResponse:
-    return _send_pdf(
-        request=request,
-        data=config.cfg_espacios,
-        model=models.EspaciosVaciosWhatsapp,
-        objetos="espacios",
-    )
+    return _send_pdf(request=request, RegModel=models.EspaciosVaciosWhatsapp)
