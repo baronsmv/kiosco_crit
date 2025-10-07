@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class ConsultaBase(models.Model):
+class Consulta(models.Model):
     fecha_consulta = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(
         max_length=20,
@@ -19,14 +19,14 @@ class ConsultaBase(models.Model):
         abstract = True
 
 
-class ConsultaFechaBase(ConsultaBase):
+class ConsultaFecha(Consulta):
     fecha_especificada = models.DateField()
 
     def __str__(self):
         return f"{self.fecha_especificada} ({self.estado})"
 
 
-class ConsultaIdFechaBase(ConsultaBase):
+class ConsultaIdFecha(Consulta):
     identificador = models.CharField(max_length=20)
     fecha_especificada = models.DateField(null=True, blank=True)
 
@@ -34,7 +34,7 @@ class ConsultaIdFechaBase(ConsultaBase):
         return str(f"{self.identificador} ({self.estado})")
 
 
-class WhatsappBase(models.Model):
+class Whatsapp(models.Model):
     fecha_envio = models.DateTimeField(auto_now_add=True)
     numero_destino = models.CharField(max_length=20)
     mensaje = models.TextField()
@@ -49,44 +49,16 @@ class WhatsappBase(models.Model):
         abstract = True
 
 
-class WhatsappFechaBase(WhatsappBase):
+class WhatsappFecha(Whatsapp):
     fecha_especificada = models.DateField()
 
     def __str__(self):
         return f"{self.fecha_especificada} → {self.numero_destino} ({self.estado})"
 
 
-class WhatsappIdFechaBase(WhatsappBase):
+class WhatsappIdFecha(Whatsapp):
     identificador = models.CharField(max_length=20)
     fecha_especificada = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.identificador} → {self.numero_destino} ({self.estado})"
-
-
-class CitasCarnetConsulta(ConsultaIdFechaBase):
-    @property
-    def carnet(self):
-        return self.identificador
-
-
-class CitasCarnetWhatsapp(WhatsappIdFechaBase):
-    @property
-    def carnet(self):
-        return self.identificador
-
-
-class CitasColaboradorConsulta(ConsultaIdFechaBase):
-    pass
-
-
-class CitasColaboradorWhatsapp(WhatsappIdFechaBase):
-    pass
-
-
-class EspaciosVaciosConsulta(ConsultaFechaBase):
-    pass
-
-
-class EspaciosVaciosWhatsapp(WhatsappFechaBase):
-    pass
