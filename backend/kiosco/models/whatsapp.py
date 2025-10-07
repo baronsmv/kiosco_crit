@@ -1,15 +1,15 @@
 from . import base
 
 
-class CitasCarnetWA(base.WhatsappIdFecha):
+class CitasPacienteWhatsapp(base.WhatsappIdFecha):
     @property
     def carnet(self):
         return self.identificador
 
 
-class CitasColaboradorWA(base.WhatsappIdFecha):
+class CitasColaboradorWhatsapp(base.WhatsappIdFecha):
     pass
 
 
-class EspaciosVaciosWA(base.WhatsappFecha):
+class EspaciosVaciosWhatsapp(base.WhatsappFecha):
     pass

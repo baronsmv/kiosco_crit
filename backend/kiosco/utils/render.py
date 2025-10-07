@@ -48,21 +48,31 @@ def ajax(
 def search(
     request: HttpRequest,
     config_data: Dict,
-    RegModel: Type[Model],
     RegForm: Type[Form],
     data_query: Callable,
     nombre_objetos: str,
+    RegModel: Optional[Type[Model]] = None,
     get_func: Callable = get.datos,
     format_func: Callable = format.campos,
     nombre_id: Optional[str] = None,
     nombre_sujeto: Optional[str] = None,
     exist_query: Optional[Callable] = None,
-    pdf_url: Optional[str] = None,
+    urls: Optional[Dict] = None,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
 
     context = get.initial_context(config_data)
+    urls = urls or {
+        f"send_{client}_{format}_url": get.pdf_url(
+            nombre_objetos, nombre_sujeto, "send", client, format
+        )
+        for format in ("pdf",)
+        for client in (
+            "email",
+            "whatsapp",
+        )
+    }
 
     if request.method == "POST":
         validate.form(
@@ -75,10 +85,10 @@ def search(
             data_query=data_query,
             get_func=get_func,
             format_func=format_func,
+            urls=urls,
             nombre_id=nombre_id,
             nombre_persona=nombre_sujeto,
             nombre_objetos=nombre_objetos,
-            pdf_url=pdf_url or get.pdf_url(nombre_objetos, nombre_sujeto),
         )
 
         if respuesta_ajax := ajax(

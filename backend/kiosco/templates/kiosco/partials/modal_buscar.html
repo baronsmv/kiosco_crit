@@ -42,18 +42,53 @@
             </div>
         </div>
 
-        <!-- Modal de impresión -->
-        {% if mostrar_imprimir %}
-        <button
-                class="btn btn-outline-primary"
-                onclick="abrirVistaPrevia('{{ tipo }}', '{{ id }}')"
-                type="button"
-        >
-            {{ preview_label }}
-        </button>
+        {% if mostrar_vista_previa or mostrar_enviar_email %}
+        <div class="botones-agrupados">
+            {% if mostrar_vista_previa %}
+            <button
+                    class="btn btn-outline-primary"
+                    onclick="abrirVistaPrevia()"
+                    type="button"
+            >
+                {{ preview_label }}
+            </button>
+            {% endif %}
+            {% if mostrar_enviar_email %}
+            <button
+                    class="btn btn-outline-secondary"
+                    onclick="mostrarFormularioEmail()"
+                    type="button"
+            >
+                {{ send_email_label }}
+            </button>
+            {% endif %}
+        </div>
         {% endif %}
 
-        <form action="{{ pdf_url }}" id="form-enviar-pdf" method="POST">
+        <form
+                action="{{ send_email_pdf_url }}"
+                id="send-email-pdf-form"
+                method="POST"
+                style="display: none; margin-top: 1em;"
+        >
+            {% csrf_token %}
+            <div class="input-button-row">
+                <label for="email">{{ email_label }}</label>
+                <input
+                        id="email"
+                        name="email"
+                        placeholder="ejemplo@correo.com"
+                        required
+                        type="email"
+                />
+                <button class="btn btn-primary" type="submit">
+                    {{ send_button_label }}
+                </button>
+            </div>
+        </form>
+        {% endif %}
+
+        <form action="{{ send_whatsapp_pdf_url }}" id="form-send-whatsapp-pdf" method="POST">
             {% csrf_token %}
             <div class="input-button-row">
                 <label class="btn-whatsapp-label" for="numero-whatsapp">{{ number_label }}</label>

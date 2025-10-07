@@ -62,3 +62,33 @@ class WhatsappIdFecha(Whatsapp):
 
     def __str__(self):
         return f"{self.identificador} → {self.numero_destino} ({self.estado})"
+
+
+class Email(models.Model):
+    fecha_envio = models.DateTimeField(auto_now_add=True)
+    correo_destino = models.CharField(max_length=50)
+    mensaje = models.TextField()
+    archivo_pdf = models.CharField(max_length=255)
+    estado = models.CharField(
+        max_length=20, choices=(("enviado", "Enviado"), ("fallido", "Fallido"))
+    )
+    detalle_error = models.TextField(blank=True, null=True)
+    ip_cliente = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
+class EmailFecha(Email):
+    fecha_especificada = models.DateField()
+
+    def __str__(self):
+        return f"{self.fecha_especificada} → {self.correo_destino} ({self.estado})"
+
+
+class EmailIdFecha(Email):
+    identificador = models.CharField(max_length=20)
+    fecha_especificada = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.identificador} → {self.correo_destino} ({self.estado})"

@@ -7,7 +7,7 @@ from django.db.models import Model
 from django.db.utils import OperationalError
 from django.forms.forms import Form
 from django.http import HttpRequest
-from django.urls import reverse
+from django.urls import reverse_lazy
 
 from . import get
 from .logger import get_logger
@@ -27,7 +27,7 @@ def _valid_id(
     fecha: datetime,
     has_fecha: bool,
     context: Dict,
-    RegModel: Type[Model],
+    RegModel: Optional[Type[Model]],
     reg_form: Form,
     ip_cliente: str,
 ) -> bool:
@@ -47,12 +47,13 @@ def _valid_id(
             }
         )
         logger.warning(f"Error de validación en ID: {e}")
-        RegModel.objects.create(
-            identificador=id,
-            fecha_especificada=fecha,
-            ip_cliente=ip_cliente,
-            estado="invalido",
-        )
+        if RegModel:
+            RegModel.objects.create(
+                identificador=id,
+                fecha_especificada=fecha,
+                ip_cliente=ip_cliente,
+                estado="invalido",
+            )
         return False
 
 
@@ -100,15 +101,15 @@ def form(
     context: Dict,
     config_data: Dict,
     reg_form: Form,
-    RegModel: Type[Model],
+    RegModel: Optional[Type[Model]],
     exist_query: Optional[Callable],
     data_query: Callable,
     get_func: Callable,
     format_func: Callable,
+    urls: Dict,
     nombre_id: str = "",
     nombre_persona: str = "",
     nombre_objetos: str = "",
-    pdf_url: str = "",
 ) -> None:
     form_fields = reg_form.fields.keys()
     has_id = "id" in form_fields
@@ -143,7 +144,7 @@ def form(
                 "id": id or "",
                 "id_proporcionado": bool(id),
                 "fecha": fecha,
-                "pdf_url": reverse(pdf_url),
+                **{name: reverse_lazy(url) for name, url in urls.items()},
             }
         )
 
@@ -157,12 +158,13 @@ def form(
             )
         except OperationalError as e:
             logger.error(f"Error de conexión a la base de datos: {e}")
-            RegModel.objects.create(
-                **({"identificador": id} if has_id else {}),
-                fecha_especificada=fecha,
-                ip_cliente=ip_cliente,
-                estado="error_conexion",
-            )
+            if RegModel:
+                RegModel.objects.create(
+                    **({"identificador": id} if has_id else {}),
+                    fecha_especificada=fecha,
+                    ip_cliente=ip_cliente,
+                    estado="error_conexion",
+                )
             context.update(
                 {
                     "mensaje_error": "❌ No se pudo conectar con la base de datos.",
@@ -218,12 +220,13 @@ def form(
             "sql_data": sql_data,
         }
 
-        RegModel.objects.create(
-            **({"identificador": id} if has_id else {}),
-            fecha_especificada=fecha,
-            ip_cliente=ip_cliente,
-            estado=estado,
-        )
+        if RegModel:
+            RegModel.objects.create(
+                **({"identificador": id} if has_id else {}),
+                fecha_especificada=fecha,
+                ip_cliente=ip_cliente,
+                estado=estado,
+            )
 
     else:
         context.update(

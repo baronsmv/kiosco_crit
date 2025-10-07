@@ -19,3 +19,8 @@ class ConsultaAdmin(Admin):
 class WhatsappAdmin(Admin):
     list_filter = ("fecha_especificada", "fecha_envio", "ip_cliente", "estado")
     search_fields = ("identificador", "numero_destino")
+
+
+class EmailAdmin(Admin):
+    list_filter = ("fecha_especificada", "fecha_envio", "ip_cliente", "estado")
+    search_fields = ("identificador", "correo_destino")

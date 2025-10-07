@@ -1,10 +1,10 @@
 async function activarEnvioWhatsApp(modal) {
     if (!modal) return;
 
-    const formEnviarPDF = modal.querySelector("#form-enviar-pdf");
-    if (!formEnviarPDF) return;
+    const formSendWhatsappPDF = modal.querySelector("#form-send-whatsapp-pdf");
+    if (!formSendWhatsappPDF) return;
 
-    const input = formEnviarPDF.querySelector("input[name=numero]");
+    const input = formSendWhatsappPDF.querySelector("input[name=numero]");
     const mensajeDiv = modal.querySelector("#mensaje-envio");
 
     // Obtener estado de WhatsApp desde el JSON embebido en el HTML
@@ -17,21 +17,21 @@ async function activarEnvioWhatsApp(modal) {
     }
 
     if (!whatsappStatus || whatsappStatus.status !== "listo" || !whatsappStatus.connected) {
-        formEnviarPDF.classList.add("hidden");
+        formSendWhatsappPDF.classList.add("hidden");
         /*if (mensajeDiv) {
             mensajeDiv.textContent = "⚠️ Servicio de WhatsApp no disponible en este momento.";
             mensajeDiv.style.display = "block";
         }*/
         return;
     } else {
-        formEnviarPDF.classList.remove("hidden");
+        formSendWhatsappPDF.classList.remove("hidden");
         if (mensajeDiv) {
             mensajeDiv.textContent = "";
             mensajeDiv.style.display = "none";
         }
     }
 
-    formEnviarPDF.addEventListener("submit", async function (e) {
+    formSendWhatsappPDF.addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const numero = input.value.trim();
@@ -54,7 +54,7 @@ async function activarEnvioWhatsApp(modal) {
             return;
         }
 
-        const boton = formEnviarPDF.querySelector("button[type=submit]");
+        const boton = formSendWhatsappPDF.querySelector("button[type=submit]");
         const textoOriginal = boton?.textContent || "Enviar";
 
         if (boton) {
@@ -62,8 +62,8 @@ async function activarEnvioWhatsApp(modal) {
             boton.disabled = true;
         }
 
-        const csrfToken = formEnviarPDF.querySelector("[name=csrfmiddlewaretoken]").value;
-        const actionUrl = formEnviarPDF.getAttribute("action") || window.location.pathname;
+        const csrfToken = formSendWhatsappPDF.querySelector("[name=csrfmiddlewaretoken]").value;
+        const actionUrl = formSendWhatsappPDF.getAttribute("action") || window.location.pathname;
 
         try {
             const response = await fetch(actionUrl, {

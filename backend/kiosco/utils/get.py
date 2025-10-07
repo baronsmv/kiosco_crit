@@ -1,4 +1,5 @@
 import inspect
+import re
 from datetime import date
 from datetime import datetime
 from typing import Any, Callable, Dict, Optional, Tuple
@@ -129,7 +130,13 @@ def datos(
     }
 
 
-def pdf_url(nombre_objetos: str, nombre_sujeto: str) -> str:
-    return "_".join(filter(None, ("pdf", nombre_objetos, nombre_sujeto))).replace(
-        " ", "_"
-    )
+def pdf_url(*args, sep: str = "_") -> str:
+    return "_".join(filter(None, args)).replace(" ", sep)
+
+
+def whatsapp_payload(number: str, mensaje: str, filename: str) -> Dict:
+    return {
+        "number": "521" + re.sub(r"\D", "", number) + "@c.us",
+        "message": mensaje,
+        "image_path": f"media/pdfs/{filename}",
+    }

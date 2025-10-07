@@ -1,9 +1,7 @@
 function cerrarModal() {
     const modal = document.getElementById("modal");
     if (!modal) return;
-
     modal.classList.remove("show");
-
     setTimeout(() => {
         modal.classList.remove("visible");
 
@@ -64,7 +62,6 @@ function activarListenersModal(modal) {
 function mostrarErrorCampo(nombreCampo) {
     const grupo = document.getElementById(nombreCampo)?.closest(".input-group");
     if (!grupo) return;
-
     grupo.classList.add("error");
 }
 
@@ -84,9 +81,15 @@ function limpiarErrores() {
     }
 }
 
-function abrirVistaPrevia(tipo, id) {
-    const url = `/pdf/${tipo}/${id}/?abrir=1`;
+function abrirVistaPrevia() {
+    const url = `/preview/pdf/?abrir=1`;
     window.open(url, "_blank");
+}
+
+function mostrarFormularioEmail() {
+    const form = document.getElementById("send-email-pdf-form");
+    form.style.display = "block";
+    form.scrollIntoView({behavior: "smooth"});
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -218,7 +221,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalInicial = document.getElementById("modal");
     if (modalInicial) {
         activarListenersModal(modalInicial);
-
         setTimeout(() => {
             modalInicial.classList.add("show");
             modalInicial.focus();
