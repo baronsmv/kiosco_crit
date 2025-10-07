@@ -22,15 +22,17 @@ def campos(
     persona_sf: Dict[str, str],
     objetos_sf: List[Dict[str, Any]],
     campos: List[str],
-    persona: str,
-    identificador: str,
+    nombre_sujeto: str,
+    nombre_id: str,
 ) -> Dict[str, Dict[str, str] | Tuple[Tuple]]:
     logger.debug(f"Formateando datos finales. Campos: {campos}")
 
     resultado = {
         "persona": {
-            f"Nombre de {persona.capitalize()}": persona_sf.get("nombre", "").title(),
-            identificador.capitalize(): persona_sf.get("id", ""),
+            f"Nombre de {nombre_sujeto.capitalize()}": persona_sf.get(
+                "nombre", ""
+            ).title(),
+            nombre_id.capitalize(): persona_sf.get("id", ""),
         },
         "tabla": tuple(
             tuple(objeto.get(campo, "") for campo in campos) for objeto in objetos_sf

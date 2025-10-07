@@ -101,9 +101,9 @@ def form(
     config_data: Dict,
     reg_form: Form,
     RegModel: Type[Model],
-    exist_func: Optional[Callable],
+    exist_query: Optional[Callable],
+    data_query: Callable,
     get_func: Callable,
-    query_func: Callable,
     format_func: Callable,
     nombre_id: str = "",
     nombre_persona: str = "",
@@ -152,8 +152,8 @@ def form(
                 id=id,
                 fecha=fecha,
                 sql_campos=sql_campos,
-                exist_func=exist_func if has_id else None,
-                query_func=query_func,
+                exist_query=exist_query if has_id else None,
+                data_query=data_query,
             )
         except OperationalError as e:
             logger.error(f"Error de conexión a la base de datos: {e}")

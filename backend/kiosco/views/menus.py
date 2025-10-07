@@ -1,36 +1,19 @@
-from typing import Dict
-
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.urls import reverse_lazy
 
-from ..utils import config
+from ..utils import config, render
+from ..utils.logger import get_logger
 
-
-def _render_menu(request: HttpRequest, config: Dict[str, Dict]) -> HttpResponse:
-    menu_options = tuple(
-        (
-            reverse_lazy(key),
-            option.get("title", ""),
-            option.get("description", ""),
-        )
-        for key, option in config.get("options", {}).items()
-    )
-    return render(
-        request,
-        "kiosco/menu.html",
-        config.get("context", {})
-        | {"home_url": reverse_lazy("home"), "menu_options": menu_options},
-    )
+logger = get_logger(__name__)
 
 
 def home(request: HttpRequest) -> HttpResponse:
-    return _render_menu(request=request, config=config.cfg_home)
+    return render.menu(request=request, config=config.cfg_home)
 
 
 def paciente(request: HttpRequest) -> HttpResponse:
-    return _render_menu(request=request, config=config.cfg_menu_paciente)
+    return render.menu(request=request, config=config.cfg_menu_paciente)
 
 
 def colaborador(request: HttpRequest) -> HttpResponse:
-    return _render_menu(request=request, config=config.cfg_menu_colaborador)
+    return render.menu(request=request, config=config.cfg_menu_colaborador)

@@ -1,25 +1,10 @@
-from django.http import HttpRequest, HttpResponse, JsonResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse
 
-from ..utils import format, generate
+from ..utils import render
+from ..utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def pdf(request: HttpRequest) -> HttpResponse:
-    abrir = request.GET.get("abrir") == "1"
-    previous_context = request.session.get("context_data", {})
-
-    filename = generate.pdf(
-        format_func=format.campos,
-        previous_context=previous_context,
-        salida_a_color=False,
-    )
-    file_url = f"/media/pdfs/{filename}"
-
-    if abrir:
-        return HttpResponseRedirect(file_url)
-
-    iframe_html = f"""
-    <div style="height: 60vh; margin-top: 2rem; padding: 1rem;">
-        <iframe src="{file_url}" width="100%" height="100%" style="border: none; border-radius: 8px;"></iframe>
-    </div>
-    """
-    return JsonResponse({"html": iframe_html, "filename": filename})
+    return render.pdf(request=request)

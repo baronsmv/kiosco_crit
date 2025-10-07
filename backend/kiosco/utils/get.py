@@ -1,13 +1,47 @@
 import inspect
+from datetime import date
 from datetime import datetime
 from typing import Any, Callable, Dict, Optional, Tuple
 
+import requests
+from django.conf import settings
 from django.db import connections, OperationalError
 from django.http import HttpRequest
+from django.urls import reverse_lazy
 
 from .logger import get_logger
+from ..utils import map
 
 logger = get_logger(__name__)
+base_url = settings.WHATSAPP_API_BASE_URL
+
+
+def whatsapp_status(url: str = f"{base_url}/status") -> Dict:
+    try:
+        return requests.get(url).json()
+    except Exception:
+        return {"status": "desconocido", "connected": False}
+
+
+def initial_context(config_data: Dict) -> Dict:
+    web_data = config_data["web"]
+    context_data = web_data["context"]
+    home_url = reverse_lazy(context_data.pop("home_url", "home"))
+    fecha_inicial = date.today() if context_data.pop("fecha_inicial", False) else ""
+    return {
+        **context_data,
+        "home_url": home_url,
+        "fecha_inicial": fecha_inicial,
+        "whatsapp_status": whatsapp_status(),
+        "tabla_columnas": map.columns(web_data, sql_data=config_data["sql"]),
+        "id": "",
+        "persona": None,
+        "id_proporcionado": False,
+        "id_error": False,
+        "date_error": False,
+        "mensaje_error": "",
+        "error_target": "",
+    }
 
 
 def client_ip(request: HttpRequest) -> str:
@@ -24,7 +58,7 @@ def _eval_query(func: Callable, **kwargs) -> Tuple[str, Tuple[str, ...]]:
     return func(**{k: v for k, v in kwargs.items() if k in sig.parameters})
 
 
-def _obtener_filas(
+def _filas(
     id: Optional[str],
     fecha: Optional[datetime],
     exist_func: Callable,
@@ -61,14 +95,12 @@ def datos(
     id: Optional[str],
     fecha: Optional[datetime],
     sql_campos: Dict,
-    exist_func: Optional[Callable],
-    query_func: Callable,
+    exist_query: Optional[Callable],
+    data_query: Callable,
 ) -> Optional[Dict[str, Any]]:
     logger.info(f"Iniciando obtención de datos para ID: {id}")
 
-    filas = _obtener_filas(
-        id=id, fecha=fecha, exist_func=exist_func, query_func=query_func
-    )
+    filas = _filas(id=id, fecha=fecha, exist_func=exist_query, query_func=data_query)
     if not filas:
         logger.warning(f"No se encontraron datos para ID: {id}")
         return None
@@ -95,3 +127,9 @@ def datos(
         "persona_sf": persona or {},
         "objetos_sf": objetos_formateados,
     }
+
+
+def pdf_url(nombre_objetos: str, nombre_sujeto: str) -> str:
+    return "_".join(filter(None, ("pdf", nombre_objetos, nombre_sujeto))).replace(
+        " ", "_"
+    )
