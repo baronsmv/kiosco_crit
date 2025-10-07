@@ -1,4 +1,4 @@
-from typing import Type, Callable, Optional
+from typing import Type, Callable
 
 import requests
 from django.conf import settings
@@ -8,6 +8,7 @@ from django.core.validators import validate_email
 from django.db.models import Model
 from django.http import HttpRequest, JsonResponse
 
+from .. import models
 from ..utils import format, generate, get
 from ..utils.logger import get_logger
 
@@ -18,13 +19,15 @@ base_url = settings.WHATSAPP_API_BASE_URL
 
 def pdf_email(
     request: HttpRequest,
-    RegModel: Optional[Type[Model]] = None,
     format_func: Callable = format.campos,
+    RegModel: Type[Model] = models.EnvioEmail,
 ) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
     id = previous_context.get("id", "")
     nombre_persona = previous_context.get("nombre_persona", "")
+    nombre_objetos = previous_context.get("nombre_objetos", "")
     fecha_especificada = previous_context.get("fecha")
+    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_persona=nombre_persona)
 
     if request.method != "POST":
         logger.warning(f"Método no permitido: {request.method}")
@@ -45,6 +48,7 @@ def pdf_email(
     )
     subject = f"Datos del {nombre_persona}"
     body = "Adjuntamos el archivo solicitado en formato PDF."
+    mensaje = "\n".join((subject, body))
     pdf_path = f"media/pdfs/{filename}"
 
     try:
@@ -55,37 +59,45 @@ def pdf_email(
         logger.exception("Error enviando correo")
         if RegModel:
             RegModel.objects.create(
+                tipo=tipo,
                 **({"identificador": id} if id else {}),
-                email_destino=correo,
+                fecha_especificada=fecha_especificada,
+                ip_cliente=get.client_ip(request),
+                correo_destino=correo,
+                mensaje=mensaje,
                 archivo_pdf=pdf_path,
-                estado="fallido",
+                estado="Fallido",
                 detalle_error=str(e),
             )
         return JsonResponse({"error": str(e)}, status=500)
 
     if RegModel:
         RegModel.objects.create(
+            tipo=tipo,
             **({"identificador": id} if id else {}),
             fecha_especificada=fecha_especificada,
-            email_destino=correo,
-            archivo_pdf=pdf_path,
-            estado="enviado",
             ip_cliente=get.client_ip(request),
+            correo_destino=correo,
+            mensaje=mensaje,
+            archivo_pdf=pdf_path,
+            estado="Enviado",
         )
     return JsonResponse({"status": "enviado"})
 
 
 def pdf_whatsapp(
     request: HttpRequest,
-    RegModel: Optional[Type[Model]] = None,
     format_func: Callable = format.campos,
+    RegModel: Type[Model] = models.EnvioWhatsapp,
 ) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
     id = previous_context.get("id", "")
     persona = previous_context.get("persona", {})
     nombre_id = previous_context.get("nombre_id")
     nombre_persona = previous_context.get("nombre_persona")
+    nombre_objetos = previous_context.get("nombre_objetos", "")
     fecha_especificada = previous_context.get("fecha", None)
+    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_persona=nombre_persona)
 
     logger.debug(
         f"enviar_pdf_whatsapp called with method {request.method} and {nombre_id} {id}"
@@ -116,7 +128,7 @@ Nombre: {persona['Nombre']}
         response_data = response.json()
         logger.debug(f"Respuesta del microservicio: {response_data}")
 
-        estado = "enviado" if response.status_code == 200 else "fallido"
+        estado = "Enviado" if response.status_code == 200 else "Fallido"
         detalle_error = (
             None
             if estado == "enviado"
@@ -125,17 +137,18 @@ Nombre: {persona['Nombre']}
 
         if RegModel:
             RegModel.objects.create(
+                tipo=tipo,
                 **({"identificador": id} if id else {}),
                 fecha_especificada=fecha_especificada,
+                ip_cliente=get.client_ip(request),
                 numero_destino=numero,
                 mensaje=mensaje,
                 archivo_pdf=payload["image_path"],
                 estado=estado,
                 detalle_error=detalle_error,
-                ip_cliente=get.client_ip(request),
             )
 
-        if estado == "enviado":
+        if estado == "Enviado":
             logger.info("Mensaje enviado correctamente")
             return JsonResponse({"status": "enviado", "detalles": response_data})
         else:
@@ -149,11 +162,14 @@ Nombre: {persona['Nombre']}
 
         if RegModel:
             RegModel.objects.create(
+                tipo=tipo,
                 **({"identificador": id} if id else {}),
+                fecha_especificada=fecha_especificada,
+                ip_cliente=get.client_ip(request),
                 numero_destino=numero,
                 mensaje=mensaje,
                 archivo_pdf=payload["image_path"],
-                estado="fallido",
+                estado="Fallido",
                 detalle_error=str(e),
             )
 

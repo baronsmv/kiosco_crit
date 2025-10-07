@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import path
 
-from .views import admin, menus, previews, search, send_email, send_whatsapp
+from .views import admin, menus, previews, search, send
 
 
 def is_staff(user):
@@ -15,19 +15,19 @@ urlpatterns = [
         name="admin_whatsapp",
     ),
     path(
-        route="preview/pdf",
+        route="preview/pdf/",
         view=previews.pdf,
         name="preview_pdf",
     ),
     path(
-        route="paciente/citas/send/whatsapp/pdf/",
-        view=send_whatsapp.pdf_citas_paciente,
-        name="send_email_pdf_citas_paciente",
+        route="send/whatsapp/pdf/",
+        view=send.whatsapp_pdf,
+        name="send_whatsapp_pdf",
     ),
     path(
-        route="paciente/citas/send/email/pdf/",
-        view=send_email.pdf_citas_paciente,
-        name="send_email_pdf_citas_paciente",
+        route="send/email/pdf/",
+        view=send.email_pdf,
+        name="send_email_pdf",
     ),
     path(
         route="paciente/citas/",
@@ -35,29 +35,9 @@ urlpatterns = [
         name="buscar_citas_paciente",
     ),
     path(
-        route="colaborador/espacios/disponibles/send/whatsapp/pdf/",
-        view=send_whatsapp.pdf_espacios_disponibles,
-        name="send_whatsapp_pdf_espacios_disponibles",
-    ),
-    path(
-        route="colaborador/espacios/disponibles/send/email/pdf/",
-        view=send_email.pdf_espacios_disponibles,
-        name="send_email_pdf_espacios_disponibles",
-    ),
-    path(
         route="colaborador/espacios/disponibles/",
         view=search.espacios_disponibles,
         name="buscar_espacios_disponibles",
-    ),
-    path(
-        route="colaborador/citas/send/whatsapp/pdf/",
-        view=send_whatsapp.pdf_citas_colaborador,
-        name="send_whatsapp_pdf_citas_colaborador",
-    ),
-    path(
-        route="colaborador/citas/send/email/pdf/",
-        view=send_email.pdf_citas_colaborador,
-        name="send_email_pdf_citas_colaborador",
     ),
     path(
         route="colaborador/citas/",

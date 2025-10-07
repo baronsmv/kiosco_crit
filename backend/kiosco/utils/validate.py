@@ -30,6 +30,7 @@ def _valid_id(
     RegModel: Optional[Type[Model]],
     reg_form: Form,
     ip_cliente: str,
+    tipo: str,
 ) -> bool:
     try:
         _check_id_pattern(
@@ -49,10 +50,11 @@ def _valid_id(
         logger.warning(f"Error de validación en ID: {e}")
         if RegModel:
             RegModel.objects.create(
+                tipo=tipo,
                 identificador=id,
                 fecha_especificada=fecha,
                 ip_cliente=ip_cliente,
-                estado="invalido",
+                estado="ID no válido",
             )
         return False
 
@@ -124,6 +126,8 @@ def form(
     web_campos = web_data.get("campos", {})
     sql_campos = sql_data.get("campos", {})
 
+    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_persona=nombre_persona)
+
     if reg_form.is_valid():
         id = reg_form.cleaned_data["id"] if has_id else None
         fecha = reg_form.cleaned_data["fecha"] if has_fecha else None
@@ -136,6 +140,7 @@ def form(
             RegModel=RegModel,
             reg_form=reg_form,
             ip_cliente=ip_cliente,
+            tipo=tipo,
         ):
             return
 
@@ -160,10 +165,11 @@ def form(
             logger.error(f"Error de conexión a la base de datos: {e}")
             if RegModel:
                 RegModel.objects.create(
+                    tipo=tipo,
                     **({"identificador": id} if has_id else {}),
                     fecha_especificada=fecha,
                     ip_cliente=ip_cliente,
-                    estado="error_conexion",
+                    estado="Error de conexión",
                 )
             context.update(
                 {
@@ -176,11 +182,11 @@ def form(
             return
 
         if not resultado:
-            estado = "inexistente"
+            estado = "ID Inexistente"
         elif not resultado.get("objetos_sf"):
-            estado = "no tiene citas"
+            estado = f"Sin {nombre_objetos.lower()}"
         else:
-            estado = "exitoso"
+            estado = "Exitoso"
 
         formatted = (
             format_func(
@@ -222,6 +228,7 @@ def form(
 
         if RegModel:
             RegModel.objects.create(
+                tipo=tipo,
                 **({"identificador": id} if has_id else {}),
                 fecha_especificada=fecha,
                 ip_cliente=ip_cliente,

@@ -45,6 +45,13 @@ def initial_context(config_data: Dict) -> Dict:
     }
 
 
+def model_type(nombre_objetos: str, nombre_persona: str) -> str:
+    tipo = nombre_objetos.title()
+    if nombre_persona:
+        tipo += f" de {nombre_persona.title()}"
+    return tipo
+
+
 def client_ip(request: HttpRequest) -> str:
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:

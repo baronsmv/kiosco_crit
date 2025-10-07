@@ -1,7 +1,7 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
-from .. import models, forms, queries
+from .. import forms, queries
 from ..utils import config, render
 from ..utils.logger import get_logger
 
@@ -12,7 +12,6 @@ def citas_paciente(request: HttpRequest) -> HttpResponse:
     return render.search(
         request=request,
         config_data=config.cfg_citas_paciente,
-        RegModel=models.consultas.CitasPaciente,
         RegForm=forms.BuscarIdFechaForm,
         exist_query=queries.exist.paciente,
         data_query=queries.data.citas_paciente,
@@ -26,7 +25,6 @@ def citas_colaborador(request: HttpRequest) -> HttpResponse:
     return render.search(
         request=request,
         config_data=config.cfg_citas_colaborador,
-        RegModel=models.consultas.CitasColaborador,
         RegForm=forms.BuscarIdFechaForm,
         exist_query=queries.exist.colaborador,
         data_query=queries.data.citas_colaborador,
@@ -40,7 +38,6 @@ def espacios_disponibles(request: HttpRequest) -> HttpResponse:
     return render.search(
         request=request,
         config_data=config.cfg_espacios_disponibles,
-        RegModel=models.consultas.EspaciosVacios,
         RegForm=forms.BuscarFechaForm,
         data_query=queries.data.espacios_disponibles,
         nombre_objetos="espacios disponibles",

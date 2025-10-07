@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 
+from .. import models
 from ..utils import format, generate, get, validate
 from ..utils.logger import get_logger
 
@@ -51,7 +52,7 @@ def search(
     RegForm: Type[Form],
     data_query: Callable,
     nombre_objetos: str,
-    RegModel: Optional[Type[Model]] = None,
+    RegModel: Optional[Type[Model]] = models.Consulta,
     get_func: Callable = get.datos,
     format_func: Callable = format.campos,
     nombre_id: Optional[str] = None,
