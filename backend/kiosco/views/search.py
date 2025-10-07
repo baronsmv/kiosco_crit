@@ -12,7 +12,7 @@ def citas_paciente(request: HttpRequest) -> HttpResponse:
     return render.search(
         request=request,
         config_data=config.cfg_citas_paciente,
-        RegModel=models.consultas.CitasCarnet,
+        RegModel=models.consultas.CitasPaciente,
         RegForm=forms.BuscarIdFechaForm,
         exist_query=queries.exist.paciente,
         data_query=queries.data.citas_paciente,

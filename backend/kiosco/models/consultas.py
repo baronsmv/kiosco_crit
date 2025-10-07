@@ -1,7 +1,7 @@
 from . import base
 
 
-class CitasCarnet(base.ConsultaIdFecha):
+class CitasPaciente(base.ConsultaIdFecha):
     @property
     def carnet(self):
         return self.identificador
