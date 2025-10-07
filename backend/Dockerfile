@@ -1,7 +1,8 @@
 FROM python:3.11-slim
 
 # Variables regionales
-ENV LANG=es_MX.UTF-8 \
+ENV PYTHONPATH=/app \
+    LANG=es_MX.UTF-8 \
     LANGUAGE=es_MX:es \
     LC_ALL=es_MX.UTF-8
 

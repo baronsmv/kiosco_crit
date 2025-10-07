@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from .. import models
@@ -35,12 +36,13 @@ class CitasCarnetConsultaTests(TestCase):
 
     def test_estado_choices(self):
         # Probar que no permite un estado inválido
-        with self.assertRaises(Exception):
-            models.consultas.CitasPaciente.objects.create(
-                identificador=self.identificador,
-                fecha_especificada=self.fecha,
-                estado="invalido_foo",  # fuera de choices
-            )
+        obj = models.consultas.CitasPaciente(
+            identificador=self.identificador,
+            fecha_especificada=self.fecha,
+            estado="invalido_123",
+        )
+        with self.assertRaises(ValidationError):
+            obj.full_clean()
 
     def test_ip_cliente_optional(self):
         # No deberíamos necesitar pasar ip_cliente porque es nullable
