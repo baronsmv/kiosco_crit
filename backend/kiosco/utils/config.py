@@ -142,7 +142,8 @@ default_config: Dict = {
                     "date_required": False,
                     "button_label": "Buscar",
                     "processing_message": "Procesando...",
-                    "data_title": "Datos del Paciente",
+                    "modal_title": "Ficha del Paciente",
+                    "data_title": "",
                     "table_title": "Citas",
                     "number_label": "Número telefónico:",
                     "preview_label": "Vista previa e impresión",
@@ -167,7 +168,7 @@ default_config: Dict = {
                 "context": {
                     "title": "Ficha del Paciente",
                     "header": "Ficha del Paciente",
-                    "data_title": "Datos Personales",
+                    "data_title": "",
                     "table_title": "Citas",
                     "footer": "Fundación Teletón México A.C.",
                 },
@@ -195,8 +196,8 @@ default_config: Dict = {
                     "estatus_cita",
                 ],
                 "context": {
-                    "title": "Citas por Colaborador",
-                    "header": "Citas por Colaborador",
+                    "title": "Agenda del Colaborador",
+                    "header": "Agenda del Colaborador",
                     "id_label": "Nombre de Usuario:",
                     "id_placeholder": "Ej: miguel.moedano",
                     "id_required": True,
@@ -205,8 +206,9 @@ default_config: Dict = {
                     "date_required": False,
                     "button_label": "Buscar",
                     "processing_message": "Procesando...",
-                    "data_title": "Datos del Colaborador",
-                    "table_title": "Citas del Día",
+                    "modal_title": "Agenda del Colaborador",
+                    "data_title": "",
+                    "table_title": "Citas",
                     "number_label": "Número telefónico:",
                     "preview_label": "Vista previa e impresión",
                     "send_button_label": "📤 Enviar por WhatsApp",
@@ -232,8 +234,8 @@ default_config: Dict = {
                 "context": {
                     "title": "Agenda del Colaborador",
                     "header": "Agenda del Colaborador",
-                    "data_title": "Datos del Colaborador",
-                    "table_title": "Citas del Día",
+                    "data_title": "",
+                    "table_title": "Citas",
                     "footer": "Fundación Teletón México A.C.",
                 },
             },
@@ -248,7 +250,7 @@ default_config: Dict = {
                 ],
             },
         },
-        "espacios": {
+        "espacios disponibles": {
             "web": {
                 "campos": [
                     "nombre_servicio",
@@ -264,8 +266,9 @@ default_config: Dict = {
                     "date_required": True,
                     "button_label": "Buscar",
                     "processing_message": "Procesando...",
-                    "data_title": "Espacios Disponibles",
-                    "table_title": "Espacios Disponibles",
+                    "modal_title": "Espacios Disponibles",
+                    "data_title": "",
+                    "table_title": "",
                     "number_label": "Número telefónico:",
                     "preview_label": "Vista previa e impresión",
                     "send_button_label": "📤 Enviar por WhatsApp",
@@ -288,8 +291,8 @@ default_config: Dict = {
                 "context": {
                     "title": "Espacios Disponibles",
                     "header": "Espacios Disponibles",
-                    "data_title": "Espacios Disponibles",
-                    "table_title": "Espacios Disponibles",
+                    "data_title": "",
+                    "table_title": "",
                     "footer": "Fundación Teletón México A.C.",
                 },
             },
@@ -342,4 +345,4 @@ cfg_citas_paciente = parse_campos(cfg_paciente.get("citas", {}))
 
 cfg_colaborador = config.get("colaborador", {})
 cfg_citas_colaborador = parse_campos(cfg_colaborador.get("citas", {}))
-cfg_espacios_disponibles = parse_campos(cfg_colaborador.get("espacios", {}))
+cfg_espacios_disponibles = parse_campos(cfg_colaborador.get("espacios disponibles", {}))

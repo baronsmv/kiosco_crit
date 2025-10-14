@@ -7,7 +7,6 @@ from django.db.models import Model
 from django.db.utils import OperationalError
 from django.forms.forms import Form
 from django.http import HttpRequest
-from django.urls import reverse_lazy
 
 from . import get
 from .logger import get_logger
@@ -65,7 +64,7 @@ def _add_result(
     fecha: Optional,
     success_dict: Dict,
     nombre_id: str,
-    nombre_persona: str,
+    nombre_sujeto: str,
     nombre_objetos: str,
 ) -> None:
     if not resultado:
@@ -73,10 +72,10 @@ def _add_result(
             {
                 "id_error": True,
                 "error_target": "id",
-                "mensaje_error": f"❌ No se encontró ningún {nombre_persona} con ese {nombre_id}.",
+                "mensaje_error": f"❌ No se encontró ningún {nombre_sujeto} con ese {nombre_id}.",
             }
         )
-        logger.warning(f"ID inválido: {nombre_id} - No se encontró {nombre_persona}")
+        logger.warning(f"ID inválido: {nombre_id} - No se encontró {nombre_sujeto}")
 
     elif not resultado.get(f"objetos_sf"):
         error_context = {
@@ -94,7 +93,7 @@ def _add_result(
     else:
         context.update(**success_dict, **resultado)
         logger.info(
-            f"{len(resultado.get('objetos_sf', []))} {nombre_objetos} encontrados para {nombre_persona} con ID {nombre_id}"
+            f"{len(resultado.get('objetos_sf', []))} {nombre_objetos} encontrados para {nombre_sujeto} con ID {nombre_id}"
         )
 
 
@@ -108,9 +107,8 @@ def form(
     data_query: Callable,
     get_func: Callable,
     format_func: Callable,
-    urls: Dict,
     nombre_id: str = "",
-    nombre_persona: str = "",
+    nombre_sujeto: str = "",
     nombre_objetos: str = "",
 ) -> None:
     form_fields = reg_form.fields.keys()
@@ -126,7 +124,7 @@ def form(
     web_campos = web_data.get("campos", {})
     sql_campos = sql_data.get("campos", {})
 
-    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_persona=nombre_persona)
+    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
 
     if reg_form.is_valid():
         id = reg_form.cleaned_data["id"] if has_id else None
@@ -149,7 +147,6 @@ def form(
                 "id": id or "",
                 "id_proporcionado": bool(id),
                 "fecha": fecha,
-                **{name: reverse_lazy(url) for name, url in urls.items()},
             }
         )
 
@@ -192,7 +189,7 @@ def form(
             format_func(
                 **resultado,
                 campos=web_campos,
-                nombre_persona=nombre_persona,
+                nombre_sujeto=nombre_sujeto,
                 nombre_id=nombre_id,
             )
             if resultado
@@ -205,13 +202,13 @@ def form(
             fecha=fecha,
             success_dict=formatted,
             nombre_id=nombre_id,
-            nombre_persona=nombre_persona,
+            nombre_sujeto=nombre_sujeto,
             nombre_objetos=nombre_objetos,
         )
 
         fecha_context = context.get("fecha")
         request.session["context_data"] = {
-            "persona_sf": context.get("persona_sf"),
+            "sujeto_sf": context.get("sujeto_sf"),
             "objetos_sf": context.get("objetos_sf"),
             "id": id or "",
             "fecha": (
@@ -220,7 +217,7 @@ def form(
                 else fecha_context
             ),
             "nombre_objetos": nombre_objetos,
-            "nombre_persona": nombre_persona,
+            "nombre_sujeto": nombre_sujeto,
             "nombre_id": nombre_id,
             "pdf_data": pdf_data,
             "sql_data": sql_data,

@@ -19,7 +19,7 @@ def campo(dato: str, formatear: Optional[str] = None) -> str:
 
 
 def campos(
-    persona_sf: Dict[str, str],
+    sujeto_sf: Dict[str, str],
     objetos_sf: List[Dict[str, Any]],
     campos: List[str],
     nombre_sujeto: str,
@@ -28,14 +28,23 @@ def campos(
     logger.debug(f"Formateando datos finales. Campos: {campos}")
 
     resultado = {
-        "persona": {
-            f"Nombre de {nombre_sujeto.capitalize()}": persona_sf.get(
-                "nombre", ""
-            ).title(),
-            nombre_id.capitalize(): persona_sf.get("id", ""),
-        },
-        "tabla": tuple(
-            tuple(objeto.get(campo, "") for campo in campos) for objeto in objetos_sf
+        "sujeto": (
+            {
+                f"Nombre de {nombre_sujeto.capitalize()}": sujeto_sf.get(
+                    "nombre", ""
+                ).title(),
+                nombre_id.capitalize(): sujeto_sf.get("id", ""),
+            }
+            if sujeto_sf
+            else None
+        ),
+        "tabla": (
+            tuple(
+                tuple(objeto.get(campo, "") for campo in campos)
+                for objeto in objetos_sf
+            )
+            if objetos_sf
+            else None
         ),
     }
 

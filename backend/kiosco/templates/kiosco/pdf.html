@@ -7,15 +7,22 @@
     <link href="{% static 'kiosco/css/pdf.css' %}" rel="stylesheet"/>
 </head>
 <body>
+
+{% if header %}
 <header>
     <h1 id="titulo-principal">{{ header }}</h1>
 </header>
+{% endif %}
 
 <main>
+    {% if sujeto %}
     <section aria-labelledby="data-title" class="info">
+        {% if data_title %}
         <h2 class="section-title" id="data-title">{{ data_title }}</h2>
+        {% endif %}
+
         <dl>
-            {% for titulo, valor in persona.items %}
+            {% for titulo, valor in sujeto.items %}
             <div class="dato">
                 <dt>{{ titulo }}</dt>
                 <dd>{{ valor }}</dd>
@@ -23,10 +30,15 @@
             {% endfor %}
         </dl>
     </section>
+    {% endif %}
 
     {% if tabla %}
     <section aria-labelledby="tabla-titulo" class="tabla-seccion">
+
+        {% if table_title %}
         <h2 class="section-title" id="tabla-titulo">{{ table_title }}</h2>
+        {% endif %}
+
         <div aria-label="{{ table_title }}" class="tabla-scrollable" role="region">
             <table summary="Tabla de {{ table_title }}">
                 <thead>
@@ -47,12 +59,16 @@
                 </tbody>
             </table>
         </div>
+
     </section>
     {% endif %}
 </main>
 
+{% if footer %}
 <footer>
     <p class="footer-text">{{ footer }}</p>
 </footer>
+{% endif %}
+
 </body>
 </html>

@@ -106,9 +106,9 @@ def espacios_disponibles(fecha: datetime) -> Tuple[str, Tuple[str, ...]]:
         INNER JOIN SCRITS2.C_USUARIO cu
         ON kc.FL_USUARIO = cu.FL_USUARIO
         WHERE kc.NO_DISPONIBLES > 0
-        AND cs.NB_SERVICIO NOT LIKE '%dummy%'
-        AND cs.NB_SERVICIO NOT LIKE '%análisis%'
-        AND cs.NB_SERVICIO NOT LIKE '%EEG%'
+        AND cs.NB_SERVICIO NOT LIKE '%%dummy%%'
+        AND cs.NB_SERVICIO NOT LIKE '%%análisis%%'
+        AND cs.NB_SERVICIO NOT LIKE '%%EEG%%'
         AND kc.FG_BLOQUEADA = 0
     """
     return _parse_query(

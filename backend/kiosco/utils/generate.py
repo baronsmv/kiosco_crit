@@ -7,22 +7,22 @@ from django.contrib.staticfiles import finders
 from django.template.loader import render_to_string
 from weasyprint import HTML
 
-from . import map
+from . import format, map
 from .logger import get_logger
 
 logger = get_logger(__name__)
 
 
 def pdf(
-    format_func: Callable,
     previous_context: Dict,
+    format_func: Callable = format.campos,
     salida_a_color: bool = False,
 ) -> str:
     id = previous_context.get("id", "")
     pdf_data = previous_context.get("pdf_data")
     sql_data = previous_context.get("sql_data")
     nombre_id = previous_context.get("nombre_id")
-    nombre_persona = previous_context.get("nombre_persona")
+    nombre_sujeto = previous_context.get("nombre_sujeto")
     nombre_objetos = previous_context.get("nombre_objetos")
 
     output_dir = os.path.join(settings.MEDIA_ROOT, "pdfs")
@@ -38,10 +38,11 @@ def pdf(
 
     try:
         formatted_context = format_func(
-            **previous_context,
+            sujeto_sf=previous_context.get("sujeto_sf"),
+            objetos_sf=previous_context.get("objetos_sf"),
             campos=pdf_data.get("campos", ()),
-            persona=nombre_persona,
-            identificador=nombre_id,
+            nombre_sujeto=nombre_sujeto,
+            nombre_id=nombre_id,
         )
         previous_context.update(formatted_context)
     except Exception:
@@ -68,7 +69,7 @@ def pdf(
         "_".join(
             filter(
                 None,
-                (nombre_objetos, nombre_persona, id, fecha_especificada, content_hash),
+                (nombre_objetos, nombre_sujeto, id, fecha_especificada, content_hash),
             )
         )
         + ".pdf"

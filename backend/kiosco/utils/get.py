@@ -11,7 +11,7 @@ from django.http import HttpRequest
 from django.urls import reverse_lazy
 
 from .logger import get_logger
-from ..utils import map
+from ..utils import format, map
 
 logger = get_logger(__name__)
 base_url = settings.WHATSAPP_API_BASE_URL
@@ -36,7 +36,8 @@ def initial_context(config_data: Dict) -> Dict:
         "whatsapp_status": whatsapp_status(),
         "tabla_columnas": map.columns(web_data, sql_data=config_data["sql"]),
         "id": "",
-        "persona": None,
+        "sujeto": None,
+        "tabla": (),
         "id_proporcionado": False,
         "id_error": False,
         "date_error": False,
@@ -45,10 +46,10 @@ def initial_context(config_data: Dict) -> Dict:
     }
 
 
-def model_type(nombre_objetos: str, nombre_persona: str) -> str:
+def model_type(nombre_objetos: str, nombre_sujeto: str) -> str:
     tipo = nombre_objetos.title()
-    if nombre_persona:
-        tipo += f" de {nombre_persona.title()}"
+    if nombre_sujeto:
+        tipo += f" de {nombre_sujeto.title()}"
     return tipo
 
 
@@ -80,9 +81,9 @@ def _filas(
     query, params = _eval_query(query_func, id=id, fecha=fecha)
     try:
         with connections[db_name].cursor() as cursor:
-            persona = exist_func(id, cursor) if exist_func else None
-            if exist_func and not persona:
-                logger.warning(f"No se encontró persona con ID: '{id}'.")
+            sujeto = exist_func(id, cursor) if exist_func else None
+            if exist_func and not sujeto:
+                logger.warning(f"No se encontró sujeto con ID: '{id}'.")
                 return None
             logger.debug(
                 f"Ejecutando consulta: '{query}',\ncon parámetros: '{params}'."
@@ -90,7 +91,7 @@ def _filas(
             cursor.execute(query, params)
             resultados = cursor.fetchall()
         logger.info(f"Se encontraron {len(resultados)} filas para ID: '{id}'")
-        return persona, resultados
+        return sujeto, resultados
     except OperationalError as e:
         logger.error(f"Error al obtener filas para ID: '{id}': {e}")
         raise
@@ -113,18 +114,18 @@ def datos(
         logger.warning(f"No se encontraron datos para ID: {id}")
         return None
 
-    persona, objetos = filas
+    sujeto, objetos = filas
 
-    if persona:
+    if sujeto:
         logger.debug(
-            f"Procesando {len(objetos)} objetos para: {persona.get('nombre', 'Desconocido')}"
+            f"Procesando {len(objetos)} objetos para: {sujeto.get('nombre', 'Desconocido')}"
         )
     else:
-        logger.debug(f"Procesando {len(objetos)} objetos sin persona asociada")
+        logger.debug(f"Procesando {len(objetos)} objetos sin sujeto asociado.")
 
     objetos_formateados = tuple(
         {
-            campo: campo(cita[i], sql_campos[campo].get("formatear"))
+            campo: format.campo(cita[i], sql_campos[campo].get("formatear"))
             for i, campo in enumerate(sql_campos.keys())
         }
         for cita in objetos
@@ -132,13 +133,9 @@ def datos(
     logger.info("Datos procesados correctamente.")
 
     return {
-        "persona_sf": persona or {},
+        "sujeto_sf": sujeto or {},
         "objetos_sf": objetos_formateados,
     }
-
-
-def pdf_url(*args, sep: str = "_") -> str:
-    return "_".join(filter(None, args)).replace(" ", sep)
 
 
 def whatsapp_payload(number: str, mensaje: str, filename: str) -> Dict:

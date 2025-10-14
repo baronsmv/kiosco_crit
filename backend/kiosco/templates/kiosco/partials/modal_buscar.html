@@ -10,16 +10,31 @@
 >
     <div class="modal-content">
         <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal()">×</button>
-        <h2 id="modal-title">{{ data_title }}</h2>
 
-        {% for titulo, valor in persona.items %}
+        {% if modal_title %}
+        <h2 id="modal-title">{{ modal_title }}</h2>
+        {% endif %}
+
+        {% if sujeto %}
+
+        {% if data_title %}
+        <h3 id="data-title">{{ data_title }}</h3>
+        {% endif %}
+
+        {% for titulo, valor in sujeto.items %}
         <div class="dato">
             <span>{{ titulo }}:</span> {{ valor }}
         </div>
         {% endfor %}
 
+        {% endif %}
+
         <div class="dato">
+
+            {% if table_title %}
             <h3>{{ table_title }}</h3>
+            {% endif %}
+
             <div class="tabla-scrollable">
                 <table>
                     <thead>
@@ -66,7 +81,7 @@
         {% endif %}
 
         <form
-                action="{{ send_email_pdf_url }}"
+                action="{% url 'send_email_pdf' %}"
                 id="send-email-pdf-form"
                 method="POST"
                 style="display: none; margin-top: 1em;"
@@ -86,9 +101,8 @@
                 </button>
             </div>
         </form>
-        {% endif %}
 
-        <form action="{{ send_whatsapp_pdf_url }}" id="form-send-whatsapp-pdf" method="POST">
+        <form action="{% url 'send_whatsapp_pdf' %}" id="form-send-whatsapp-pdf" method="POST">
             {% csrf_token %}
             <div class="input-button-row">
                 <label class="btn-whatsapp-label" for="numero-whatsapp">{{ number_label }}</label>

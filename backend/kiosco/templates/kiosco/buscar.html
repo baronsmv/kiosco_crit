@@ -66,7 +66,7 @@
 
     <!-- Respuesta AJAX (fallback) -->
     <div id="respuesta-ajax">
-        {% if not persona and id_proporcionado %}
+        {% if not estado_inicial and not tabla %}
         {% include 'kiosco/partials/mensaje_error.html' %}
         {% endif %}
     </div>
@@ -78,8 +78,8 @@
     <div>{{ processing_message|default:"Procesando..." }}</div>
 </div>
 
-<!-- Modal de persona si hay resultados -->
-{% if persona and id %}
+<!-- Modal si hay resultados -->
+{% if tabla %}
 {% include 'kiosco/partials/modal_buscar.html' %}
 {% endif %}
 

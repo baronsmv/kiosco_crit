@@ -39,7 +39,7 @@ def ajax(
 ) -> Optional[HttpResponse]:
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         template = "kiosco/partials/"
-        template += partial_filename if context["persona"] else partial_error
+        template += partial_filename if context["tabla"] else partial_error
         logger.debug(f"Renderizando plantilla parcial: {template}")
         html = render_to_string(template, context, request=request)
         return HttpResponse(html)
@@ -58,22 +58,11 @@ def search(
     nombre_id: Optional[str] = None,
     nombre_sujeto: Optional[str] = None,
     exist_query: Optional[Callable] = None,
-    urls: Optional[Dict] = None,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
 
     context = get.initial_context(config_data)
-    urls = urls or {
-        f"send_{client}_{format}_url": get.pdf_url(
-            nombre_objetos, nombre_sujeto, "send", client, format
-        )
-        for format in ("pdf",)
-        for client in (
-            "email",
-            "whatsapp",
-        )
-    }
 
     if request.method == "POST":
         validate.form(
@@ -86,11 +75,11 @@ def search(
             data_query=data_query,
             get_func=get_func,
             format_func=format_func,
-            urls=urls,
             nombre_id=nombre_id,
-            nombre_persona=nombre_sujeto,
+            nombre_sujeto=nombre_sujeto,
             nombre_objetos=nombre_objetos,
         )
+        print(context, flush=True)
 
         if respuesta_ajax := ajax(
             request=request,
@@ -100,7 +89,7 @@ def search(
             logger.debug("Respuesta AJAX enviada")
             return respuesta_ajax
 
-    logger.debug("Renderizando vista completa con contexto inicial")
+    logger.debug("Renderizando vista completa con contexto inicial.")
     return render(request, f"kiosco/buscar.html", context)
 
 
@@ -109,8 +98,8 @@ def pdf(request: HttpRequest) -> HttpResponse:
     previous_context = request.session.get("context_data", {})
 
     filename = generate.pdf(
-        format_func=format.campos,
         previous_context=previous_context,
+        format_func=format.campos,
         salida_a_color=False,
     )
     file_url = f"/media/pdfs/{filename}"

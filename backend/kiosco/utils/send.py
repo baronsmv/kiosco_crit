@@ -24,10 +24,10 @@ def pdf_email(
 ) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
     id = previous_context.get("id", "")
-    nombre_persona = previous_context.get("nombre_persona", "")
+    nombre_sujeto = previous_context.get("nombre_sujeto", "")
     nombre_objetos = previous_context.get("nombre_objetos", "")
     fecha_especificada = previous_context.get("fecha")
-    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_persona=nombre_persona)
+    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
 
     if request.method != "POST":
         logger.warning(f"Método no permitido: {request.method}")
@@ -42,11 +42,11 @@ def pdf_email(
         return JsonResponse({"error": "Email inválido"}, status=400)
 
     filename = generate.pdf(
-        format_func=format_func,
         previous_context=previous_context,
+        format_func=format_func,
         salida_a_color=True,
     )
-    subject = f"Datos del {nombre_persona}"
+    subject = f"Datos del {nombre_sujeto}"
     body = "Adjuntamos el archivo solicitado en formato PDF."
     mensaje = "\n".join((subject, body))
     pdf_path = f"media/pdfs/{filename}"
@@ -92,12 +92,12 @@ def pdf_whatsapp(
 ) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
     id = previous_context.get("id", "")
-    persona = previous_context.get("persona", {})
+    sujeto = previous_context.get("sujeto", {})
     nombre_id = previous_context.get("nombre_id")
-    nombre_persona = previous_context.get("nombre_persona")
+    nombre_sujeto = previous_context.get("nombre_sujeto")
     nombre_objetos = previous_context.get("nombre_objetos", "")
     fecha_especificada = previous_context.get("fecha", None)
-    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_persona=nombre_persona)
+    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
 
     logger.debug(
         f"enviar_pdf_whatsapp called with method {request.method} and {nombre_id} {id}"
@@ -114,13 +114,13 @@ def pdf_whatsapp(
         return JsonResponse({"error": "Número de WhatsApp requerido"}, status=400)
 
     filename = generate.pdf(
-        format_func=format_func,
         previous_context=previous_context,
+        format_func=format_func,
         salida_a_color=True,
     )
-    mensaje = f"""Datos del {nombre_persona}:
-Nombre: {persona['Nombre']}
-{nombre_id.title()}: {persona[nombre_id.title()]}"""
+    mensaje = f"""Datos del {nombre_sujeto}:
+Nombre: {sujeto['Nombre']}
+{nombre_id.title()}: {sujeto[nombre_id.title()]}"""
     payload = get.whatsapp_payload(number=numero, mensaje=mensaje, filename=filename)
 
     try:
