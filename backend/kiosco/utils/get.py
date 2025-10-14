@@ -27,8 +27,10 @@ def whatsapp_status(url: str = f"{base_url}/status") -> Dict:
 def initial_context(config_data: Dict) -> Dict:
     web_data = config_data["web"]
     context_data = web_data["context"]
-    home_url = reverse_lazy(context_data.pop("home_url", "home"))
-    fecha_inicial = date.today() if context_data.pop("fecha_inicial", False) else ""
+
+    home_url = reverse_lazy(context_data.get("home_url", "home"))
+    fecha_inicial = date.today() if context_data.get("fecha_inicial", False) else ""
+
     return {
         **context_data,
         "home_url": home_url,
@@ -67,7 +69,7 @@ def _eval_query(func: Callable, **kwargs) -> Tuple[str, Tuple[str, ...]]:
     return func(**{k: v for k, v in kwargs.items() if k in sig.parameters})
 
 
-def _filas(
+def _get_filas(
     id: Optional[str],
     fecha: Optional[datetime],
     exist_func: Callable,
@@ -109,7 +111,9 @@ def datos(
 ) -> Optional[Dict[str, Any]]:
     logger.info(f"Iniciando obtención de datos para ID: {id}")
 
-    filas = _filas(id=id, fecha=fecha, exist_func=exist_query, query_func=data_query)
+    filas = _get_filas(
+        id=id, fecha=fecha, exist_func=exist_query, query_func=data_query
+    )
     if not filas:
         logger.warning(f"No se encontraron datos para ID: {id}")
         return None

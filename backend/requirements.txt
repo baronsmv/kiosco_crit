@@ -1,4 +1,5 @@
 django
+django-xff
 djangorestframework
 gunicorn
 mssql-django

@@ -105,11 +105,11 @@ default_config: Dict = {
                     "sql": "cec.NB_ESTATUS_CITA",
                 },
                 "espacios_disponibles": {
-                    "nombre": "Espacios disponibles",
+                    "nombre": "Disponibles",
                     "sql": "kc.NO_DISPONIBLES",
                 },
                 "duracion_servicio": {
-                    "nombre": "Duración de servicio",
+                    "nombre": "Duración",
                     "sql": "CONCAT(kc.NO_DURACION,' min')",
                 },
             },
@@ -125,12 +125,6 @@ default_config: Dict = {
                     "clinica",
                     "estatus_cita",
                 ],
-                "filtros": {
-                    "kpc.CL_ESTATUS_CITA": {
-                        "con_fecha": ["A", "N"],
-                        "sin_fecha": ["A"],
-                    },
-                },
                 "context": {
                     "title": "Búsqueda de citas",
                     "header": "Búsqueda de citas",
@@ -181,6 +175,12 @@ default_config: Dict = {
                     "clinica",
                     "estatus_cita",
                 ],
+                "filtros": {
+                    "kpc.CL_ESTATUS_CITA": {
+                        "con_fecha": ["A", "N"],
+                        "sin_fecha": ["A"],
+                    },
+                },
             },
         },
     },
