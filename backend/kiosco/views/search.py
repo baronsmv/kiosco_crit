@@ -12,7 +12,7 @@ def citas_paciente(request: HttpRequest) -> HttpResponse:
     return render.search(
         request=request,
         config_data=config.cfg_citas_paciente,
-        RegForm=forms.BuscarIdFechaForm,
+        form=forms.BuscarIdFechaForm,
         exist_query=queries.exist.paciente,
         data_query=queries.data.citas_paciente,
         nombre_id="carnet",
@@ -25,7 +25,7 @@ def citas_colaborador(request: HttpRequest) -> HttpResponse:
     return render.search(
         request=request,
         config_data=config.cfg_citas_colaborador,
-        RegForm=forms.BuscarIdFechaForm,
+        form=forms.BuscarIdFechaForm,
         exist_query=queries.exist.colaborador,
         data_query=queries.data.citas_colaborador,
         nombre_id="nombre de usuario",
@@ -38,7 +38,7 @@ def espacios_disponibles(request: HttpRequest) -> HttpResponse:
     return render.search(
         request=request,
         config_data=config.cfg_espacios_disponibles,
-        RegForm=forms.BuscarFechaForm,
+        form=forms.BuscarFechaForm,
         data_query=queries.data.espacios_disponibles,
         nombre_objetos="espacios disponibles",
     )

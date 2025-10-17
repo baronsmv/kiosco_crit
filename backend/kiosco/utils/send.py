@@ -5,7 +5,6 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import validate_email
-from django.db.models import Model
 from django.http import HttpRequest, JsonResponse
 
 from .. import models
@@ -20,7 +19,7 @@ base_url = settings.WHATSAPP_API_BASE_URL
 def pdf_email(
     request: HttpRequest,
     format_func: Callable = format.campos,
-    RegModel: Type[Model] = models.EnvioEmail,
+    model: Type[models.Base] = models.EnvioEmail,
 ) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
     id = previous_context.get("id", "")
@@ -57,8 +56,8 @@ def pdf_email(
         email.send()
     except Exception as e:
         logger.exception("Error enviando correo")
-        if RegModel:
-            RegModel.objects.create(
+        if model:
+            model.objects.create(
                 tipo=tipo,
                 **({"identificador": id} if id else {}),
                 fecha_especificada=fecha_especificada,
@@ -71,8 +70,8 @@ def pdf_email(
             )
         return JsonResponse({"error": str(e)}, status=500)
 
-    if RegModel:
-        RegModel.objects.create(
+    if model:
+        model.objects.create(
             tipo=tipo,
             **({"identificador": id} if id else {}),
             fecha_especificada=fecha_especificada,
@@ -88,7 +87,7 @@ def pdf_email(
 def pdf_whatsapp(
     request: HttpRequest,
     format_func: Callable = format.campos,
-    RegModel: Type[Model] = models.EnvioWhatsapp,
+    model: Type[models.Base] = models.EnvioWhatsapp,
 ) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
     id = previous_context.get("id", "")
@@ -135,8 +134,8 @@ Nombre: {sujeto['Nombre']}
             else response_data.get("error", "Error desconocido")
         )
 
-        if RegModel:
-            RegModel.objects.create(
+        if model:
+            model.objects.create(
                 tipo=tipo,
                 **({"identificador": id} if id else {}),
                 fecha_especificada=fecha_especificada,
@@ -160,8 +159,8 @@ Nombre: {sujeto['Nombre']}
     except requests.exceptions.RequestException as e:
         logger.error(f"Error de conexión con microservicio: {str(e)}", exc_info=True)
 
-        if RegModel:
-            RegModel.objects.create(
+        if model:
+            model.objects.create(
                 tipo=tipo,
                 **({"identificador": id} if id else {}),
                 fecha_especificada=fecha_especificada,

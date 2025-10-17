@@ -1,6 +1,5 @@
 from typing import Dict, Type, Callable, Optional
 
-from django.db.models import Model
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -49,10 +48,10 @@ def ajax(
 def search(
     request: HttpRequest,
     config_data: Dict,
-    RegForm: Type[Form],
+    form: Type[Form],
     data_query: Callable,
     nombre_objetos: str,
-    RegModel: Optional[Type[Model]] = models.Consulta,
+    model: Optional[Type[models.Base]] = models.Consulta,
     get_func: Callable = get.datos,
     format_func: Callable = format.campos,
     nombre_id: Optional[str] = None,
@@ -69,8 +68,8 @@ def search(
             request=request,
             config_data=config_data,
             context=context,
-            reg_form=RegForm(request.POST),
-            RegModel=RegModel,
+            reg_form=form(request.POST),
+            RegModel=model,
             exist_query=exist_query,
             data_query=data_query,
             get_func=get_func,
