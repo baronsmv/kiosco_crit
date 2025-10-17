@@ -21,18 +21,13 @@ def pdf(
         logger.error("previous_context está vacío. No se puede generar PDF.")
         raise ValueError("No hay datos de contexto en sesión.")
 
-    id = previous_context.get("id", "")
     pdf_data = previous_context.get("pdf_data")
     sql_data = previous_context.get("sql_data")
-    nombre_sujeto = previous_context.get("nombre_sujeto")
-    nombre_objetos = previous_context.get("nombre_objetos")
 
     output_dir = os.path.join(settings.MEDIA_ROOT, "pdfs")
     os.makedirs(output_dir, exist_ok=True)
 
     logger.debug(f"Contexto recibido en generar_pdf: {previous_context.keys()}")
-
-    fecha_especificada = previous_context.pop("fecha", None)
 
     # Render HTML
     try:
@@ -48,23 +43,22 @@ def pdf(
         logger.exception("Error al renderizar HTML")
         raise
 
-    # Calcular hash del contenido HTML
     content_hash = hashlib.sha1(html.encode("utf-8")).hexdigest()[:10]
-    filename = (
-        "_".join(
-            filter(
-                None,
-                (nombre_objetos, nombre_sujeto, id, fecha_especificada, content_hash),
-            )
+    name_parts = tuple(
+        previous_context.get(k)
+        for k in (
+            "nombre_objetos",
+            "nombre_sujeto",
+            "id",
+            "fecha",
         )
-        + ".pdf"
-    )
+    ) + (content_hash,)
+    filename = "_".join(filter(None, name_parts)).replace(" ", "_") + ".pdf"
     output_path = os.path.join(output_dir, filename)
     logger.debug(f"Generando PDF en: {output_path}")
 
-    # Buscar CSS
     css_path = finders.find(f"kiosco/css/pdf{'-color' if salida_a_color else ''}.css")
-    css_files = [css_path] if css_path else []
+    css_files = (css_path,) if css_path else ()
 
     try:
         HTML(string=html).write_pdf(output_path, stylesheets=css_files)

@@ -70,13 +70,14 @@ def search(
             "sujeto": None,
             "tabla": context["tabla"],
             "id": "ID de ejemplo",
-            "fecha": "Fecha de ejemplo",
+            "fecha": "2025-10-17",
             "nombre_objetos": nombre_objetos,
             "nombre_sujeto": nombre_sujeto,
             "nombre_id": nombre_id,
             "pdf_data": config_data["pdf"],
             "sql_data": config_data["sql"],
         }
+        model = None
 
     if not testing and request.method == "POST":
         validate.form(
