@@ -1,4 +1,4 @@
-from typing import Type, Callable
+from typing import Type
 
 import requests
 from django.conf import settings
@@ -8,7 +8,7 @@ from django.core.validators import validate_email
 from django.http import HttpRequest, JsonResponse
 
 from .. import models
-from ..utils import format, generate, get
+from ..utils import generate, get
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -18,7 +18,6 @@ base_url = settings.WHATSAPP_API_BASE_URL
 
 def pdf_email(
     request: HttpRequest,
-    format_func: Callable = format.campos,
     model: Type[models.Base] = models.EnvioEmail,
 ) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
@@ -40,11 +39,7 @@ def pdf_email(
         logger.error("Email inválido")
         return JsonResponse({"error": "Email inválido"}, status=400)
 
-    filename = generate.pdf(
-        previous_context=previous_context,
-        format_func=format_func,
-        salida_a_color=True,
-    )
+    filename = generate.pdf(previous_context, salida_a_color=True)
     subject = f"Datos del {nombre_sujeto}"
     body = "Adjuntamos el archivo solicitado en formato PDF."
     mensaje = "\n".join((subject, body))
@@ -86,7 +81,6 @@ def pdf_email(
 
 def pdf_whatsapp(
     request: HttpRequest,
-    format_func: Callable = format.campos,
     model: Type[models.Base] = models.EnvioWhatsapp,
 ) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
@@ -112,11 +106,7 @@ def pdf_whatsapp(
         logger.error("Número de WhatsApp requerido no proporcionado")
         return JsonResponse({"error": "Número de WhatsApp requerido"}, status=400)
 
-    filename = generate.pdf(
-        previous_context=previous_context,
-        format_func=format_func,
-        salida_a_color=True,
-    )
+    filename = generate.pdf(previous_context, salida_a_color=True)
     mensaje = f"""Datos del {nombre_sujeto}:
 Nombre: {sujeto['Nombre']}
 {nombre_id.title()}: {sujeto[nombre_id.title()]}"""

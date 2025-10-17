@@ -3,13 +3,13 @@ from datetime import date, datetime
 from typing import Callable, Dict, Optional, Type
 
 from django.core.exceptions import ValidationError
-from django.db.models import Model
 from django.db.utils import OperationalError
 from django.forms.forms import Form
 from django.http import HttpRequest
 
 from . import get
 from .logger import get_logger
+from .. import models
 
 logger = get_logger(__name__)
 
@@ -26,7 +26,7 @@ def _valid_id(
     fecha: datetime,
     has_fecha: bool,
     context: Dict,
-    RegModel: Optional[Type[Model]],
+    model: Optional[Type[models.Base]],
     reg_form: Form,
     ip_cliente: str,
     tipo: str,
@@ -47,8 +47,8 @@ def _valid_id(
             }
         )
         logger.warning(f"Error de validación en ID: {e}")
-        if RegModel:
-            RegModel.objects.create(
+        if model:
+            model.objects.create(
                 tipo=tipo,
                 identificador=id,
                 fecha_especificada=fecha,
@@ -101,8 +101,8 @@ def form(
     request: HttpRequest,
     context: Dict,
     config_data: Dict,
-    reg_form: Form,
-    RegModel: Optional[Type[Model]],
+    form: Form,
+    model: Optional[Type[models.Base]],
     exist_query: Optional[Callable],
     data_query: Callable,
     get_func: Callable,
@@ -111,7 +111,7 @@ def form(
     nombre_sujeto: str = "",
     nombre_objetos: str = "",
 ) -> None:
-    form_fields = reg_form.fields.keys()
+    form_fields = form.fields.keys()
     has_id = "id" in form_fields
     has_fecha = "fecha" in form_fields
 
@@ -126,17 +126,17 @@ def form(
 
     tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
 
-    if reg_form.is_valid():
-        id = reg_form.cleaned_data["id"] if has_id else None
-        fecha = reg_form.cleaned_data["fecha"] if has_fecha else None
+    if form.is_valid():
+        id = form.cleaned_data["id"] if has_id else None
+        fecha = form.cleaned_data["fecha"] if has_fecha else None
 
         if has_id and not _valid_id(
             id=id,
             fecha=fecha,
             has_fecha=has_fecha,
             context=context,
-            RegModel=RegModel,
-            reg_form=reg_form,
+            model=model,
+            reg_form=form,
             ip_cliente=ip_cliente,
             tipo=tipo,
         ):
@@ -160,8 +160,8 @@ def form(
             )
         except OperationalError as e:
             logger.error(f"Error de conexión a la base de datos: {e}")
-            if RegModel:
-                RegModel.objects.create(
+            if model:
+                model.objects.create(
                     tipo=tipo,
                     **({"identificador": id} if has_id else {}),
                     fecha_especificada=fecha,
@@ -208,8 +208,8 @@ def form(
 
         fecha_context = context.get("fecha")
         request.session["context_data"] = {
-            "sujeto_sf": context.get("sujeto_sf"),
-            "objetos_sf": context.get("objetos_sf"),
+            "sujeto": context.get("sujeto"),
+            "tabla": context.get("tabla"),
             "id": id or "",
             "fecha": (
                 fecha_context.isoformat()
@@ -223,8 +223,8 @@ def form(
             "sql_data": sql_data,
         }
 
-        if RegModel:
-            RegModel.objects.create(
+        if model:
+            model.objects.create(
                 tipo=tipo,
                 **({"identificador": id} if has_id else {}),
                 fecha_especificada=fecha,
@@ -235,10 +235,8 @@ def form(
     else:
         context.update(
             {
-                "id_error": has_id and bool(reg_form["id"].errors),
-                "date_error": has_fecha and bool(reg_form["fecha"].errors),
+                "id_error": has_id and bool(form["id"].errors),
+                "date_error": has_fecha and bool(form["fecha"].errors),
             }
         )
-        logger.warning(
-            f"Errores de validación en formulario: {reg_form.errors.as_json()}"
-        )
+        logger.warning(f"Errores de validación en formulario: {form.errors.as_json()}")

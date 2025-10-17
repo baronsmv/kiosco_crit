@@ -148,6 +148,7 @@ default_config: Dict = {
                     "fecha_inicial": False,
                     "auto_borrado": True,
                     "mostrar_vista_previa": True,
+                    "mostrar_enviar_email": True,
                     "id_pattern": r"^[a-zA-Z0-9. \-]+$",
                     "id_max_length": 20,
                 },
@@ -218,6 +219,7 @@ default_config: Dict = {
                     "fecha_inicial": True,
                     "auto_borrado": False,
                     "mostrar_vista_previa": True,
+                    "mostrar_enviar_email": True,
                     "id_pattern": r"^[a-zA-Z0-9. \-]+$",
                     "id_max_length": 20,
                 },
@@ -279,6 +281,7 @@ default_config: Dict = {
                     "fecha_inicial": True,
                     "auto_borrado": False,
                     "mostrar_vista_previa": True,
+                    "mostrar_enviar_email": True,
                 },
             },
             "pdf": {

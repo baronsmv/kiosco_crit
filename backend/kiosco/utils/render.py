@@ -62,14 +62,29 @@ def search(
     logger.debug(f"POST data: {request.POST}")
 
     context = get.initial_context(config_data)
+    testing = True
 
-    if request.method == "POST":
+    if testing:
+        context["tabla"] = (("Ejemplo", "Ejemplo", "Ejemplo", "Ejemplo", "Ejemplo"),)
+        request.session["context_data"] = {
+            "sujeto": None,
+            "tabla": context["tabla"],
+            "id": "ID de ejemplo",
+            "fecha": "Fecha de ejemplo",
+            "nombre_objetos": nombre_objetos,
+            "nombre_sujeto": nombre_sujeto,
+            "nombre_id": nombre_id,
+            "pdf_data": config_data["pdf"],
+            "sql_data": config_data["sql"],
+        }
+
+    if not testing and request.method == "POST":
         validate.form(
             request=request,
             config_data=config_data,
             context=context,
-            reg_form=form(request.POST),
-            RegModel=model,
+            form=form(request.POST),
+            model=model,
             exist_query=exist_query,
             data_query=data_query,
             get_func=get_func,
@@ -78,7 +93,6 @@ def search(
             nombre_sujeto=nombre_sujeto,
             nombre_objetos=nombre_objetos,
         )
-        print(context, flush=True)
 
         if respuesta_ajax := ajax(
             request=request,
@@ -93,17 +107,11 @@ def search(
 
 
 def pdf(request: HttpRequest) -> HttpResponse:
-    abrir = request.GET.get("abrir") == "1"
     previous_context = request.session.get("context_data", {})
-
-    filename = generate.pdf(
-        previous_context=previous_context,
-        format_func=format.campos,
-        salida_a_color=False,
-    )
+    filename = generate.pdf(previous_context, salida_a_color=False)
     file_url = f"/media/pdfs/{filename}"
 
-    if abrir:
+    if request.GET.get("abrir") == "1":
         return HttpResponseRedirect(file_url)
 
     iframe_html = f"""

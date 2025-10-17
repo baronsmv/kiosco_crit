@@ -1,13 +1,13 @@
 import hashlib
 import os
-from typing import Callable, Dict
+from typing import Dict
 
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.template.loader import render_to_string
 from weasyprint import HTML
 
-from . import format, map
+from . import map
 from .logger import get_logger
 
 logger = get_logger(__name__)
@@ -15,39 +15,24 @@ logger = get_logger(__name__)
 
 def pdf(
     previous_context: Dict,
-    format_func: Callable = format.campos,
     salida_a_color: bool = False,
 ) -> str:
+    if not previous_context:
+        logger.error("previous_context está vacío. No se puede generar PDF.")
+        raise ValueError("No hay datos de contexto en sesión.")
+
     id = previous_context.get("id", "")
     pdf_data = previous_context.get("pdf_data")
     sql_data = previous_context.get("sql_data")
-    nombre_id = previous_context.get("nombre_id")
     nombre_sujeto = previous_context.get("nombre_sujeto")
     nombre_objetos = previous_context.get("nombre_objetos")
 
     output_dir = os.path.join(settings.MEDIA_ROOT, "pdfs")
     os.makedirs(output_dir, exist_ok=True)
 
-    if not previous_context:
-        logger.error("previous_context está vacío. No se puede generar PDF.")
-        raise ValueError("No hay datos de contexto en sesión.")
-
     logger.debug(f"Contexto recibido en generar_pdf: {previous_context.keys()}")
 
     fecha_especificada = previous_context.pop("fecha", None)
-
-    try:
-        formatted_context = format_func(
-            sujeto_sf=previous_context.get("sujeto_sf"),
-            objetos_sf=previous_context.get("objetos_sf"),
-            campos=pdf_data.get("campos", ()),
-            nombre_sujeto=nombre_sujeto,
-            nombre_id=nombre_id,
-        )
-        previous_context.update(formatted_context)
-    except Exception:
-        logger.exception("Error al aplicar format_func en generar_pdf")
-        raise
 
     # Render HTML
     try:
