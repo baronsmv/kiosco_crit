@@ -1,7 +1,7 @@
 {% load custom_filters %}
 
 <div
-        aria-labelledby="modal-title"
+        aria-labelledby="modal.title"
         aria-modal="true"
         class="modal visible"
         id="modal"
@@ -11,14 +11,14 @@
     <div class="modal-content">
         <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal()">×</button>
 
-        {% if modal_title %}
-        <h2 id="modal-title">{{ modal_title }}</h2>
+        {% if modal.title %}
+        <h2 id="modal-title">{{ modal.title }}</h2>
         {% endif %}
 
         {% if sujeto %}
 
-        {% if data_title %}
-        <h3 id="data-title">{{ data_title }}</h3>
+        {% if modal.data_title %}
+        <h3 id="data-title">{{ modal.data_title }}</h3>
         {% endif %}
 
         {% for titulo, valor in sujeto.items %}
@@ -31,8 +31,8 @@
 
         <div class="dato">
 
-            {% if table_title %}
-            <h3>{{ table_title }}</h3>
+            {% if modal.table_title %}
+            <h3>{{ modal.table_title }}</h3>
             {% endif %}
 
             <div class="tabla-scrollable">
@@ -57,24 +57,24 @@
             </div>
         </div>
 
-        {% if mostrar_vista_previa or mostrar_enviar_email %}
+        {% if modal.preview.show or modal.send_email.show %}
         <div class="botones-agrupados">
-            {% if mostrar_vista_previa %}
+            {% if modal.preview.show %}
             <button
                     class="btn btn-outline-primary"
                     onclick="abrirVistaPrevia()"
                     type="button"
             >
-                {{ preview_label }}
+                {{ modal.preview.button_label }}
             </button>
             {% endif %}
-            {% if mostrar_enviar_email %}
+            {% if modal.send_email.show %}
             <button
                     class="btn btn-outline-secondary"
                     onclick="mostrarFormularioEmail()"
                     type="button"
             >
-                {{ send_email_label }}
+                {{ modal.send_email.button_label }}
             </button>
             {% endif %}
         </div>
@@ -88,16 +88,17 @@
         >
             {% csrf_token %}
             <div class="input-button-row">
-                <label for="email">{{ email_label }}</label>
+                <label for="email">{{ modal.send_email.email_label }}</label>
                 <input
                         id="email"
                         name="email"
-                        placeholder="ejemplo@correo.com"
+                        placeholder="{{ modal.send_email.placeholder }}"
                         required
+                        title="{{ modal.send_email.pattern_text }}"
                         type="email"
                 />
                 <button class="btn btn-primary" type="submit">
-                    {{ send_button_label }}
+                    {{ modal.send_email.send_label }}
                 </button>
             </div>
         </form>
@@ -105,18 +106,18 @@
         <form action="{% url 'send_whatsapp_pdf' %}" id="form-send-whatsapp-pdf" method="POST">
             {% csrf_token %}
             <div class="input-button-row">
-                <label class="btn-whatsapp-label" for="numero-whatsapp">{{ number_label }}</label>
+                <label class="btn-whatsapp-label" for="numero-whatsapp">{{ modal.send_whatsapp.number_label }}</label>
 
                 <input class="btn-whatsapp-input"
                        id="numero-whatsapp"
                        name="numero"
-                       pattern="^\d{10}$"
-                       placeholder="Ej. 5512345678"
+                       pattern="{{ modal.send_whatsapp.pattern }}"
+                       placeholder="{{ modal.send_whatsapp.placeholder }}"
                        required
-                       title="Debe tener 10 dígitos numéricos"
+                       title="{{ modal.send_whatsapp.pattern_text }}"
                        type="text"/>
 
-                <button class="btn-whatsapp" type="submit">{{ send_button_label }}</button>
+                <button class="btn-whatsapp" type="submit">{{ modal.send_whatsapp.send_label }}</button>
             </div>
         </form>
 

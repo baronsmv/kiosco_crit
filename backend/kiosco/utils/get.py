@@ -28,13 +28,15 @@ def initial_context(config_data: Dict) -> Dict:
     web_data = config_data["web"]
     context_data = web_data["context"]
 
-    home_url = reverse_lazy(context_data.get("home_url", "home"))
-    fecha_inicial = date.today() if context_data.get("fecha_inicial", False) else ""
+    home_url = reverse_lazy(context_data["main"].get("home", {}).get("url", "home"))
+    initial_date = (
+        date.today() if context_data["main"].get("date", {}).get("initial") else ""
+    )
 
     return {
         **context_data,
         "home_url": home_url,
-        "fecha_inicial": fecha_inicial,
+        "initial_date": initial_date,
         "whatsapp_status": whatsapp_status(),
         "tabla_columnas": map.columns(web_data, sql_data=config_data["sql"]),
         "id": "",

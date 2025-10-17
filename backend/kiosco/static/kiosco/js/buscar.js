@@ -100,8 +100,9 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log(window.FormConfig);
 
     const idRequired = window.FormConfig?.idRequired ?? false;
+    const idPreserve = window.FormConfig?.idPreserve ?? false;
     const dateRequired = window.FormConfig?.dateRequired ?? false;
-    const autoBorrado = window.FormConfig?.autoBorrado ?? false;
+    const datePreserve = window.FormConfig?.datePreserve ?? false;
 
     form.addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -174,10 +175,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 setTimeout(() => {
                     nuevoModal.classList.add("show");
                     nuevoModal.focus();
-                    if (autoBorrado) {
+                    if (!idPreserve)
                         idInput.value = "";
+                    if (!fechaPreserve)
                         fechaInput.value = "";
-                    }
                 }, 20);
 
                 activarListenersModal(nuevoModal);

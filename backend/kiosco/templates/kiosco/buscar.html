@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8"/>
-    <title>{{ title }}</title>
+    <title>{{ main.title }}</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     {% load static %}
     <link href="{% static 'kiosco/css/buscar.css' %}" rel="stylesheet"/>
@@ -10,39 +10,39 @@
 <body>
 
 <div aria-labelledby="main-title" class="container" role="main">
-    {% if mostrar_inicio %}
-    <a href="{{ home_url }}" class="home-link">{{ home_label }}</a>
+    {% if main.home.show %}
+    <a href="{{ home_url }}" class="home-link">{{ main.home.label }}</a>
     {% endif %}
 
-    <h1 id="main-title">{{ header }}</h1>
+    <h1 id="main-title">{{ main.header }}</h1>
 
     <form id="buscar-form" method="POST">
         {% csrf_token %}
         <div class="form-group">
             <!-- ID -->
-            {% if id_label %}
-            <label for="id">{{ id_label }}</label>
+            {% if main.id.show %}
+            <label for="id">{{ main.id.label }}</label>
             <div class="input-group {% if id_error %}error{% endif %}">
                 <input
                         aria-describedby="{% if id_error %}id-error{% endif %}"
                         aria-invalid="{% if id_error %}true{% else %}false{% endif %}"
                         class="{% if id_error %}error{% endif %}"
                         id="id"
-                        maxlength="{{ id_max_length|default:50 }}"
+                        maxlength="{{ main.id.max_length|default:50 }}"
                         name="id"
-                        pattern="{{ id_pattern|default:'' }}"
-                        placeholder="{{ id_placeholder|default:'' }}"
-                        {% if id_required %}required{% endif %}
+                        pattern="{{ main.id.pattern|default:'' }}"
+                        placeholder="{{ main.id.placeholder|default:'' }}"
+                        {% if main.id.required %}required{% endif %}
                         type="text"
                         value="{{ id|default:'' }}"
                 />
             </div>
             {% endif %}
             <!-- Fecha -->
-            {% if date_label %}
-            <label class="fecha-label" for="fecha">{{ date_label }}</label>
-            {% if date_sublabel %}
-            <p class="form-sublabel">{{ date_sublabel }}</p>
+            {% if main.date.show %}
+            <label class="fecha-label" for="fecha">{{ main.date.label }}</label>
+            {% if main.date.sublabel %}
+            <p class="form-sublabel">{{ main.date.sublabel }}</p>
             {% endif %}
             <div class="input-group {% if date_error %}error{% endif %}">
                 <input
@@ -51,16 +51,16 @@
                         class="{% if date_error %}error{% endif %}"
                         id="fecha"
                         name="fecha"
-                        {% if date_required %}required{% endif %}
+                        {% if main.date.required %}required{% endif %}
                         type="date"
-                        value="{{ fecha_inicial|date:'Y-m-d' }}"
+                        value="{{ initial_date|date:'Y-m-d' }}"
                 />
             </div>
             {% endif %}
         </div>
 
-        <button aria-label="{{ button_label }}" type="submit">
-            {{ button_label }}
+        <button aria-label="{{ main.search_button.label }}" type="submit">
+            {{ main.search_button.label }}
         </button>
     </form>
 
@@ -75,7 +75,7 @@
 <!-- Mensaje de 'Procesando...' -->
 <div id="processing-message" aria-hidden="true">
     <div class="spinner"></div>
-    <div>{{ processing_message|default:"Procesando..." }}</div>
+    <div>{{ main.send_button.message }}</div>
 </div>
 
 <!-- Modal si hay resultados -->
@@ -86,9 +86,10 @@
 <!-- Scripts -->
 <script>
     window.FormConfig = {
-        idRequired: {{ id_required|yesno:"true,false" }},
-        dateRequired: {{ date_required|yesno:"true,false" }},
-        autoBorrado: {{ auto_borrado|yesno:"true,false" }}
+        idRequired: {{ main.id.required|yesno:"true,false" }},
+        idPreserve: {{ main.id.preserve|yesno:"true,false" }},
+        dateRequired: {{ main.date.required|yesno:"true,false" }},
+        datePreserve: {{ main.id.preserve|yesno:"true,false" }}
     };
 </script>
 <script defer src="{% static 'kiosco/js/error_form_handler.js' %}"></script>
