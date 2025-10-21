@@ -166,7 +166,7 @@ default_config: Dict = {
                         },
                         "send_email": {
                             "show": True,
-                            "button_label": "E-mail",
+                            "button_label": "Enviar por e-mail",
                             "title": "Envío por E-mail",
                             "email_label": "Correo electrónico:",
                             "placeholder": "Ej: ejemplo@correo.com",
@@ -270,7 +270,7 @@ default_config: Dict = {
                         },
                         "send_email": {
                             "show": True,
-                            "button_label": "E-mail",
+                            "button_label": "Enviar por e-mail",
                             "title": "Envío por E-mail",
                             "email_label": "Correo electrónico:",
                             "placeholder": "Ej: ejemplo@correo.com",
@@ -361,7 +361,7 @@ default_config: Dict = {
                         },
                         "send_email": {
                             "show": True,
-                            "button_label": "E-mail",
+                            "button_label": "Enviar por e-mail",
                             "title": "Envío por E-mail",
                             "email_label": "Correo electrónico:",
                             "placeholder": "Ej: ejemplo@correo.com",
