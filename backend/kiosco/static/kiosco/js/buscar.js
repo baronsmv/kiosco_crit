@@ -1,12 +1,29 @@
-function cerrarModal(id = "modal") {
+function abrirModal(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+
+    modal.classList.add("visible");
+
+    setTimeout(() => {
+        modal.classList.add("show");
+        modal.focus();
+    }, 20);
+
+    activarListenersModal(modal);
+}
+
+function cerrarModal(id = "modal", focusTarget = null) {
     const modal = document.getElementById(id);
     if (!modal) return;
 
     modal.classList.remove("show");
     setTimeout(() => {
         modal.classList.remove("visible");
-        const input = document.getElementById("id");
-        input?.focus();
+        modal.dispatchEvent(new CustomEvent("modalClosed"));
+        if (focusTarget) {
+            const input = document.getElementById(focusTarget);
+            input?.focus();
+        }
     }, 300);
 }
 
@@ -14,11 +31,6 @@ function activarListenersModal(modal) {
     if (!modal) return;
 
     const onKeyDown = (e) => {
-        if (!document.body.contains(modal)) {
-            document.removeEventListener("keydown", onKeyDown);
-            return;
-        }
-
         if (e.key === "Escape") {
             cerrarModal(modal.id);
         }
@@ -43,6 +55,13 @@ function activarListenersModal(modal) {
     };
 
     document.addEventListener("keydown", onKeyDown);
+
+    // Limpieza automática al cerrar (opcional)
+    const onClose = () => {
+        document.removeEventListener("keydown", onKeyDown);
+        modal.removeEventListener("modalClosed", onClose);
+    };
+    modal.addEventListener("modalClosed", onClose);
 
     modal.addEventListener("click", (event) => {
         if (event.target === modal) {
@@ -82,12 +101,6 @@ function focusYSeleccionarInput(id) {
 
 function abrirVistaPrevia() {
     window.open(`/preview/pdf/?abrir=1`, "_blank");
-}
-
-function mostrarFormularioEmail() {
-    const form = document.getElementById("send-email-pdf-form");
-    form.style.display = "block";
-    form.scrollIntoView({behavior: "smooth"});
 }
 
 document.addEventListener("DOMContentLoaded", () => {

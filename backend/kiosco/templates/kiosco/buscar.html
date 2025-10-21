@@ -20,7 +20,7 @@
         {% csrf_token %}
         <div class="form-group">
 
-            <!-- ID -->
+            <!-- Entrada de ID -->
             {% if main.id.show %}
                 <label for="id">{{ main.id.label }}</label>
                 <div class="input-group {% if id_error %}error{% endif %}">
@@ -40,7 +40,7 @@
                 </div>
             {% endif %}
 
-            <!-- Fecha -->
+            <!-- Entrada de Fecha -->
             {% if main.date.show %}
                 <label class="fecha-label" for="fecha">{{ main.date.label }}</label>
                 {% if main.date.sublabel %}
@@ -67,7 +67,7 @@
     </form>
 
     <!-- Respuesta AJAX (fallback) -->
-    {% if mensaje_error and not tabla and mensaje_error %}
+    {% if mensaje_error and not tabla %}
         {% include 'kiosco/partials/mensaje_error.html' %}
     {% endif %}
 </div>
@@ -82,6 +82,9 @@
 {% if tabla %}
     {% include 'kiosco/partials/modal_buscar.html' %}
 {% endif %}
+
+{% include 'kiosco/partials/modal_enviar_email.html' %}
+{% include 'kiosco/partials/modal_enviar_whatsapp.html' %}
 
 <!-- Scripts -->
 <script>

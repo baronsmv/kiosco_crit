@@ -10,7 +10,7 @@
 >
     <div class="modal-content">
         <!-- Botón de cierre de modal -->
-        <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal()">×</button>
+        <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal('modal', 'id')">×</button>
 
         <!-- Título del modal -->
         {% if modal.title %}
@@ -79,57 +79,23 @@
             {% if modal.send_email.show %}
             <button
                     class="btn btn-outline-secondary"
-                    onclick="mostrarFormularioEmail()"
+                    onclick="abrirModal('modal-enviar-email')"
                     type="button"
             >
                 {{ modal.send_email.button_label }}
             </button>
             {% endif %}
+            {% if modal.send_whatsapp.show %}
+            <button
+                    class="btn btn-outline-secondary"
+                    onclick="abrirModal('modal-enviar-whatsapp')"
+                    type="button"
+            >
+                {{ modal.send_whatsapp.button_label }}
+            </button>
+            {% endif %}
         </div>
         {% endif %}
-
-        <!-- Entrada de e-mail -->
-        <form
-                action="{% url 'send_email_pdf' %}"
-                id="send-email-pdf-form"
-                method="POST"
-                style="display: none; margin-top: 1em;"
-        >
-            {% csrf_token %}
-            <div class="input-button-row">
-                <label for="email">{{ modal.send_email.email_label }}</label>
-                <input
-                        id="email"
-                        name="email"
-                        placeholder="{{ modal.send_email.placeholder }}"
-                        required
-                        title="{{ modal.send_email.pattern_text }}"
-                        type="email"
-                />
-                <button class="btn btn-primary" type="submit">
-                    {{ modal.send_email.send_label }}
-                </button>
-            </div>
-        </form>
-
-        <!-- Entrada de número -->
-        <form action="{% url 'send_whatsapp_pdf' %}" id="form-send-whatsapp-pdf" method="POST">
-            {% csrf_token %}
-            <div class="input-button-row">
-                <label class="btn-whatsapp-label" for="numero-whatsapp">{{ modal.send_whatsapp.number_label }}</label>
-
-                <input class="btn-whatsapp-input"
-                       id="numero-whatsapp"
-                       name="numero"
-                       pattern="{{ modal.send_whatsapp.pattern }}"
-                       placeholder="{{ modal.send_whatsapp.placeholder }}"
-                       required
-                       title="{{ modal.send_whatsapp.pattern_text }}"
-                       type="text"/>
-
-                <button class="btn-whatsapp" type="submit">{{ modal.send_whatsapp.send_label }}</button>
-            </div>
-        </form>
 
         <!-- Mensaje de fracaso por AJAX -->
         <div class="mensaje-transitorio" id="mensaje-envio" style="display: none;"></div>

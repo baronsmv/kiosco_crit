@@ -1,0 +1,36 @@
+<div
+        aria-labelledby="modal-enviar-email"
+        aria-modal="true"
+        class="modal"
+        id="modal-enviar-email"
+        role="dialog"
+        tabindex="-1"
+>
+    <div class="modal-content">
+        <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal('modal-enviar-email')">×</button>
+
+        <!-- Título -->
+        {% if modal.send_email.modal_title %}
+        <h2 id="modal-envios-title">{{ modal.send_email.modal_title }}</h2>
+        {% endif %}
+
+        <!-- Formulario -->
+        <form action="{% url 'send_email_pdf' %}" method="POST">
+            {% csrf_token %}
+            <div class="input-button-row">
+                <label for="email">{{ modal.send_email.email_label }}</label>
+                <input
+                        id="email"
+                        name="email"
+                        placeholder="{{ modal.send_email.placeholder }}"
+                        required
+                        title="{{ modal.send_email.pattern_text }}"
+                        type="email"
+                />
+                <button class="btn btn-primary" type="submit">
+                    {{ modal.send_email.send_label }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
