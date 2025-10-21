@@ -112,7 +112,6 @@ input:focus {
 
 /* Botones */
 button,
-.btn-whatsapp,
 button[style] {
     background-color: #6a0dad;
     color: white;
@@ -127,8 +126,6 @@ button[style] {
 
 button:hover,
 button:focus,
-.btn-whatsapp:hover,
-.btn-whatsapp:focus,
 button[style]:hover,
 button[style]:focus {
     background-color: #4b0082;
@@ -368,7 +365,6 @@ button[style] {
     display: flex;
     justify-content: center;
     gap: 1rem;
-    margin-top: 2rem;
     flex-wrap: wrap;
 }
 
@@ -418,16 +414,6 @@ button[style] {
     box-shadow: 0 0 4px #f44336;
 }
 
-/* Modal form */
-.input-button-row {
-    max-width: 50vw;
-    margin: 1rem auto 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
 
 /* Estilo para párrafos con inline style */
 p[style] {
@@ -547,11 +533,6 @@ p[style] {
 
     .dato {
         margin-bottom: 1rem;
-    }
-
-    .input-button-row {
-        flex-direction: column;
-        align-items: stretch;
     }
 
     .tabla-scrollable table,

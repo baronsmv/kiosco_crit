@@ -18,20 +18,18 @@
         <!-- Formulario -->
         <form action="{% url 'send_email_pdf' %}" data-ajax="true" method="POST">
             {% csrf_token %}
-            <div class="input-button-row">
-                <label for="email">{{ modal.send_email.email_label }}</label>
-                <input
-                        id="email"
-                        name="email"
-                        placeholder="{{ modal.send_email.placeholder }}"
-                        required
-                        title="{{ modal.send_email.pattern_text }}"
-                        type="email"
-                />
-                <button class="btn btn-primary" type="submit">
-                    {{ modal.send_email.send_label }}
-                </button>
-            </div>
+            <label for="email">{{ modal.send_email.email_label }}</label>
+            <input
+                    id="email"
+                    name="email"
+                    placeholder="{{ modal.send_email.placeholder }}"
+                    required
+                    title="{{ modal.send_email.pattern_text }}"
+                    type="email"
+            />
+            <button class="btn btn-primary" type="submit">
+                {{ modal.send_email.send_label }}
+            </button>
         </form>
         <div class="ajax-response"></div>
     </div>

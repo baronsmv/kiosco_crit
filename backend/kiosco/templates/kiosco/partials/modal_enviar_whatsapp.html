@@ -18,19 +18,17 @@
         <!-- Formulario -->
         <form action="{% url 'send_whatsapp_pdf' %}" data-ajax="true" method="POST">
             {% csrf_token %}
-            <div class="input-button-row">
-                <label for="numero-whatsapp">{{ modal.send_whatsapp.number_label }}</label>
-                <input
-                        id="numero-whatsapp"
-                        name="numero"
-                        pattern="{{ modal.send_whatsapp.pattern }}"
-                        placeholder="{{ modal.send_whatsapp.placeholder }}"
-                        required
-                        title="{{ modal.send_whatsapp.pattern_text }}"
-                        type="text"
-                />
-                <button class="btn-whatsapp" type="submit">{{ modal.send_whatsapp.send_label }}</button>
-            </div>
+            <label for="numero-whatsapp">{{ modal.send_whatsapp.number_label }}</label>
+            <input
+                    id="numero-whatsapp"
+                    name="numero"
+                    pattern="{{ modal.send_whatsapp.pattern }}"
+                    placeholder="{{ modal.send_whatsapp.placeholder }}"
+                    required
+                    title="{{ modal.send_whatsapp.pattern_text }}"
+                    type="text"
+            />
+            <button class="btn-whatsapp" type="submit">{{ modal.send_whatsapp.send_label }}</button>
         </form>
         <div class="ajax-response"></div>
     </div>
