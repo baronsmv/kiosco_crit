@@ -1,5 +1,6 @@
 <div
-        aria-labelledby="modal-enviar-whatsapp"
+        aria-describedby="modal-envios-title"
+        aria-labelledby="modal-envios-title"
         aria-modal="true"
         class="modal"
         id="modal-enviar-whatsapp"
@@ -10,8 +11,8 @@
         <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal('modal-enviar-whatsapp')">×</button>
 
         <!-- Título -->
-        {% if modal.send_whatsapp.modal_title %}
-        <h2 id="modal-envios-title">{{ modal.send_whatsapp.modal_title }}</h2>
+        {% if modal.send_whatsapp.title %}
+        <h2 id="modal-envios-title">{{ modal.send_whatsapp.title }}</h2>
         {% endif %}
 
         <!-- Formulario -->

@@ -167,6 +167,7 @@ default_config: Dict = {
                         "send_email": {
                             "show": True,
                             "button_label": "E-mail",
+                            "title": "Envío por E-mail",
                             "email_label": "Correo electrónico:",
                             "placeholder": "Ej: ejemplo@correo.com",
                             "pattern_text": "Debe ser un e-mail válido",
@@ -174,7 +175,8 @@ default_config: Dict = {
                         },
                         "send_whatsapp": {
                             "show": False,
-                            "label": "WhatsApp",
+                            "button_label": "WhatsApp",
+                            "title": "Envío por WhatsApp",
                             "number_label": "Número telefónico:",
                             "placeholder": "Ej: 5512345678",
                             "pattern": r"^\d{10}$",
@@ -269,6 +271,7 @@ default_config: Dict = {
                         "send_email": {
                             "show": True,
                             "button_label": "E-mail",
+                            "title": "Envío por E-mail",
                             "email_label": "Correo electrónico:",
                             "placeholder": "Ej: ejemplo@correo.com",
                             "pattern_text": "Debe ser un e-mail válido",
@@ -276,7 +279,8 @@ default_config: Dict = {
                         },
                         "send_whatsapp": {
                             "show": False,
-                            "label": "WhatsApp",
+                            "button_label": "WhatsApp",
+                            "title": "Envío por WhatsApp",
                             "number_label": "Número telefónico:",
                             "placeholder": "Ej: 5512345678",
                             "pattern": r"^\d{10}$",
@@ -358,6 +362,7 @@ default_config: Dict = {
                         "send_email": {
                             "show": True,
                             "button_label": "E-mail",
+                            "title": "Envío por E-mail",
                             "email_label": "Correo electrónico:",
                             "placeholder": "Ej: ejemplo@correo.com",
                             "pattern_text": "Debe ser un e-mail válido",
@@ -365,7 +370,8 @@ default_config: Dict = {
                         },
                         "send_whatsapp": {
                             "show": False,
-                            "label": "WhatsApp",
+                            "button_label": "WhatsApp",
+                            "title": "Envío por WhatsApp",
                             "number_label": "Número telefónico:",
                             "placeholder": "Ej: 5512345678",
                             "pattern": r"^\d{10}$",

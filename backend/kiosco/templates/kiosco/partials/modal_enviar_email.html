@@ -1,5 +1,6 @@
 <div
-        aria-labelledby="modal-enviar-email"
+        aria-describedby="modal-envios-title"
+        aria-labelledby="modal-envios-title"
         aria-modal="true"
         class="modal"
         id="modal-enviar-email"
@@ -10,8 +11,8 @@
         <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal('modal-enviar-email')">×</button>
 
         <!-- Título -->
-        {% if modal.send_email.modal_title %}
-        <h2 id="modal-envios-title">{{ modal.send_email.modal_title }}</h2>
+        {% if modal.send_email.title %}
+        <h2 id="modal-envios-title">{{ modal.send_email.title }}</h2>
         {% endif %}
 
         <!-- Formulario -->

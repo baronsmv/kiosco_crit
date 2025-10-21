@@ -90,9 +90,7 @@ label {
     color: #2c2c54;
 }
 
-input[type="text"],
-input[type="date"],
-.form-group input {
+input {
     padding: 0.6rem 1rem;
     border: 2px solid #b09fdc;
     border-radius: 8px;
@@ -101,9 +99,7 @@ input[type="date"],
     width: 100%;
 }
 
-input[type="text"]:focus,
-input[type="date"]:focus,
-.form-group input:focus {
+input:focus {
     outline: none;
     border-color: #8a2be2;
     box-shadow: 0 0 8px #b09fdc;
@@ -221,6 +217,7 @@ button[style] {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
+    z-index: 1100;
 }
 
 .modal.visible {
@@ -258,10 +255,6 @@ button[style] {
 
 #modal {
     z-index: 1000;
-}
-
-#modal-enviar-email, #modal-enviar-whatsapp {
-    z-index: 1100;
 }
 
 .hidden {
