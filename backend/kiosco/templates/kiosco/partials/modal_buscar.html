@@ -9,34 +9,39 @@
         tabindex="-1"
 >
     <div class="modal-content">
+        <!-- Botón de cierre de modal -->
         <button aria-label="Cerrar modal" class="close-btn" onclick="cerrarModal()">×</button>
 
+        <!-- Título del modal -->
         {% if modal.title %}
         <h2 id="modal-title">{{ modal.title }}</h2>
         {% endif %}
 
+        <!-- Datos del sujeto -->
         {% if sujeto %}
-
+        <!-- Subtítulo del apartado -->
         {% if modal.data_title %}
         <h3 id="data-title">{{ modal.data_title }}</h3>
         {% endif %}
-
+        <!-- Datos -->
         {% for titulo, valor in sujeto.items %}
         <div class="dato">
             <span>{{ titulo }}:</span> {{ valor }}
         </div>
         {% endfor %}
-
         {% endif %}
 
+        <!-- Tabla de datos -->
         <div class="dato">
-
+            <!-- Subtítulo de la tabla -->
             {% if modal.table_title %}
             <h3>{{ modal.table_title }}</h3>
             {% endif %}
 
+            <!-- Definición de la tabla -->
             <div class="tabla-scrollable">
                 <table>
+                    <!-- Definición de columnas -->
                     <thead>
                     <tr>
                         {% for columna in tabla_columnas %}
@@ -44,8 +49,10 @@
                         {% endfor %}
                     </tr>
                     </thead>
+                    <!-- Definición de filas -->
                     <tbody>
                     {% for fila in tabla %}
+                    <!-- Definición de campos de cada fila -->
                     <tr>
                         {% for dato in fila %}
                         <td data-label="{{ tabla_columnas|index:forloop.counter0 }}">{{ dato|default_if_none:"" }}</td>
@@ -57,6 +64,7 @@
             </div>
         </div>
 
+        <!-- Botones -->
         {% if modal.preview.show or modal.send_email.show %}
         <div class="botones-agrupados">
             {% if modal.preview.show %}
@@ -80,6 +88,7 @@
         </div>
         {% endif %}
 
+        <!-- Entrada de e-mail -->
         <form
                 action="{% url 'send_email_pdf' %}"
                 id="send-email-pdf-form"
@@ -103,6 +112,7 @@
             </div>
         </form>
 
+        <!-- Entrada de número -->
         <form action="{% url 'send_whatsapp_pdf' %}" id="form-send-whatsapp-pdf" method="POST">
             {% csrf_token %}
             <div class="input-button-row">
@@ -121,7 +131,7 @@
             </div>
         </form>
 
-        <!-- Contenedor donde se cargará el mensaje de error por AJAX -->
+        <!-- Mensaje de fracaso por AJAX -->
         <div class="mensaje-transitorio" id="mensaje-envio" style="display: none;"></div>
     </div>
 </div>
