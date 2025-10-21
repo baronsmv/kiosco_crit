@@ -19,11 +19,8 @@
         <form action="{% url 'send_whatsapp_pdf' %}" method="POST">
             {% csrf_token %}
             <div class="input-button-row">
-                <label class="btn-whatsapp-label" for="numero-whatsapp">
-                    {{ modal.send_whatsapp.number_label }}
-                </label>
+                <label for="numero-whatsapp">{{ modal.send_whatsapp.number_label }}</label>
                 <input
-                        class="btn-whatsapp-input"
                         id="numero-whatsapp"
                         name="numero"
                         pattern="{{ modal.send_whatsapp.pattern }}"
