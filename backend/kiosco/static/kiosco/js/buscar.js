@@ -101,6 +101,15 @@ function activarEnvioAjaxEnModal(modal) {
 
             if (container) {
                 container.innerHTML = html;
+
+                // Buscar el mensaje flotante dentro de la respuesta
+                const mensaje = container.querySelector('.mensaje-flotante');
+                if (mensaje) {
+                    setTimeout(() => {
+                        mensaje.classList.add("fade-out");
+                        mensaje.addEventListener("transitionend", () => mensaje.remove());
+                    }, 5000); // 5000 ms = 5 segundos
+                }
             } else {
                 console.warn("No se encontró el contenedor .ajax-response dentro del modal.");
             }

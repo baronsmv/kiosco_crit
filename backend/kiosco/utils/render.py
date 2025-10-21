@@ -63,7 +63,9 @@ def search(
     testing = True
 
     if testing:
-        context["tabla"] = (("Ejemplo", "Ejemplo", "Ejemplo", "Ejemplo", "Ejemplo"),)
+        context["tabla"] = tuple(
+            ("Ejemplo", "Ejemplo", "Ejemplo", "Ejemplo", "Ejemplo") for _ in range(100)
+        )
         request.session["context_data"] = {
             "sujeto": None,
             "tabla": context["tabla"],
