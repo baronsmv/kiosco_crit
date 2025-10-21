@@ -67,7 +67,7 @@
     </form>
 
     <!-- Respuesta AJAX (fallback) -->
-    {% if mensaje_error and not tabla %}
+    {% if not tabla %}
         {% include 'kiosco/partials/mensaje_error.html' %}
     {% endif %}
 </div>

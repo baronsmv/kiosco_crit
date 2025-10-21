@@ -5,8 +5,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import validate_email
-from django.http import HttpRequest, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 
+from . import render
 from .. import models
 from ..utils import generate, get
 from ..utils.logger import get_logger
@@ -19,7 +20,7 @@ base_url = settings.WHATSAPP_API_BASE_URL
 def pdf_email(
     request: HttpRequest,
     model: Type[models.Base] = models.EnvioEmail,
-) -> JsonResponse:
+) -> HttpResponse | JsonResponse:
     previous_context = request.session.get("context_data", {})
     id = previous_context.get("id", "")
     nombre_sujeto = previous_context.get("nombre_sujeto", "")
@@ -33,11 +34,15 @@ def pdf_email(
 
     correo = request.POST.get("email")
     logger.debug(f"Email recibido: {correo}")
+
     try:
         validate_email(correo)
     except ValidationError:
         logger.error("Email inválido")
-        return JsonResponse({"error": "Email inválido"}, status=400)
+        return render.ajax(
+            request,
+            context={"mensaje_ajax": "Dirección de correo inválida.", "tipo": "error"},
+        ) or JsonResponse({"error": "Email inválido"}, status=400)
 
     filename = generate.pdf(previous_context, salida_a_color=True)
     subject = f"Datos del {nombre_sujeto}"
@@ -63,7 +68,13 @@ def pdf_email(
                 estado="Fallido",
                 detalle_error=str(e),
             )
-        return JsonResponse({"error": str(e)}, status=500)
+        return render.ajax(
+            request,
+            context={
+                "mensaje_ajax": "Ocurrió un error al enviar el correo.",
+                "tipo": "error",
+            },
+        ) or JsonResponse({"error": str(e)}, status=500)
 
     if model:
         model.objects.create(
@@ -76,7 +87,13 @@ def pdf_email(
             archivo_pdf=pdf_path,
             estado="Enviado",
         )
-    return JsonResponse({"status": "enviado"})
+    return render.ajax(
+        request,
+        context={
+            "mensaje_ajax": "Correo enviado exitosamente.",
+            "tipo": "success",
+        },
+    ) or JsonResponse({"status": "enviado"})
 
 
 def pdf_whatsapp(

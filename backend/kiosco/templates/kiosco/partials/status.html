@@ -1,0 +1,10 @@
+{% if mensaje_ajax %}
+<div class="mensaje-flotante {{ tipo }}" id="respuesta-ajax">
+    <p aria-live="assertive"
+       data-error-target="{{ error_target }}"
+       role="alert"
+    >
+        {{ mensaje_ajax }}
+    </p>
+</div>
+{% endif %}

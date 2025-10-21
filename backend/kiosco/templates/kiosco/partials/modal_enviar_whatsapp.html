@@ -16,7 +16,7 @@
         {% endif %}
 
         <!-- Formulario -->
-        <form action="{% url 'send_whatsapp_pdf' %}" method="POST">
+        <form action="{% url 'send_whatsapp_pdf' %}" data-ajax="true" method="POST">
             {% csrf_token %}
             <div class="input-button-row">
                 <label for="numero-whatsapp">{{ modal.send_whatsapp.number_label }}</label>
@@ -32,5 +32,6 @@
                 <button class="btn-whatsapp" type="submit">{{ modal.send_whatsapp.send_label }}</button>
             </div>
         </form>
+        <div class="ajax-response" style="margin-top: 1rem;"></div>
     </div>
 </div>

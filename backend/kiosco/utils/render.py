@@ -33,12 +33,10 @@ def menu(request: HttpRequest, config: Dict[str, Dict]) -> HttpResponse:
 def ajax(
     request: HttpRequest,
     context: Dict,
-    partial_filename: str,
-    partial_error: str = "mensaje_error.html",
+    filename: str = "status.html",
 ) -> Optional[HttpResponse]:
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
-        template = "kiosco/partials/"
-        template += partial_filename if context["tabla"] else partial_error
+        template = f"kiosco/partials/{filename}"
         logger.debug(f"Renderizando plantilla parcial: {template}")
         html = render_to_string(template, context, request=request)
         return HttpResponse(html)
@@ -98,7 +96,7 @@ def search(
         if respuesta_ajax := ajax(
             request=request,
             context=context,
-            partial_filename="modal_buscar.html",
+            filename=("modal_buscar.html" if context.get("tabla") else "status.html"),
         ):
             logger.debug("Respuesta AJAX enviada")
             return respuesta_ajax

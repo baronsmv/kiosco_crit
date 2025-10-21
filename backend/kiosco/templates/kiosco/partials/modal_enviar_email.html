@@ -16,7 +16,7 @@
         {% endif %}
 
         <!-- Formulario -->
-        <form action="{% url 'send_email_pdf' %}" method="POST">
+        <form action="{% url 'send_email_pdf' %}" data-ajax="true" method="POST">
             {% csrf_token %}
             <div class="input-button-row">
                 <label for="email">{{ modal.send_email.email_label }}</label>
@@ -33,5 +33,6 @@
                 </button>
             </div>
         </form>
+        <div class="ajax-response" style="margin-top: 1rem;"></div>
     </div>
 </div>

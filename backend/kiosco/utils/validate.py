@@ -72,14 +72,14 @@ def _add_result(
             {
                 "id_error": True,
                 "error_target": "id",
-                "mensaje_error": f"❌ No se encontró ningún {nombre_sujeto} con ese {nombre_id}.",
+                "mensaje_ajax": f"❌ No se encontró ningún {nombre_sujeto} con ese {nombre_id}.",
             }
         )
         logger.warning(f"ID inválido: {nombre_id} - No se encontró {nombre_sujeto}")
 
     elif not resultado.get(f"objetos_sf"):
         error_context = {
-            "mensaje_error": (
+            "mensaje_ajax": (
                 f"❌ No se encontraron {nombre_objetos} con la fecha especificada."
                 if fecha
                 else f"❌ No se encontraron {nombre_objetos} activas para este {nombre_id}."
@@ -170,7 +170,7 @@ def form(
                 )
             context.update(
                 {
-                    "mensaje_error": "❌ No se pudo conectar con la base de datos.",
+                    "mensaje_ajax": "❌ No se pudo conectar con la base de datos.",
                     "id_error": has_id,
                     "date_error": has_fecha,
                     "error_target": "id" if has_id else "fecha",

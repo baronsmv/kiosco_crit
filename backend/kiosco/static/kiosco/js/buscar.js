@@ -70,6 +70,47 @@ function activarListenersModal(modal) {
     });
 }
 
+function activarEnvioAjaxEnModal(modal) {
+    console.log("activarEnvioAjaxEnModal llamado para modal:", modal.id);
+    const form = modal.querySelector("form[data-ajax='true']");
+    if (!form) {
+        console.warn("No se encontró form data-ajax='true' en modal:", modal.id);
+        return;
+    }
+
+    form.addEventListener("submit", async (e) => {
+        console.log("Submit AJAX interceptado");
+        e.preventDefault();
+        limpiarErrores();
+
+        const formData = new FormData(form);
+        const csrfToken = form.querySelector("[name='csrfmiddlewaretoken']")?.value;
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                body: formData,
+            });
+
+            const html = await response.text();
+            const container = modal.querySelector(".ajax-response");
+
+            if (container) {
+                container.innerHTML = html;
+            } else {
+                console.warn("No se encontró el contenedor .ajax-response dentro del modal.");
+            }
+
+        } catch (error) {
+            console.error("Error en envío AJAX:", error);
+        }
+    });
+}
+
 function mostrarErrorCampo(nombreCampo) {
     document.querySelector(`#${nombreCampo}`)?.closest(".input-group")?.classList.add("error");
 }
@@ -169,6 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 activarListenersModal(nuevoModal);
                 activarEnvioWhatsApp(nuevoModal);
+                activarEnvioAjaxEnModal(nuevoModal);  // Solo en el modal nuevo
             } else {
                 const error = doc.querySelector(".error-message");
                 if (error) {
@@ -191,12 +233,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    const modalInicial = document.getElementById("modal");
-    if (modalInicial) {
-        activarListenersModal(modalInicial);
-        setTimeout(() => {
-            modalInicial.classList.add("show");
-            modalInicial.focus();
-        }, 20);
-    }
+    // Al cargar la página, activa para TODOS los modales que haya
+    document.querySelectorAll("div.modal").forEach(modal => {
+        activarListenersModal(modal);
+        activarEnvioAjaxEnModal(modal);
+    });
 });
