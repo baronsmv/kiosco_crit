@@ -335,6 +335,7 @@ default_config: Dict = {
                             "show": False,
                         },
                         "date": {
+                            "show": True,
                             "required": True,
                             "label": "Fecha:",
                             "sublabel": "",
