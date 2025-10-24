@@ -108,9 +108,8 @@ def search(
 
 
 def pdf(request: HttpRequest) -> HttpResponse:
-    previous_context = request.session.get("context_data", {})
-    filename = generate.pdf(previous_context, salida_a_color=False)
-    file_url = f"/media/pdfs/{filename}"
+    filename = generate.pdf(request.session.get("context_data", {}), color=False)
+    file_url = f"/media/pdf/{filename}"
 
     if request.GET.get("abrir") == "1":
         return HttpResponseRedirect(file_url)
@@ -121,3 +120,10 @@ def pdf(request: HttpRequest) -> HttpResponse:
     </div>
     """
     return JsonResponse({"html": iframe_html, "filename": filename})
+
+
+def excel(request: HttpRequest) -> HttpResponse:
+    filename = generate.excel(request.session.get("context_data", {}))
+    file_url = f"/media/excel/{filename}"
+
+    return HttpResponseRedirect(file_url)

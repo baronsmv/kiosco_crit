@@ -70,13 +70,13 @@ services:
 
   cleaner:
     image: alpine
-    container_name: pdf_cleaner_kiosco
+    container_name: output_cleaner_kiosco
     volumes:
       - ./backend/media:/media
       - ./backend/scripts:/scripts
     env_file:
       - .env
-    command: [ "/scripts/clean_pdfs.sh" ]
+    command: [ "/scripts/clean_output.sh" ]
     networks:
       - app_net
     restart: unless-stopped

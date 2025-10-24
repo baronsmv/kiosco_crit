@@ -8,3 +8,7 @@ logger = get_logger(__name__)
 
 def pdf(request: HttpRequest) -> HttpResponse:
     return render.pdf(request=request)
+
+
+def excel(request: HttpRequest) -> HttpResponse:
+    return render.excel(request=request)

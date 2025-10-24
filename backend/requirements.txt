@@ -4,7 +4,9 @@ djangorestframework
 gunicorn
 mssql-django
 psycopg2-binary
+polars
 pyodbc
 pyyaml
 requests
 weasyprint
+xlsxwriter

@@ -149,8 +149,12 @@ function focusYSeleccionarInput(id) {
     }
 }
 
-function abrirVistaPrevia() {
+function abrirVistaPreviaPDF() {
     window.open(`/preview/pdf/?abrir=1`, "_blank");
+}
+
+function abrirVistaPreviaExcel() {
+    window.open(`/preview/excel/?abrir=1`, "_blank");
 }
 
 document.addEventListener("DOMContentLoaded", () => {

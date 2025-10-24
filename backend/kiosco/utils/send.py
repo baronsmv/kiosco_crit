@@ -44,11 +44,11 @@ def pdf_email(
             context={"mensaje_ajax": "Dirección de correo inválida.", "tipo": "error"},
         ) or JsonResponse({"error": "Email inválido"}, status=400)
 
-    filename = generate.pdf(previous_context, salida_a_color=True)
+    filename = generate.pdf(previous_context, color=True)
     subject = f"Datos del {nombre_sujeto}"
     body = "Adjuntamos el archivo solicitado en formato PDF."
     mensaje = "\n".join((subject, body))
-    pdf_path = f"media/pdfs/{filename}"
+    pdf_path = f"media/pdf/{filename}"
 
     try:
         email = EmailMessage(subject, body, to=[correo])
@@ -123,7 +123,7 @@ def pdf_whatsapp(
         logger.error("Número de WhatsApp requerido no proporcionado")
         return JsonResponse({"error": "Número de WhatsApp requerido"}, status=400)
 
-    filename = generate.pdf(previous_context, salida_a_color=True)
+    filename = generate.pdf(previous_context, color=True)
     mensaje = f"""Datos del {nombre_sujeto}:
 Nombre: {sujeto['Nombre']}
 {nombre_id.title()}: {sujeto[nombre_id.title()]}"""

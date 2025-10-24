@@ -65,15 +65,24 @@
         </div>
 
         <!-- Botones -->
-        {% if modal.preview.show or modal.send_email.show or modal.send_whatsapp.show %}
+        {% if modal.pdf_preview.show or modal.excel_preview.show or modal.send_email.show or modal.send_whatsapp.show %}
         <div class="botones-agrupados">
-            {% if modal.preview.show %}
+            {% if modal.pdf_preview.show %}
             <button
                     class="btn btn-outline-primary"
-                    onclick="abrirVistaPrevia()"
+                    onclick="abrirVistaPreviaPDF()"
                     type="button"
             >
-                {{ modal.preview.button_label }}
+                {{ modal.pdf_preview.button_label }}
+            </button>
+            {% endif %}
+            {% if modal.excel_preview.show %}
+            <button
+                    class="btn btn-outline-primary"
+                    onclick="abrirVistaPreviaExcel()"
+                    type="button"
+            >
+                {{ modal.excel_preview.button_label }}
             </button>
             {% endif %}
             {% if modal.send_email.show %}

@@ -1,3 +1,4 @@
+import os
 import re
 from datetime import date, datetime
 from typing import Callable, Dict, Optional, Type
@@ -240,3 +241,17 @@ def form(
             }
         )
         logger.warning(f"Errores de validación en formulario: {form.errors.as_json()}")
+
+
+def context(context: Optional[Dict]):
+    if not context:
+        logger.error("El contexto en sesión está vacío. No se puede generar PDF.")
+        raise ValueError("No hay datos de contexto en sesión.")
+
+    logger.debug(f"Contexto en sesión recibido: {context.keys()}")
+
+
+def output_file(path: str):
+    if not os.path.exists(path):
+        logger.error(f"El archivo no fue creado: {path}")
+        raise FileNotFoundError("No se pudo generar el archivo.")

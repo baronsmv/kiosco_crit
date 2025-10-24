@@ -15,6 +15,11 @@ urlpatterns = [
         name="admin_whatsapp",
     ),
     path(
+        route="preview/excel/",
+        view=previews.excel,
+        name="preview_excel",
+    ),
+    path(
         route="preview/pdf/",
         view=previews.pdf,
         name="preview_pdf",

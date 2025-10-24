@@ -1,4 +1,6 @@
+import hashlib
 import inspect
+import os
 import re
 from datetime import date
 from datetime import datetime
@@ -144,9 +146,32 @@ def datos(
     }
 
 
+def filename(
+    previous_context: Dict[str, Optional[str]],
+    ext: str,
+    keys: Tuple[str, ...] = (
+        "nombre_objetos",
+        "nombre_sujeto",
+        "id",
+        "fecha",
+    ),
+    buffer=None,
+    sep: str = "_",
+):
+    parts = tuple(previous_context.get(k) for k in keys)
+    content_hash = hashlib.sha1(buffer).hexdigest()[:10] if buffer else None
+    return sep.join(filter(None, parts + (content_hash,))).replace(" ", sep) + f".{ext}"
+
+
+def output_path(dir: str, filename: str) -> str:
+    output_dir = os.path.join(settings.MEDIA_ROOT, dir)
+    os.makedirs(output_dir, exist_ok=True)
+    return os.path.join(output_dir, filename)
+
+
 def whatsapp_payload(number: str, mensaje: str, filename: str) -> Dict:
     return {
         "number": "521" + re.sub(r"\D", "", number) + "@c.us",
         "message": mensaje,
-        "image_path": f"media/pdfs/{filename}",
+        "image_path": f"media/pdf/{filename}",
     }

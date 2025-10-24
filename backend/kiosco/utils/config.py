@@ -160,9 +160,13 @@ default_config: Dict = {
                         "title": "Ficha del Paciente",
                         "data_title": "",
                         "table_title": "Citas",
-                        "preview": {
+                        "pdf_preview": {
                             "show": True,
                             "button_label": "Vista previa e impresión",
+                        },
+                        "excel_preview": {
+                            "show": False,
+                            "button_label": "Descargar Excel",
                         },
                         "send_email": {
                             "show": True,
@@ -264,9 +268,13 @@ default_config: Dict = {
                         "title": "Agenda del Colaborador",
                         "data_title": "",
                         "table_title": "Citas",
-                        "preview": {
+                        "pdf_preview": {
                             "show": True,
                             "button_label": "Vista previa e impresión",
+                        },
+                        "excel_preview": {
+                            "show": True,
+                            "button_label": "Descargar Excel",
                         },
                         "send_email": {
                             "show": True,
@@ -356,9 +364,13 @@ default_config: Dict = {
                         "title": "Espacios Disponibles",
                         "data_title": "",
                         "table_title": "",
-                        "preview": {
+                        "pdf_preview": {
                             "show": True,
                             "button_label": "Vista previa e impresión",
+                        },
+                        "excel_preview": {
+                            "show": True,
+                            "button_label": "Descargar Excel",
                         },
                         "send_email": {
                             "show": True,
