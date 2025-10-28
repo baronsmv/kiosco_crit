@@ -62,7 +62,7 @@ def excel(context: Dict) -> str:
     logger.debug(f"Generando Excel en: {output_path}")
 
     try:
-        df.write_excel(output_path)
+        df.write_excel(output_path, worksheet="Hoja 1")
     except Exception:
         logger.exception("Error al generar el Excel.")
         raise

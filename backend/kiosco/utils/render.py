@@ -7,7 +7,8 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 
 from .. import models
-from ..utils import format, generate, get, parse
+from ..utils import generate, get, parse
+from ..utils.exceptions import AjaxException
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -53,8 +54,6 @@ def search(
     nombre_objetos: str,
     *,
     model: Optional[Type[models.Base]] = models.Consulta,
-    get_func: Callable = get.datos,
-    format_func: Callable = format.campos,
     nombre_id: Optional[str] = None,
     nombre_sujeto: Optional[str] = None,
     exist_query: Optional[Callable] = None,
@@ -81,21 +80,22 @@ def search(
         model = None
 
     if not testing and request.method == "POST":
-        parse.form(
-            request=request,
-            config_data=config_data,
-            context=context,
-            form=form(request.POST),
-            model=model,
-            exist_query=exist_query,
-            data_query=data_query,
-            get_func=get_func,
-            format_func=format_func,
-            nombre_id=nombre_id,
-            nombre_sujeto=nombre_sujeto,
-            nombre_objetos=nombre_objetos,
-        )
-        logger.debug(f"Datos de contexto procesados:\n{context}")
+        try:
+            parse.form(
+                request=request,
+                config_data=config_data,
+                context=context,
+                form=form(request.POST),
+                model=model,
+                exist_query=exist_query,
+                data_query=data_query,
+                nombre_id=nombre_id,
+                nombre_sujeto=nombre_sujeto,
+                nombre_objetos=nombre_objetos,
+            )
+            logger.debug(f"Datos de contexto procesados:\n{context}")
+        except AjaxException as e:
+            return ajax(request, context=e.context())
 
         if respuesta_ajax := ajax(
             request=request,

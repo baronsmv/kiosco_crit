@@ -132,31 +132,38 @@ def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
     SELECT {_select(cfg.get("campos", {}))}
     FROM SCRITS2.K_SERVICIO_DETALLE AS ksd
     INNER JOIN SCRITS2.K_PACIENTE_CITA AS kpc 
-        ON ksd.FL_PACIENTE_CITA = KPC.FL_PACIENTE_CITA
+        ON ksd.FL_PACIENTE_CITA = kpc.FL_PACIENTE_CITA
     INNER JOIN SCRITS2.C_PACIENTE AS cp
-        ON kpc.FL_PACIENTE = CP.FL_PACIENTE
+        ON kpc.FL_PACIENTE = cp.FL_PACIENTE
     INNER JOIN SCRITS2.K_CITA AS kc
-        ON kpc.FL_CITA = KC.FL_CITA
+        ON kpc.FL_CITA = kc.FL_CITA
     INNER JOIN SCRITS2.C_CLINICA AS cc
         ON cp.FL_CLINICA = cc.FL_CLINICA
     INNER JOIN SCRITS2.C_SERVICIO AS cs
-        ON kc.FL_SERVICIO = CS.FL_SERVICIO
-    WHERE
-        WHERE cp.NO_CARNET = %s
-        AND KSD.FG_CANCELADO = 0
-        AND KSD.MN_TOTAL > KSD.MN_PAGADO
+        ON kc.FL_SERVICIO = cs.FL_SERVICIO
+    WHERE cp.NO_CARNET = %s
+        AND ksd.FG_CANCELADO = 0
+        AND ksd.MN_TOTAL > KSD.MN_PAGADO
         AND (
-            CP.CL_ESTATUS = 'A' 
+            cp.CL_ESTATUS = 'A' 
             OR (
-                CP.CL_ESTATUS = 'E' 
-                AND CP.CL_FORMA_SEGUIMIENTO IS NOT NULL 
-                AND CP.FL_TIPO_SEGUIMIENTO IS NOT NULL
+                cp.CL_ESTATUS = 'E' 
+                AND cp.CL_FORMA_SEGUIMIENTO IS NOT NULL 
+                AND cp.FL_TIPO_SEGUIMIENTO IS NOT NULL
             )
         )
-        AND KPC.FG_EXTERNO = 0
-        AND (CP.FG_EXTERNO IS NULL OR CP.FG_EXTERNO = 0)
-    HAVING 
-        SUM(KSD.MN_TOTAL - KSD.MN_PAGADO) > 0
+        AND kpc.FG_EXTERNO = 0
+        AND (cp.FG_EXTERNO IS NULL OR cp.FG_EXTERNO = 0)
+    GROUP BY
+        cp.NO_CARNET,
+        cp.NB_PACIENTE,
+        cp.NB_PATERNO,
+        cp.NB_MATERNO,
+        cc.DS_CLINICA,
+        cp.NO_INASISTENCIAS,
+        cp.FE_ULTANIVERSARIO
+    HAVING
+        SUM(ksd.MN_TOTAL - ksd.MN_PAGADO) > 0
     """
     return _parse_query(
         query=query,

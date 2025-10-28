@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Dict, List, Any, Tuple
+from typing import Optional
 
 from .logger import get_logger
 
@@ -16,37 +16,3 @@ def campo(dato: str, formatear: Optional[str] = None) -> str:
             dato.strftime("%d/%m/%Y %H:%M") if isinstance(dato, datetime) else str(dato)
         )
     return dato
-
-
-def campos(
-    sujeto_sf: Dict[str, str],
-    objetos_sf: List[Dict[str, Any]],
-    campos: List[str],
-    nombre_sujeto: str,
-    nombre_id: str,
-) -> Dict[str, Dict[str, str] | Tuple[Tuple]]:
-    logger.debug(f"Formateando datos finales. Campos: {campos}")
-
-    resultado = {
-        "sujeto": (
-            {
-                f"Nombre de {nombre_sujeto.capitalize()}": sujeto_sf.get(
-                    "nombre", ""
-                ).title(),
-                nombre_id.capitalize(): sujeto_sf.get("id", ""),
-            }
-            if sujeto_sf
-            else None
-        ),
-        "tabla": (
-            tuple(
-                tuple(objeto.get(campo, "") for campo in campos)
-                for objeto in objetos_sf
-            )
-            if objetos_sf
-            else None
-        ),
-    }
-
-    logger.info("Formato final completado.")
-    return resultado

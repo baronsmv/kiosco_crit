@@ -26,6 +26,7 @@ def datos_paciente(request: HttpRequest) -> HttpResponse:
         request=request,
         config_data=config.cfg_datos_paciente,
         form=forms.BuscarIdForm,
+        exist_query=queries.exist.paciente,
         data_query=queries.data.datos_paciente,
         nombre_id="carnet",
         nombre_sujeto="paciente",

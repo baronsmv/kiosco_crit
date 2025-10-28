@@ -4,7 +4,7 @@ import os
 import re
 from datetime import date
 from datetime import datetime
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import requests
 from django.conf import settings
@@ -12,6 +12,7 @@ from django.db import connections, OperationalError
 from django.http import HttpRequest
 from django.urls import reverse_lazy
 
+from .exceptions import AjaxException
 from .logger import get_logger
 from ..utils import format, map
 
@@ -68,82 +69,104 @@ def client_ip(request: HttpRequest) -> str:
     return ip
 
 
-def _eval_query(func: Callable, **kwargs) -> Tuple[str, Tuple[str, ...]]:
+def evaluate_query(func: Callable, **kwargs) -> Tuple[str, Tuple[str, ...]]:
     sig = inspect.signature(func)
     return func(**{k: v for k, v in kwargs.items() if k in sig.parameters})
 
 
-def _get_filas(
+def subject(
     id: Optional[str],
-    fecha: Optional[datetime],
-    exist_func: Callable,
-    query_func: Callable,
+    exist_query: Optional[Callable],
+    nombre_sujeto: str,
+    nombre_id: str,
+    *,
     db_name: str = "crit",
-) -> Optional[Tuple]:
-    logger.info(
-        f"Buscando filas para ID: '{id}' con fecha '{fecha}'"
-        + f" en base de datos: '{db_name}'"
-    )
-    query, params = _eval_query(query_func, id=id, fecha=fecha)
+) -> Optional[Dict[str, str]]:
+    if not id or not exist_query:
+        return None
+
+    logger.info(f"Buscando datos para {nombre_sujeto} con {nombre_id}: '{id}'")
+
     try:
         with connections[db_name].cursor() as cursor:
-            sujeto = exist_func(id, cursor) if exist_func else None
-            if exist_func and not sujeto:
-                logger.warning(f"No se encontró sujeto con ID: '{id}'.")
-                return None
-            logger.debug(
-                f"Ejecutando consulta: '{query}',\ncon parámetros: '{params}'."
-            )
-            cursor.execute(query, params)
-            resultados = cursor.fetchall()
-        logger.info(f"Se encontraron {len(resultados)} filas para ID: '{id}'")
-        return sujeto, resultados
+            sujeto = exist_query(id, cursor) if exist_query else None
     except OperationalError as e:
-        logger.error(f"Error al obtener filas para ID: '{id}': {e}")
+        logger.error(f"Error al obtener datos para ID: '{id}': {e}")
         raise
     except Exception as e:
-        logger.exception(f"Error al obtener filas para ID: '{id}': {str(e)}")
-        return None
+        logger.exception(f"Error al obtener datos del ID: '{id}': {str(e)}")
+        raise AjaxException()
 
-
-def datos(
-    id: Optional[str],
-    fecha: Optional[datetime],
-    sql_campos: Dict,
-    exist_query: Optional[Callable],
-    data_query: Callable,
-) -> Optional[Dict[str, Any]]:
-    logger.info(f"Iniciando obtención de datos para ID '{id}' con fecha '{fecha}'.")
-
-    filas = _get_filas(
-        id=id, fecha=fecha, exist_func=exist_query, query_func=data_query
-    )
-    if not filas:
-        logger.warning(f"No se encontraron datos para ID '{id}' con fecha '{fecha}'.")
-        return None
-
-    sujeto, objetos = filas
-
-    if sujeto:
-        logger.debug(
-            f"Procesando {len(objetos)} objetos para: {sujeto.get('nombre', 'Desconocido')}"
-        )
-    else:
-        logger.debug(f"Procesando {len(objetos)} objetos sin sujeto asociado.")
-
-    objetos_formateados = tuple(
-        {
-            campo: format.campo(cita[i], sql_campos[campo].get("formatear"))
-            for i, campo in enumerate(sql_campos.keys())
-        }
-        for cita in objetos
-    )
-    logger.info("Datos procesados correctamente.")
+    if not sujeto:
+        message = f"❌ No se encontró ningún {nombre_sujeto} con ese {nombre_id}."
+        logger.info(message)
+        raise AjaxException(message, causa="ID Inexistente")
 
     return {
-        "sujeto_sf": sujeto or {},
-        "objetos_sf": objetos_formateados,
+        f"Nombre de {nombre_sujeto.capitalize()}": sujeto.get("nombre", "").title(),
+        nombre_id.capitalize(): sujeto.get("id", ""),
     }
+
+
+def all_objects(
+    id: Optional[str],
+    fecha: Optional[datetime],
+    data_query: Optional[Callable],
+    nombre_objetos: str,
+    nombre_id: str,
+    *,
+    db_name: str = "crit",
+) -> Optional[List[str]]:
+    if not data_query:
+        return None
+
+    query, params = evaluate_query(data_query, id=id, fecha=fecha)
+    logger.debug(f"Ejecutando consulta: '{query}', con parámetros: '{params}'.")
+
+    try:
+        with connections[db_name].cursor() as cursor:
+            objetos = cursor.execute(query, params).fetchall()
+    except OperationalError as e:
+        logger.error(f"Error al obtener objetos para ID: '{id}': {e}")
+        raise
+    except Exception as e:
+        logger.exception(f"Error al obtener objetos para ID: '{id}': {str(e)}")
+        raise AjaxException()
+
+    if not objetos:
+        if fecha:
+            message = (
+                f"❌ No se encontraron {nombre_objetos} con la fecha especificada."
+            )
+        else:
+            message = f"❌ No se encontraron {nombre_objetos} para este {nombre_id}."
+        logger.info(message)
+        raise AjaxException(
+            message, target="fecha" if fecha else "id", causa="Sin resultados"
+        )
+
+    logger.info(f"Se encontraron {len(objetos)} objetos para ID: '{id}'")
+    return objetos
+
+
+def filtered_objects(
+    objetos: Optional[Dict[str, str]],
+    campos: List[str],
+    sql_campos: Dict[str, Any],
+) -> Optional[Tuple[Tuple, ...]]:
+    if not objetos:
+        return None
+
+    return tuple(
+        tuple(
+            {
+                campo: format.campo(cita[i], sql_campos[campo].get("formatear"))
+                for i, campo in enumerate(sql_campos)
+            }.get(campo, "")
+            for campo in campos
+        )
+        for cita in objetos
+    )
 
 
 def filename(

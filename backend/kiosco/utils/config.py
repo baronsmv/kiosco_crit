@@ -245,6 +245,7 @@ default_config: Dict = {
                     "clinica",
                     "inasistencias_paciente",
                     "aniversario_paciente",
+                    "deuda_total_paciente",
                 ],
                 "context": {
                     "main": {
@@ -313,6 +314,7 @@ default_config: Dict = {
                     "clinica",
                     "inasistencias_paciente",
                     "aniversario_paciente",
+                    "deuda_total_paciente",
                 ],
                 "context": {
                     "title": "Datos del Paciente",
@@ -329,6 +331,7 @@ default_config: Dict = {
                     "clinica",
                     "inasistencias_paciente",
                     "aniversario_paciente",
+                    "deuda_total_paciente",
                 ],
             },
         },
