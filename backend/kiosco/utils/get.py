@@ -47,7 +47,7 @@ def initial_context(config_data: Dict) -> Dict:
         "id_proporcionado": False,
         "id_error": False,
         "date_error": False,
-        "mensaje_error": "",
+        "mensaje_ajax": "",
         "error_target": "",
     }
 
@@ -113,13 +113,13 @@ def datos(
     exist_query: Optional[Callable],
     data_query: Callable,
 ) -> Optional[Dict[str, Any]]:
-    logger.info(f"Iniciando obtención de datos para ID: {id}")
+    logger.info(f"Iniciando obtención de datos para ID '{id}' con fecha '{fecha}'.")
 
     filas = _get_filas(
         id=id, fecha=fecha, exist_func=exist_query, query_func=data_query
     )
     if not filas:
-        logger.warning(f"No se encontraron datos para ID: {id}")
+        logger.warning(f"No se encontraron datos para ID '{id}' con fecha '{fecha}'.")
         return None
 
     sujeto, objetos = filas

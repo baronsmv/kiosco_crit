@@ -48,8 +48,15 @@ def pdf(context: Dict, color: bool = False) -> str:
 
 def excel(context: Dict) -> str:
     validate.context(context)
+    pdf_data = context.get("pdf_data")
+    sql_data = context.get("sql_data")
 
-    df = pl.DataFrame(data=context.get("tabla"), schema=context.get("tabla_columnas"))
+    df = pl.DataFrame(
+        data=context.get("tabla"),
+        orient="row",
+        schema=map.columns(pdf_data, sql_data=sql_data),
+    )
+    logger.debug(f"DataFrame generado:\n{df.head()}")
     filename = get.filename(context, ext="xlsx", buffer=df.write_csv().encode())
     output_path = get.output_path(dir="excel", filename=filename)
     logger.debug(f"Generando Excel en: {output_path}")

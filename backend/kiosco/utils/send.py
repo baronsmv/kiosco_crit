@@ -41,7 +41,10 @@ def pdf_email(
         logger.error("Email inválido")
         return render.ajax(
             request,
-            context={"mensaje_ajax": "Dirección de correo inválida.", "tipo": "error"},
+            context={
+                "mensaje_ajax": "Dirección de correo inválida.",
+                "tipo_ajax": "error",
+            },
         ) or JsonResponse({"error": "Email inválido"}, status=400)
 
     filename = generate.pdf(previous_context, color=True)
@@ -72,7 +75,7 @@ def pdf_email(
             request,
             context={
                 "mensaje_ajax": "Ocurrió un error al enviar el correo.",
-                "tipo": "error",
+                "tipo_ajax": "error",
             },
         ) or JsonResponse({"error": str(e)}, status=500)
 
@@ -91,7 +94,7 @@ def pdf_email(
         request,
         context={
             "mensaje_ajax": "Correo enviado exitosamente.",
-            "tipo": "success",
+            "tipo_ajax": "success",
         },
     ) or JsonResponse({"status": "enviado"})
 

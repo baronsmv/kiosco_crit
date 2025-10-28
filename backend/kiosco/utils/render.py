@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 
 from .. import models
-from ..utils import format, generate, get, validate
+from ..utils import format, generate, get, parse
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -33,6 +33,7 @@ def menu(request: HttpRequest, config: Dict[str, Dict]) -> HttpResponse:
 def ajax(
     request: HttpRequest,
     context: Dict,
+    *,
     filename: str = "status.html",
 ) -> Optional[HttpResponse]:
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -49,23 +50,22 @@ def search(
     form: Type[Form],
     data_query: Callable,
     nombre_objetos: str,
+    *,
     model: Optional[Type[models.Base]] = models.Consulta,
     get_func: Callable = get.datos,
     format_func: Callable = format.campos,
     nombre_id: Optional[str] = None,
     nombre_sujeto: Optional[str] = None,
     exist_query: Optional[Callable] = None,
+    testing: bool = True,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
 
     context = get.initial_context(config_data)
-    testing = True
 
     if testing:
-        context["tabla"] = tuple(
-            ("Ejemplo", "Ejemplo", "Ejemplo", "Ejemplo", "Ejemplo") for _ in range(100)
-        )
+        context["tabla"] = tuple(("Ejemplo",) * 5 for _ in range(100))
         request.session["context_data"] = {
             "sujeto": None,
             "tabla": context["tabla"],
@@ -80,7 +80,7 @@ def search(
         model = None
 
     if not testing and request.method == "POST":
-        validate.form(
+        parse.form(
             request=request,
             config_data=config_data,
             context=context,
