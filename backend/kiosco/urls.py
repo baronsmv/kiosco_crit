@@ -35,19 +35,24 @@ urlpatterns = [
         name="send_email_pdf",
     ),
     path(
+        route="paciente/datos/",
+        view=search.datos_paciente,
+        name="datos_paciente",
+    ),
+    path(
         route="paciente/citas/",
         view=search.citas_paciente,
-        name="buscar_citas_paciente",
+        name="citas_paciente",
     ),
     path(
         route="colaborador/espacios/disponibles/",
         view=search.espacios_disponibles,
-        name="buscar_espacios_disponibles",
+        name="espacios_disponibles",
     ),
     path(
         route="colaborador/citas/",
         view=search.citas_colaborador,
-        name="buscar_citas_colaborador",
+        name="citas_colaborador",
     ),
     path(route="paciente/", view=menus.paciente, name="menu_paciente"),
     path(route="colaborador/", view=menus.colaborador, name="menu_colaborador"),

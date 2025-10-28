@@ -41,6 +41,7 @@ def ajax(
         logger.debug(f"Renderizando plantilla parcial: {template}")
         html = render_to_string(template, context, request=request)
         return HttpResponse(html)
+    logger.info("Petición no AJAX recibida (probablemente vista inicial).")
     return None
 
 
@@ -57,7 +58,7 @@ def search(
     nombre_id: Optional[str] = None,
     nombre_sujeto: Optional[str] = None,
     exist_query: Optional[Callable] = None,
-    testing: bool = True,
+    testing: bool = False,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
@@ -94,6 +95,7 @@ def search(
             nombre_sujeto=nombre_sujeto,
             nombre_objetos=nombre_objetos,
         )
+        logger.debug(f"Datos de contexto procesados:\n{context}")
 
         if respuesta_ajax := ajax(
             request=request,

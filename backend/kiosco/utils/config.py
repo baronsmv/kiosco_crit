@@ -41,9 +41,13 @@ default_config: Dict = {
                 "home_label": "Inicio",
             },
             "options": {
-                "buscar_citas_paciente": {
+                "citas_paciente": {
                     "title": "🪪 Citas por Paciente",
                     "description": "Busca citas con el carnet de un paciente.",
+                },
+                "datos_paciente": {
+                    "title": "📝 Datos del Paciente",
+                    "description": "Muestra los datos de un paciente.",
                 },
             },
         },
@@ -56,11 +60,11 @@ default_config: Dict = {
                 "home_label": "Inicio",
             },
             "options": {
-                "buscar_citas_colaborador": {
+                "citas_colaborador": {
                     "title": "👤 Citas por Colaborador",
                     "description": "Busca citas de un colaborador.",
                 },
-                "buscar_espacios_disponibles": {
+                "espacios_disponibles": {
                     "title": "📅 Espacios disponibles",
                     "description": "Busca espacios disponibles para agendar.",
                 },
@@ -111,6 +115,18 @@ default_config: Dict = {
                 "duracion_servicio": {
                     "nombre": "Duración",
                     "sql": "CONCAT(kc.NO_DURACION,' min')",
+                },
+                "inasistencias_paciente": {
+                    "nombre": "Inasistencias",
+                    "sql": "CP.NO_INASISTENCIAS",
+                },
+                "aniversario_paciente": {
+                    "nombre": "Aniversario",
+                    "sql": "CP.FE_ULTANIVERSARIO",
+                },
+                "deuda_total_paciente": {
+                    "nombre": "Deuda total",
+                    "sql": "CONVERT(DECIMAL(10,2), SUM(KSD.MN_TOTAL - KSD.MN_PAGADO))",
                 },
             },
         },
@@ -219,6 +235,101 @@ default_config: Dict = {
                         "sin_fecha": ["A"],
                     },
                 },
+            },
+        },
+        "datos": {
+            "web": {
+                "campos": [
+                    "no_carnet",
+                    "nombre_paciente",
+                    "clinica",
+                    "inasistencias_paciente",
+                    "aniversario_paciente",
+                ],
+                "context": {
+                    "main": {
+                        "title": "Datos del paciente",
+                        "header": "Datos del paciente",
+                        "id": {
+                            "show": True,
+                            "required": True,
+                            "label": "Número de Carnet:",
+                            "placeholder": "Ej: 123456",
+                            "max_length": 20,
+                            "pattern": r"^[a-zA-Z0-9. \-]+$",
+                            "preserve": False,
+                        },
+                        "date": {
+                            "show": False,
+                        },
+                        "search_button": {
+                            "label": "Buscar",
+                            "message": "Procesando...",
+                        },
+                        "home": {
+                            "show": True,
+                            "label": "Volver",
+                            "url": "menu_paciente",
+                        },
+                    },
+                    "modal": {
+                        "title": "Datos del Paciente",
+                        "data_title": "",
+                        "table_title": "",
+                        "pdf_preview": {
+                            "show": True,
+                            "button_label": "Vista previa e impresión",
+                        },
+                        "excel_preview": {
+                            "show": False,
+                            "button_label": "Descargar Excel",
+                        },
+                        "send_email": {
+                            "show": True,
+                            "button_label": "Enviar por e-mail",
+                            "title": "Envío por E-mail",
+                            "email_label": "Correo electrónico:",
+                            "placeholder": "Ej: ejemplo@correo.com",
+                            "pattern_text": "Debe ser un e-mail válido",
+                            "send_label": "Enviar",
+                        },
+                        "send_whatsapp": {
+                            "show": False,
+                            "button_label": "WhatsApp",
+                            "title": "Envío por WhatsApp",
+                            "number_label": "Número telefónico:",
+                            "placeholder": "Ej: 5512345678",
+                            "pattern": r"^\d{10}$",
+                            "pattern_text": "Debe tener 10 dígitos numéricos",
+                            "send_label": "Enviar",
+                        },
+                    },
+                },
+            },
+            "pdf": {
+                "campos": [
+                    "no_carnet",
+                    "nombre_paciente",
+                    "clinica",
+                    "inasistencias_paciente",
+                    "aniversario_paciente",
+                ],
+                "context": {
+                    "title": "Datos del Paciente",
+                    "header": "Datos del Paciente",
+                    "data_title": "",
+                    "table_title": "",
+                    "footer": "Fundación Teletón México A.C.",
+                },
+            },
+            "sql": {
+                "campos": [
+                    "no_carnet",
+                    "nombre_paciente",
+                    "clinica",
+                    "inasistencias_paciente",
+                    "aniversario_paciente",
+                ],
             },
         },
     },
@@ -456,6 +567,7 @@ cfg_menu_colaborador = cfg_menus.get("colaborador", {})
 
 cfg_paciente = config.get("paciente", {})
 cfg_citas_paciente = parse_campos(cfg_paciente.get("citas", {}))
+cfg_datos_paciente = parse_campos(cfg_paciente.get("datos", {}))
 
 cfg_colaborador = config.get("colaborador", {})
 cfg_citas_colaborador = parse_campos(cfg_colaborador.get("citas", {}))

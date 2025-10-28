@@ -78,12 +78,18 @@ def citas_colaborador(
     query = f"""
         SELECT {_select(cfg.get("campos", {}))}
         FROM SCRITS2.K_CITA kc
-        INNER JOIN SCRITS2.C_USUARIO cu ON kc.FL_USUARIO = cu.FL_USUARIO
-        INNER JOIN SCRITS2.C_SERVICIO cs ON kc.FL_SERVICIO = cs.FL_SERVICIO
-        LEFT JOIN SCRITS2.K_PACIENTE_CITA kpc ON kc.FL_CITA = kpc.FL_CITA
-        LEFT JOIN SCRITS2.C_PACIENTE cp ON kpc.FL_PACIENTE = cp.FL_PACIENTE
-        LEFT JOIN SCRITS2.C_CLINICA cc ON cp.FL_CLINICA = cc.FL_CLINICA
-        LEFT JOIN SCRITS2.C_ESTATUS_CITA cec ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
+        INNER JOIN SCRITS2.C_USUARIO cu
+            ON kc.FL_USUARIO = cu.FL_USUARIO
+        INNER JOIN SCRITS2.C_SERVICIO cs
+            ON kc.FL_SERVICIO = cs.FL_SERVICIO
+        LEFT JOIN SCRITS2.K_PACIENTE_CITA kpc
+            ON kc.FL_CITA = kpc.FL_CITA
+        LEFT JOIN SCRITS2.C_PACIENTE cp
+            ON kpc.FL_PACIENTE = cp.FL_PACIENTE
+        LEFT JOIN SCRITS2.C_CLINICA cc
+            ON cp.FL_CLINICA = cc.FL_CLINICA
+        LEFT JOIN SCRITS2.C_ESTATUS_CITA cec
+            ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
         WHERE cu.CL_LOGIN= %s
     """
     return _parse_query(
@@ -102,9 +108,9 @@ def espacios_disponibles(fecha: datetime) -> Tuple[str, Tuple[str, ...]]:
         SELECT {_select(cfg.get("campos", {}))}
         FROM SCRITS2.K_CITA kc
         INNER JOIN SCRITS2.C_SERVICIO cs
-        ON kc.FL_SERVICIO = cs.FL_SERVICIO
+            ON kc.FL_SERVICIO = cs.FL_SERVICIO
         INNER JOIN SCRITS2.C_USUARIO cu
-        ON kc.FL_USUARIO = cu.FL_USUARIO
+            ON kc.FL_USUARIO = cu.FL_USUARIO
         WHERE kc.NO_DISPONIBLES > 0
         AND cs.NB_SERVICIO NOT LIKE '%%dummy%%'
         AND cs.NB_SERVICIO NOT LIKE '%%análisis%%'
@@ -116,4 +122,45 @@ def espacios_disponibles(fecha: datetime) -> Tuple[str, Tuple[str, ...]]:
         fecha=fecha,
         filters=cfg.get("filtros", {}),
         order_by="kc.FE_CITA ASC",
+    )
+
+
+def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
+    logger.info(f"Construyendo query de datos del paciente por carnet: {id}")
+    cfg = config.cfg_datos_paciente.get("sql", {})
+    query = f"""
+    SELECT {_select(cfg.get("campos", {}))}
+    FROM SCRITS2.K_SERVICIO_DETALLE AS ksd
+    INNER JOIN SCRITS2.K_PACIENTE_CITA AS kpc 
+        ON ksd.FL_PACIENTE_CITA = KPC.FL_PACIENTE_CITA
+    INNER JOIN SCRITS2.C_PACIENTE AS cp
+        ON kpc.FL_PACIENTE = CP.FL_PACIENTE
+    INNER JOIN SCRITS2.K_CITA AS kc
+        ON kpc.FL_CITA = KC.FL_CITA
+    INNER JOIN SCRITS2.C_CLINICA AS cc
+        ON cp.FL_CLINICA = cc.FL_CLINICA
+    INNER JOIN SCRITS2.C_SERVICIO AS cs
+        ON kc.FL_SERVICIO = CS.FL_SERVICIO
+    WHERE
+        WHERE cp.NO_CARNET = %s
+        AND KSD.FG_CANCELADO = 0
+        AND KSD.MN_TOTAL > KSD.MN_PAGADO
+        AND (
+            CP.CL_ESTATUS = 'A' 
+            OR (
+                CP.CL_ESTATUS = 'E' 
+                AND CP.CL_FORMA_SEGUIMIENTO IS NOT NULL 
+                AND CP.FL_TIPO_SEGUIMIENTO IS NOT NULL
+            )
+        )
+        AND KPC.FG_EXTERNO = 0
+        AND (CP.FG_EXTERNO IS NULL OR CP.FG_EXTERNO = 0)
+    HAVING 
+        SUM(KSD.MN_TOTAL - KSD.MN_PAGADO) > 0
+    """
+    return _parse_query(
+        query=query,
+        id=id,
+        filters=cfg.get("filtros", {}),
+        order_by="deuda_total_paciente DESC",
     )

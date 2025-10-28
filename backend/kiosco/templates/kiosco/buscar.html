@@ -16,7 +16,7 @@
 
     <h1 id="main-title">{{ main.header }}</h1>
 
-    <form id="buscar-form" method="POST">
+    <form id="buscar-form" method="POST" data-ajax="true" action="">
         {% csrf_token %}
         <div class="form-group">
 
@@ -64,12 +64,10 @@
         <button aria-label="{{ main.search_button.label }}" type="submit">
             {{ main.search_button.label }}
         </button>
-    </form>
 
-    <!-- Respuesta AJAX (fallback) -->
-    {% if not tabla %}
-        {% include 'kiosco/partials/status.html' %}
-    {% endif %}
+        <!-- Contenedor para respuesta AJAX -->
+        <div class="ajax-response"></div>
+    </form>
 </div>
 
 <!-- Mensaje de 'Procesando...' -->
@@ -81,10 +79,9 @@
 <!-- Modal si hay resultados -->
 {% if tabla %}
     {% include 'kiosco/partials/modal_buscar.html' %}
+    {% include 'kiosco/partials/modal_enviar_email.html' %}
+    {% include 'kiosco/partials/modal_enviar_whatsapp.html' %}
 {% endif %}
-
-{% include 'kiosco/partials/modal_enviar_email.html' %}
-{% include 'kiosco/partials/modal_enviar_whatsapp.html' %}
 
 <!-- Scripts -->
 <script>
@@ -92,10 +89,9 @@
         idRequired: {{ main.id.required|yesno:"true,false" }},
         idPreserve: {{ main.id.preserve|yesno:"true,false" }},
         dateRequired: {{ main.date.required|yesno:"true,false" }},
-        datePreserve: {{ main.id.preserve|yesno:"true,false" }}
+        datePreserve: {{ main.date.preserve|yesno:"true,false" }}
     };
 </script>
-
 <script defer src="{% static 'kiosco/js/buscar.js' %}"></script>
 <script defer src="{% static 'kiosco/js/enviar_pdf_whatsapp.js' %}"></script>
 

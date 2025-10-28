@@ -3,7 +3,6 @@ function abrirModal(id) {
     if (!modal) return;
 
     modal.classList.add("visible");
-
     setTimeout(() => {
         modal.classList.add("show");
         modal.focus();
@@ -56,7 +55,6 @@ function activarListenersModal(modal) {
 
     document.addEventListener("keydown", onKeyDown);
 
-    // Limpieza automática al cerrar (opcional)
     const onClose = () => {
         document.removeEventListener("keydown", onKeyDown);
         modal.removeEventListener("modalClosed", onClose);
@@ -70,58 +68,70 @@ function activarListenersModal(modal) {
     });
 }
 
-function activarEnvioAjaxEnModal(modal) {
-    console.log("activarEnvioAjaxEnModal llamado para modal:", modal.id);
-    const form = modal.querySelector("form[data-ajax='true']");
-    if (!form) {
-        console.warn("No se encontró form data-ajax='true' en modal:", modal.id);
-        return;
-    }
+function activarEnvioAjax(element) {
+    const forms = element.querySelectorAll("form[data-ajax='true']");
+    if (!forms.length) return;
 
-    form.addEventListener("submit", async (e) => {
-        console.log("Submit AJAX interceptado");
-        e.preventDefault();
-        limpiarErrores();
+    forms.forEach(form => {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            limpiarErrores();
+            toggleMensajeProcesando(true);
 
-        const formData = new FormData(form);
-        const csrfToken = form.querySelector("[name='csrfmiddlewaretoken']")?.value;
+            const formData = new FormData(form);
+            const csrfToken = form.querySelector("[name='csrfmiddlewaretoken']")?.value;
 
-        try {
-            const response = await fetch(form.action, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                    "X-Requested-With": "XMLHttpRequest",
-                },
-                body: formData,
-            });
+            try {
+                const response = await fetch(form.action || "", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                    body: formData,
+                });
 
-            const html = await response.text();
-            const container = modal.querySelector(".ajax-response");
+                const html = await response.text();
+                const doc = new DOMParser().parseFromString(html, "text/html");
 
-            if (container) {
-                container.innerHTML = html;
+                // Si hay un modal con resultados
+                const nuevoModal = doc.getElementById("modal");
+                if (nuevoModal) {
+                    document.getElementById("modal")?.remove();
+                    document.body.appendChild(nuevoModal);
 
-                // Buscar el mensaje flotante dentro de la respuesta
-                const mensaje = container.querySelector('.mensaje-flotante');
+                    setTimeout(() => {
+                        nuevoModal.classList.add("show");
+                        nuevoModal.focus();
+                    }, 20);
+
+                    activarListenersModal(nuevoModal);
+                    activarEnvioAjax(nuevoModal);
+                    activarEnvioWhatsApp(nuevoModal);
+                    toggleMensajeProcesando(false);
+                    return;
+                }
+
+                // Mostrar mensajes inline (status.html)
+                const container = form.querySelector(".ajax-response") || document.querySelector(".ajax-response");
+                const contenido = doc.querySelector(".mensaje-flotante");
+                container.innerHTML = contenido ? contenido.outerHTML : "";
+
+                const mensaje = container.querySelector(".mensaje-flotante");
                 if (mensaje) {
                     setTimeout(() => {
                         mensaje.classList.add("fade-out");
                         mensaje.addEventListener("transitionend", () => mensaje.remove());
-                    }, 5000); // 5000 ms = 5 segundos
+                    }, 5000);
                 }
-            } else {
-                console.warn("No se encontró el contenedor .ajax-response dentro del modal.");
+
+            } catch (error) {
+                console.error("Error en envío AJAX:", error);
+            } finally {
+                toggleMensajeProcesando(false);
             }
-
-        } catch (error) {
-            console.error("Error en envío AJAX:", error);
-        }
+        });
     });
-}
-
-function mostrarErrorCampo(nombreCampo) {
-    document.querySelector(`#${nombreCampo}`)?.closest(".input-group")?.classList.add("error");
 }
 
 function limpiarErrores() {
@@ -141,14 +151,6 @@ function toggleMensajeProcesando(visible) {
     processingMessage.setAttribute("aria-hidden", visible ? "false" : "true");
 }
 
-function focusYSeleccionarInput(id) {
-    const input = document.getElementById(id);
-    if (input) {
-        input.focus();
-        input.select();
-    }
-}
-
 function abrirVistaPreviaPDF() {
     window.open(`/preview/pdf/?abrir=1`, "_blank");
 }
@@ -158,97 +160,14 @@ function abrirVistaPreviaExcel() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("modal")?.remove(); // limpia modal anterior
+    document.getElementById("modal")?.remove();
 
-    const form = document.getElementById("buscar-form");
-
-    const {
-        idRequired = false,
-        idPreserve = false,
-        dateRequired = false,
-        datePreserve = false
-    } = window.FormConfig || {};
-
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        toggleMensajeProcesando(true);
-        limpiarErrores();
-
-        const idInput = document.getElementById("id");
-        const fechaInput = document.getElementById("fecha");
-
-        const id = idInput?.value.trim() ?? "";
-        const fecha = fechaInput?.value.trim() ?? "";
-
-        const validarCampo = (campo, valor) => {
-            if (!valor) {
-                toggleMensajeProcesando(false);
-                mostrarErrorCampo(campo);
-                focusYSeleccionarInput(campo);
-                return false;
-            }
-            return true;
-        };
-
-        if (idRequired && !validarCampo("id", id)) return;
-        if (dateRequired && !validarCampo("fecha", fecha)) return;
-
-        const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]")?.value;
-
-        try {
-            const response = await fetch("", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                    "X-Requested-With": "XMLHttpRequest",
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: new URLSearchParams({id, fecha}),
-            });
-
-            const html = await response.text();
-            const doc = new DOMParser().parseFromString(html, "text/html");
-            const nuevoModal = doc.getElementById("modal");
-
-            document.getElementById("modal")?.remove(); // elimina viejo modal
-
-            if (nuevoModal) {
-                document.body.appendChild(nuevoModal);
-                setTimeout(() => {
-                    nuevoModal.classList.add("show");
-                    nuevoModal.focus();
-                    if (!idPreserve) idInput.value = "";
-                    if (!datePreserve) fechaInput.value = "";
-                }, 20);
-
-                activarListenersModal(nuevoModal);
-                activarEnvioWhatsApp(nuevoModal);
-                activarEnvioAjaxEnModal(nuevoModal);  // Solo en el modal nuevo
-            } else {
-                const error = doc.querySelector(".error-message");
-                if (error) {
-                    const container = document.querySelector(".container");
-                    container.querySelector(".error-message")?.remove();
-                    container.insertAdjacentElement("beforeend", error);
-
-                    const target = error.getAttribute("data-error-target") || "id";
-                    mostrarErrorCampo(target);
-                    focusYSeleccionarInput(target);
-                } else {
-                    focusYSeleccionarInput("id");
-                }
-            }
-        } catch (error) {
-            console.error("Error al buscar:", error);
-            focusYSeleccionarInput("id");
-        } finally {
-            toggleMensajeProcesando(false);
-        }
-    });
-
-    // Al cargar la página, activa para TODOS los modales que haya
+    // Activar listeners globales para modales y formularios
     document.querySelectorAll("div.modal").forEach(modal => {
         activarListenersModal(modal);
-        activarEnvioAjaxEnModal(modal);
+        activarEnvioAjax(modal);
     });
+
+    // Activar AJAX en toda la página (incluye #buscar-form inline)
+    activarEnvioAjax(document);
 });

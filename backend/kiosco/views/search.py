@@ -21,6 +21,18 @@ def citas_paciente(request: HttpRequest) -> HttpResponse:
     )
 
 
+def datos_paciente(request: HttpRequest) -> HttpResponse:
+    return render.search(
+        request=request,
+        config_data=config.cfg_datos_paciente,
+        form=forms.BuscarIdForm,
+        data_query=queries.data.datos_paciente,
+        nombre_id="carnet",
+        nombre_sujeto="paciente",
+        nombre_objetos="datos",
+    )
+
+
 def citas_colaborador(request: HttpRequest) -> HttpResponse:
     return render.search(
         request=request,
