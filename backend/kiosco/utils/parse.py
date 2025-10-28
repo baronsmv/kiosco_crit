@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Dict, Optional, Type, Callable
+from typing import Callable, Dict, Tuple, Optional, Type
 
 from django.db import OperationalError
 from django.forms import Form
@@ -11,6 +11,40 @@ from .logger import get_logger
 from .. import models
 
 logger = get_logger(__name__)
+
+
+def query(
+    query: str,
+    id: Optional[str] = None,
+    fecha: Optional[date] = None,
+    *,
+    filters: Optional[Dict] = None,
+    order_by: Optional[str] = None,
+    fecha_query: str = " AND CAST(kc.FE_CITA AS DATE) = %s",
+) -> Tuple[str, Tuple[str, ...]]:
+    logger.info(f"Generando consulta para ID: {id} con fecha: {fecha}")
+    params = tuple(filter(None, (id, fecha)))
+
+    if fecha:
+        query += fecha_query
+        logger.debug("Agregado filtro adicional por fecha exacta.")
+
+    if filters:
+        for k, v in filters.items():
+            if fecha:
+                valores = v.get("con_fecha")
+            else:
+                valores = v.get("sin_fecha")
+            if valores:
+                query += f" AND {k} IN ('" + "', '".join(valores) + "')"
+
+    if order_by:
+        query += f" ORDER BY {order_by}"
+
+    logger.debug(f"Query final generado: {query}")
+    logger.debug(f"Parámetros: {params}")
+
+    return query, params
 
 
 def form(
@@ -28,27 +62,16 @@ def form(
     form_fields = form.fields.keys()
     has_id = "id" in form_fields
     has_fecha = "fecha" in form_fields
-
     ip_cliente = get.client_ip(request)
+    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
 
     web_data = config_data["web"]
     pdf_data = config_data["pdf"]
     sql_data = config_data["sql"]
 
-    web_campos = web_data.get("campos", {})
-    sql_campos = sql_data.get("campos", {})
-
-    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
-
     if not form.is_valid():
-        context.update(
-            {
-                "id_error": has_id and bool(form["id"].errors),
-                "date_error": has_fecha and bool(form["fecha"].errors),
-            }
-        )
         logger.warning(f"Errores de validación en formulario: {form.errors.as_json()}")
-        return
+        raise AjaxException()
 
     id = form.cleaned_data["id"] if has_id else None
     fecha = form.cleaned_data["fecha"] if has_fecha else None
@@ -63,7 +86,7 @@ def form(
         ip_cliente=ip_cliente,
         tipo=tipo,
     ):
-        return
+        raise AjaxException(f"{nombre_id.capitalize()} no válido.")
 
     context.update({"id": id or "", "fecha": fecha})
 
@@ -105,7 +128,9 @@ def form(
 
     context["sujeto"] = sujeto
     context["tabla"] = get.filtered_objects(
-        objetos, campos=web_campos, sql_campos=sql_campos
+        objetos,
+        campos=web_data.get("campos", {}),
+        sql_campos=sql_data.get("campos", {}),
     )
 
     if model:
@@ -120,6 +145,7 @@ def form(
     request.session["context_data"] = {
         "sujeto": sujeto,
         "tabla": context.get("tabla"),
+        "objetos": objetos,
         "id": id or "",
         "fecha": (fecha.isoformat() if isinstance(fecha, date) else fecha),
         "nombre_objetos": nombre_objetos,

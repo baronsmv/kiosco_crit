@@ -1,57 +1,17 @@
-from datetime import datetime
-from typing import Tuple, Optional, Dict
+from datetime import date
+from typing import Tuple, Optional
 
-from ..utils import config
+from ..utils import config, get, parse
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 
-def _select(campos: Dict) -> str:
-    seleccion = ", ".join(campos[c]["sql"] + f" AS {c}" for c in campos.keys())
-    logger.debug(f"Campos seleccionados para query: {seleccion}")
-    return seleccion
-
-
-def _parse_query(
-    query: str,
-    id: Optional[str] = None,
-    fecha: Optional[datetime] = None,
-    *,
-    filters: Optional[Dict] = None,
-    order_by: Optional[str] = None,
-    fecha_query: str = " AND CAST(kc.FE_CITA AS DATE) = %s",
-) -> Tuple[str, Tuple[str, ...]]:
-    logger.info(f"Generando consulta para ID: {id} con fecha: {fecha}")
-    params = tuple(filter(None, (id, fecha)))
-
-    if fecha:
-        query += fecha_query
-        logger.debug("Agregado filtro adicional por fecha exacta.")
-
-    if filters:
-        for k, v in filters.items():
-            if fecha:
-                valores = v.get("con_fecha")
-            else:
-                valores = v.get("sin_fecha")
-            if valores:
-                query += f" AND {k} IN ('" + "', '".join(valores) + "')"
-
-    if order_by:
-        query += f" ORDER BY {order_by}"
-
-    logger.debug(f"Query final generado: {query}")
-    logger.debug(f"Parámetros: {params}")
-
-    return query, params
-
-
-def citas_paciente(id: str, fecha: Optional[datetime]) -> Tuple[str, Tuple[str, ...]]:
+def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de citas por carnet: {id}, fecha: {fecha}")
-    cfg = config.cfg_citas_paciente.get("sql", {})
+    sql_config = config.cfg_citas_paciente.get("sql", {})
     query = f"""
-        SELECT {_select(cfg.get("campos", {}))}
+        SELECT {get.sql_selection(sql_config)}
         FROM SCRITS2.C_PACIENTE cp
         INNER JOIN SCRITS2.K_PACIENTE_CITA kpc ON cp.FL_PACIENTE = kpc.FL_PACIENTE
         INNER JOIN SCRITS2.K_CITA kc ON kpc.FL_CITA = kc.FL_CITA
@@ -61,22 +21,20 @@ def citas_paciente(id: str, fecha: Optional[datetime]) -> Tuple[str, Tuple[str, 
         LEFT JOIN SCRITS2.C_ESTATUS_CITA cec ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
         WHERE cp.NO_CARNET = %s
     """
-    return _parse_query(
+    return parse.query(
         query=query,
         id=id,
         fecha=fecha,
-        filters=cfg.get("filtros", {}),
+        filters=sql_config.get("filtros", {}),
         order_by="kc.FE_CITA ASC",
     )
 
 
-def citas_colaborador(
-    id: str, fecha: Optional[datetime]
-) -> Tuple[str, Tuple[str, ...]]:
+def citas_colaborador(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de citas por colaborador ID: {id}, fecha: {fecha}")
-    cfg = config.cfg_citas_colaborador.get("sql", {})
+    sql_config = config.cfg_citas_colaborador.get("sql", {})
     query = f"""
-        SELECT {_select(cfg.get("campos", {}))}
+        SELECT {get.sql_selection(sql_config)}
         FROM SCRITS2.K_CITA kc
         INNER JOIN SCRITS2.C_USUARIO cu
             ON kc.FL_USUARIO = cu.FL_USUARIO
@@ -92,20 +50,20 @@ def citas_colaborador(
             ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
         WHERE cu.CL_LOGIN= %s
     """
-    return _parse_query(
+    return parse.query(
         query=query,
         id=id,
         fecha=fecha,
-        filters=cfg.get("filtros", {}),
+        filters=sql_config.get("filtros", {}),
         order_by="kc.FE_CITA ASC",
     )
 
 
-def espacios_disponibles(fecha: datetime) -> Tuple[str, Tuple[str, ...]]:
+def espacios_disponibles(fecha: date) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de espacios disponibles por fecha: {fecha}")
-    cfg = config.cfg_espacios_disponibles.get("sql", {})
+    sql_config = config.cfg_espacios_disponibles.get("sql", {})
     query = f"""
-        SELECT {_select(cfg.get("campos", {}))}
+        SELECT {get.sql_selection(sql_config)}
         FROM SCRITS2.K_CITA kc
         INNER JOIN SCRITS2.C_SERVICIO cs
             ON kc.FL_SERVICIO = cs.FL_SERVICIO
@@ -117,19 +75,19 @@ def espacios_disponibles(fecha: datetime) -> Tuple[str, Tuple[str, ...]]:
         AND cs.NB_SERVICIO NOT LIKE '%%EEG%%'
         AND kc.FG_BLOQUEADA = 0
     """
-    return _parse_query(
+    return parse.query(
         query=query,
         fecha=fecha,
-        filters=cfg.get("filtros", {}),
+        filters=sql_config.get("filtros", {}),
         order_by="kc.FE_CITA ASC",
     )
 
 
 def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de datos del paciente por carnet: {id}")
-    cfg = config.cfg_datos_paciente.get("sql", {})
+    sql_config = config.cfg_datos_paciente.get("sql", {})
     query = f"""
-    SELECT {_select(cfg.get("campos", {}))}
+    SELECT {get.sql_selection(sql_config)}
     FROM SCRITS2.K_SERVICIO_DETALLE AS ksd
     INNER JOIN SCRITS2.K_PACIENTE_CITA AS kpc 
         ON ksd.FL_PACIENTE_CITA = kpc.FL_PACIENTE_CITA
@@ -165,9 +123,9 @@ def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
     HAVING
         SUM(ksd.MN_TOTAL - ksd.MN_PAGADO) > 0
     """
-    return _parse_query(
+    return parse.query(
         query=query,
         id=id,
-        filters=cfg.get("filtros", {}),
+        filters=sql_config.get("filtros", {}),
         order_by="deuda_total_paciente DESC",
     )

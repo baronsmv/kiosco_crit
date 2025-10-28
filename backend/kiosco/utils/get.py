@@ -53,6 +53,13 @@ def initial_context(config_data: Dict) -> Dict:
     }
 
 
+def sql_selection(sql_config: Dict[str, Dict]) -> str:
+    campos = sql_config.get("campos", {})
+    seleccion = ", ".join(campos[c]["sql"] + f" AS {c}" for c in campos.keys())
+    logger.info(f"Campos seleccionados para query: {seleccion}")
+    return seleccion
+
+
 def model_type(nombre_objetos: str, nombre_sujeto: str) -> str:
     tipo = nombre_objetos.title()
     if nombre_sujeto:
@@ -116,7 +123,7 @@ def all_objects(
     nombre_id: str,
     *,
     db_name: str = "crit",
-) -> Optional[List[str]]:
+) -> Optional[List[Dict]]:
     if not data_query:
         return None
 
@@ -125,7 +132,9 @@ def all_objects(
 
     try:
         with connections[db_name].cursor() as cursor:
-            objetos = cursor.execute(query, params).fetchall()
+            cursor.execute(query, params)
+            columnas = tuple(col[0] for col in cursor.description)
+            objetos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
     except OperationalError as e:
         logger.error(f"Error al obtener objetos para ID: '{id}': {e}")
         raise
@@ -150,7 +159,7 @@ def all_objects(
 
 
 def filtered_objects(
-    objetos: Optional[Dict[str, str]],
+    objetos: Optional[List[Dict[str, Any]]],
     campos: List[str],
     sql_campos: Dict[str, Any],
 ) -> Optional[Tuple[Tuple, ...]]:
@@ -159,13 +168,14 @@ def filtered_objects(
 
     return tuple(
         tuple(
-            {
-                campo: format.campo(cita[i], sql_campos[campo].get("formatear"))
-                for i, campo in enumerate(sql_campos)
-            }.get(campo, "")
+            (
+                format.campo(objeto.get(campo), sql_campos[campo].get("formatear"))
+                if campo in sql_campos
+                else ""
+            )
             for campo in campos
         )
-        for cita in objetos
+        for objeto in objetos
     )
 
 
