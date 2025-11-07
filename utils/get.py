@@ -13,8 +13,8 @@ from django.http import HttpRequest
 from django.urls import reverse_lazy
 
 from classes.exceptions import AjaxException
-from utils import format, map
-from utils.logger import get_logger
+from . import map
+from .logger import get_logger
 
 logger = get_logger(__name__)
 base_url = settings.WHATSAPP_API_BASE_URL
@@ -158,6 +158,18 @@ def all_objects(
     return objetos
 
 
+def formatted_row(dato: str, formatear: Optional[str] = None) -> str:
+    if not formatear:
+        return dato
+    if formatear == "nombre":
+        return dato.title()
+    if formatear == "fecha":
+        return (
+            dato.strftime("%d/%m/%Y %H:%M") if isinstance(dato, datetime) else str(dato)
+        )
+    return dato
+
+
 def filtered_objects(
     objetos: Optional[List[Dict[str, Any]]],
     campos: List[str],
@@ -169,7 +181,7 @@ def filtered_objects(
     return tuple(
         tuple(
             (
-                format.campo(objeto.get(campo), sql_campos[campo].get("formatear"))
+                formatted_row(objeto.get(campo), sql_campos[campo].get("formatear"))
                 if campo in sql_campos
                 else ""
             )

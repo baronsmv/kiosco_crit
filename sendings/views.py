@@ -7,12 +7,21 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from utils import config
-from utils import send
 from utils.logger import get_logger
+from .utils import email_pdf_view, whatsapp_pdf_view
 
 logger = get_logger(__name__)
 
 base_url = settings.WHATSAPP_API_BASE_URL
+
+
+def email_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
+    return email_pdf_view(request)
+
+
+@csrf_exempt
+def whatsapp_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
+    return whatsapp_pdf_view(request)
 
 
 @login_required
@@ -60,12 +69,3 @@ def whatsapp_admin(request: HttpRequest):
             "node_base_url": base_url,
         },
     )
-
-
-@csrf_exempt
-def whatsapp_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
-    return send.pdf_whatsapp(request)
-
-
-def email_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
-    return send.pdf_email(request)

@@ -8,16 +8,16 @@ from django.core.validators import validate_email
 from django.http import HttpRequest, HttpResponse, JsonResponse
 
 from classes.models import BaseModel
-from sendings import models
 from utils import generate, get, render
 from utils.logger import get_logger
+from . import models
 
 logger = get_logger(__name__)
 
 base_url = settings.WHATSAPP_API_BASE_URL
 
 
-def pdf_email(
+def email_pdf_view(
     request: HttpRequest,
     model: Type[BaseModel] = models.EnvioEmail,
 ) -> HttpResponse | JsonResponse:
@@ -39,7 +39,7 @@ def pdf_email(
         validate_email(correo)
     except ValidationError:
         logger.error("Email inválido")
-        return render.ajax(
+        return render.ajax_response(
             request,
             context={
                 "mensaje_ajax": "Dirección de correo inválida.",
@@ -71,7 +71,7 @@ def pdf_email(
                 estado="Fallido",
                 detalle_error=str(e),
             )
-        return render.ajax(
+        return render.ajax_response(
             request,
             context={
                 "mensaje_ajax": "Ocurrió un error al enviar el correo.",
@@ -90,7 +90,7 @@ def pdf_email(
             archivo_pdf=pdf_path,
             estado="Enviado",
         )
-    return render.ajax(
+    return render.ajax_response(
         request,
         context={
             "mensaje_ajax": "Correo enviado exitosamente.",
@@ -99,7 +99,7 @@ def pdf_email(
     ) or JsonResponse({"status": "enviado"})
 
 
-def pdf_whatsapp(
+def whatsapp_pdf_view(
     request: HttpRequest,
     model: Type[BaseModel] = models.EnvioWhatsapp,
 ) -> JsonResponse:

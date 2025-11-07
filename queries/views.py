@@ -1,15 +1,15 @@
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
 
-from utils import config, render
+from utils import config
 from utils.logger import get_logger
 from . import forms, queries
+from .utils import query_view
 
 logger = get_logger(__name__)
 
 
 def citas_paciente(request: HttpRequest) -> HttpResponse:
-    return render.search(
+    return query_view(
         request=request,
         config_data=config.cfg_citas_paciente,
         form=forms.BuscarIdFechaForm,
@@ -22,7 +22,7 @@ def citas_paciente(request: HttpRequest) -> HttpResponse:
 
 
 def datos_paciente(request: HttpRequest) -> HttpResponse:
-    return render.search(
+    return query_view(
         request=request,
         config_data=config.cfg_datos_paciente,
         form=forms.BuscarIdForm,
@@ -35,7 +35,7 @@ def datos_paciente(request: HttpRequest) -> HttpResponse:
 
 
 def citas_colaborador(request: HttpRequest) -> HttpResponse:
-    return render.search(
+    return query_view(
         request=request,
         config_data=config.cfg_citas_colaborador,
         form=forms.BuscarIdFechaForm,
@@ -48,7 +48,7 @@ def citas_colaborador(request: HttpRequest) -> HttpResponse:
 
 
 def espacios_disponibles(request: HttpRequest) -> HttpResponse:
-    return render.search(
+    return query_view(
         request=request,
         config_data=config.cfg_espacios_disponibles,
         form=forms.BuscarFechaForm,

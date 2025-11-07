@@ -1,53 +1,24 @@
 from datetime import date
-from typing import Callable, Dict, Tuple, Optional, Type
+from typing import Callable, Dict, Optional, Type
 
 from django.db import OperationalError
 from django.forms import Form
 from django.http import HttpRequest
+from django.http import HttpResponse
+from django.shortcuts import render
 
 from classes import models
 from classes.exceptions import AjaxException
+from classes.models import BaseModel
 from utils import get, validate
 from utils.logger import get_logger
+from utils.render import ajax_response
+from .models import Consulta
 
 logger = get_logger(__name__)
 
 
-def query(
-    query: str,
-    id: Optional[str] = None,
-    fecha: Optional[date] = None,
-    *,
-    filters: Optional[Dict] = None,
-    order_by: Optional[str] = None,
-    fecha_query: str = " AND CAST(kc.FE_CITA AS DATE) = %s",
-) -> Tuple[str, Tuple[str, ...]]:
-    logger.info(f"Generando consulta para ID: {id} con fecha: {fecha}")
-    params = tuple(filter(None, (id, fecha)))
-
-    if fecha:
-        query += fecha_query
-        logger.debug("Agregado filtro adicional por fecha exacta.")
-
-    if filters:
-        for k, v in filters.items():
-            if fecha:
-                valores = v.get("con_fecha")
-            else:
-                valores = v.get("sin_fecha")
-            if valores:
-                query += f" AND {k} IN ('" + "', '".join(valores) + "')"
-
-    if order_by:
-        query += f" ORDER BY {order_by}"
-
-    logger.debug(f"Query final generado: {query}")
-    logger.debug(f"Parámetros: {params}")
-
-    return query, params
-
-
-def form(
+def parse_form(
     request: HttpRequest,
     context: Dict,
     config_data: Dict,
@@ -154,3 +125,66 @@ def form(
         "pdf_data": pdf_data,
         "sql_data": sql_data,
     }
+
+
+def query_view(
+    request: HttpRequest,
+    config_data: Dict,
+    form: Type[Form],
+    data_query: Callable,
+    nombre_objetos: str,
+    *,
+    model: Optional[Type[BaseModel]] = Consulta,
+    nombre_id: Optional[str] = None,
+    nombre_sujeto: Optional[str] = None,
+    exist_query: Optional[Callable] = None,
+    testing: bool = False,
+) -> HttpResponse:
+    logger.info(f"Request method: {request.method}")
+    logger.debug(f"POST data: {request.POST}")
+
+    context = get.initial_context(config_data)
+
+    if testing:
+        context["tabla"] = tuple(("Ejemplo",) * 5 for _ in range(100))
+        request.session["context_data"] = {
+            "sujeto": None,
+            "tabla": context["tabla"],
+            "id": "ID de ejemplo",
+            "fecha": "2025-10-17",
+            "nombre_objetos": nombre_objetos,
+            "nombre_sujeto": nombre_sujeto,
+            "nombre_id": nombre_id,
+            "pdf_data": config_data["pdf"],
+            "sql_data": config_data["sql"],
+        }
+        model = None
+
+    if not testing and request.method == "POST":
+        try:
+            parse_form(
+                request=request,
+                config_data=config_data,
+                context=context,
+                form=form(request.POST),
+                model=model,
+                exist_query=exist_query,
+                data_query=data_query,
+                nombre_id=nombre_id,
+                nombre_sujeto=nombre_sujeto,
+                nombre_objetos=nombre_objetos,
+            )
+            logger.debug(f"Datos de contexto procesados:\n{context}")
+        except AjaxException as e:
+            return ajax_response(request, context=e.context())
+
+        if respuesta_ajax := ajax_response(
+            request=request,
+            context=context,
+            filename=("modal_buscar.html" if context.get("tabla") else "status.html"),
+        ):
+            logger.debug("Respuesta AJAX enviada")
+            return respuesta_ajax
+
+    logger.debug("Renderizando vista completa con contexto inicial.")
+    return render(request, f"queries/consulta.html", context)

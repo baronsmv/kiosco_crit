@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 
 
-def menu(request: HttpRequest, config: Dict[str, Dict]) -> HttpResponse:
+def menu_view(request: HttpRequest, config: Dict[str, Dict]) -> HttpResponse:
     menu_options = tuple(
         (
             reverse_lazy(key),

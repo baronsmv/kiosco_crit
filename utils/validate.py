@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.forms.forms import Form
 
 from classes.models import BaseModel
-from utils.logger import get_logger
+from .logger import get_logger
 
 logger = get_logger(__name__)
 
