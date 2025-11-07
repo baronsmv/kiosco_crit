@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>{{ main.title }}</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    {% load static %}
+    <link href="{% static 'main/css/main.css' %}" rel="stylesheet"/>
+</head>
+<body>
+
+<div aria-labelledby="main-title" class="container" role="main">
+    {% if main.home.show %}
+        <a href="{{ home_url }}" class="home-link">{{ main.home.label }}</a>
+    {% endif %}
+
+    <h1 id="main-title">{{ main.header }}</h1>
+
+    <form id="buscar-form" method="POST" data-ajax="true" action="">
+        {% csrf_token %}
+        <div class="form-group">
+
+            <!-- Entrada de ID -->
+            {% if main.id.show %}
+                <label for="id">{{ main.id.label }}</label>
+                <div class="input-group {% if id_error %}error{% endif %}">
+                    <input
+                            aria-describedby="{% if id_error %}id-error{% endif %}"
+                            aria-invalid="{% if id_error %}true{% else %}false{% endif %}"
+                            class="{% if id_error %}error{% endif %}"
+                            id="id"
+                            maxlength="{{ main.id.max_length|default:50 }}"
+                            name="id"
+                            pattern="{{ main.id.pattern|default:'' }}"
+                            placeholder="{{ main.id.placeholder|default:'' }}"
+                            {% if main.id.required %}required{% endif %}
+                            type="text"
+                            value="{{ id|default:'' }}"
+                    />
+                </div>
+            {% endif %}
+
+            <!-- Entrada de Fecha -->
+            {% if main.date.show %}
+                <label class="fecha-label" for="fecha">{{ main.date.label }}</label>
+                {% if main.date.sublabel %}
+                <p class="form-sublabel">{{ main.date.sublabel }}</p>
+                {% endif %}
+                <div class="input-group {% if date_error %}error{% endif %}">
+                    <input
+                            aria-describedby="{% if date_error %}fecha-error{% endif %}"
+                            aria-invalid="{% if date_error %}true{% else %}false{% endif %}"
+                            class="{% if date_error %}error{% endif %}"
+                            id="fecha"
+                            name="fecha"
+                            {% if main.date.required %}required{% endif %}
+                            type="date"
+                            value="{{ initial_date|date:'Y-m-d' }}"
+                    />
+                </div>
+            {% endif %}
+
+        </div>
+        <button aria-label="{{ main.search_button.label }}" type="submit">
+            {{ main.search_button.label }}
+        </button>
+
+        <!-- Contenedor para respuesta AJAX -->
+        <div class="ajax-response"></div>
+    </form>
+</div>
+
+<!-- Mensaje de 'Procesando...' -->
+<div id="processing-message" aria-hidden="true">
+    <div class="spinner"></div>
+    <div>{{ main.search_button.message }}</div>
+</div>
+
+<!-- Modal si hay resultados -->
+{% if tabla %}
+    {% include 'queries/partials/modal_buscar.html' %}
+    {% include 'queries/partials/modal_enviar_email.html' %}
+    {% include 'queries/partials/modal_enviar_whatsapp.html' %}
+{% endif %}
+
+<!-- Scripts -->
+<script>
+    window.FormConfig = {
+        idRequired: {{ main.id.required|yesno:"true,false" }},
+        idPreserve: {{ main.id.preserve|yesno:"true,false" }},
+        dateRequired: {{ main.date.required|yesno:"true,false" }},
+        datePreserve: {{ main.date.preserve|yesno:"true,false" }}
+    };
+</script>
+<script defer src="{% static 'queries/js/consulta.js' %}"></script>
+<script defer src="{% static 'sendings/js/whatsapp.js' %}"></script>
+
+</body>
+</html>

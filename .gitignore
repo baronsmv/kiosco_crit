@@ -30,7 +30,7 @@ dist/
 *.egg-info/
 
 # Archivos estáticos generados por Django
-backend/staticfiles/
+staticfiles/
 
 # Archivos de medios cargados por el usuario
 */media/

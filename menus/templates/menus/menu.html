@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{{ title }}</title>
+    {% load static %}
+    <link href="{% static 'main/css/main.css' %}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container home-menu">
+    {% if mostrar_inicio %}
+    <a class="home-link" href="{{ home_url }}">{{ home_label }}</a>
+    {% endif %}
+
+    <h1>{{ header }}</h1>
+
+    <p style="text-align:center; margin-bottom: 2rem; font-size:1.1rem;">
+        {{ select_text }}
+    </p>
+
+    <div class="menu-options">
+        {% for option_url, option_title, option_description in menu_options %}
+        <a class="menu-card" href="{{ option_url }}">
+            <h2>{{ option_title }}</h2>
+            <p>{{ option_description }}</p>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>
