@@ -24,4 +24,9 @@ urlpatterns = [
         view=views.email_pdf,
         name="send_email_pdf",
     ),
+    path(
+        route="send/email/excel/",
+        view=views.email_excel,
+        name="send_email_excel",
+    ),
 ]

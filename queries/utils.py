@@ -11,8 +11,8 @@ from classes import models
 from classes.exceptions import AjaxException
 from classes.models import BaseModel
 from utils import get, validate
+from utils.decorators import ajax_handler
 from utils.logger import get_logger
-from utils.render import ajax_response
 from .models import Consulta
 
 logger = get_logger(__name__)
@@ -115,9 +115,8 @@ def parse_form(
 
     request.session["context_data"] = {
         "sujeto": sujeto,
-        "tabla": context.get("tabla"),
         "objetos": objetos,
-        "id": id or "",
+        "id": id,
         "fecha": (fecha.isoformat() if isinstance(fecha, date) else fecha),
         "nombre_objetos": nombre_objetos,
         "nombre_sujeto": nombre_sujeto,
@@ -127,6 +126,7 @@ def parse_form(
     }
 
 
+@ajax_handler
 def query_view(
     request: HttpRequest,
     config_data: Dict,
@@ -138,7 +138,7 @@ def query_view(
     nombre_id: Optional[str] = None,
     nombre_sujeto: Optional[str] = None,
     exist_query: Optional[Callable] = None,
-    testing: bool = False,
+    testing: bool = True,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
@@ -146,10 +146,21 @@ def query_view(
     context = get.initial_context(config_data)
 
     if testing:
-        context["tabla"] = tuple(("Ejemplo",) * 5 for _ in range(100))
+        rows = 100
+        text = "Ejemplo"
+        sql_campos = config_data["sql"]["campos"]
+        model = None
+        context.update(
+            {
+                "tabla": tuple((text,) * len(sql_campos) for _ in range(rows)),
+                "objetos": [{campo: text for campo in sql_campos} for _ in range(rows)],
+            }
+        )
+
         request.session["context_data"] = {
             "sujeto": None,
             "tabla": context["tabla"],
+            "objetos": context["objetos"],
             "id": "ID de ejemplo",
             "fecha": "2025-10-17",
             "nombre_objetos": nombre_objetos,
@@ -158,33 +169,24 @@ def query_view(
             "pdf_data": config_data["pdf"],
             "sql_data": config_data["sql"],
         }
-        model = None
 
     if not testing and request.method == "POST":
-        try:
-            parse_form(
-                request=request,
-                config_data=config_data,
-                context=context,
-                form=form(request.POST),
-                model=model,
-                exist_query=exist_query,
-                data_query=data_query,
-                nombre_id=nombre_id,
-                nombre_sujeto=nombre_sujeto,
-                nombre_objetos=nombre_objetos,
-            )
-            logger.debug(f"Datos de contexto procesados:\n{context}")
-        except AjaxException as e:
-            return ajax_response(request, context=e.context())
-
-        if respuesta_ajax := ajax_response(
+        parse_form(
             request=request,
+            config_data=config_data,
             context=context,
-            filename=("modal_buscar.html" if context.get("tabla") else "status.html"),
-        ):
-            logger.debug("Respuesta AJAX enviada")
-            return respuesta_ajax
+            form=form(request.POST),
+            model=model,
+            exist_query=exist_query,
+            data_query=data_query,
+            nombre_id=nombre_id,
+            nombre_sujeto=nombre_sujeto,
+            nombre_objetos=nombre_objetos,
+        )
+        logger.debug(f"Datos de contexto procesados:\n{context}")
+
+        if context.get("tabla"):
+            raise AjaxException(context=context, filename="modal_buscar.html")
 
     logger.debug("Renderizando vista completa con contexto inicial.")
     return render(request, f"queries/consulta.html", context)

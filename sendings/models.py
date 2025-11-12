@@ -6,7 +6,7 @@ from classes.models import BaseModel
 class EnvioWhatsapp(BaseModel):
     numero_destino = models.CharField(max_length=20)
     mensaje = models.TextField()
-    archivo_pdf = models.CharField(max_length=255)
+    archivo = models.CharField(max_length=255)
     estado = models.CharField(max_length=20)
     detalle_error = models.TextField(blank=True, null=True)
 
@@ -27,7 +27,7 @@ class EnvioWhatsapp(BaseModel):
 class EnvioEmail(BaseModel):
     correo_destino = models.EmailField()
     mensaje = models.TextField()
-    archivo_pdf = models.CharField(max_length=255)
+    archivo = models.CharField(max_length=255)
     estado = models.CharField(max_length=20)
     detalle_error = models.TextField(blank=True, null=True)
 

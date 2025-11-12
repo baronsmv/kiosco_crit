@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Optional
 
 import requests
 from django.conf import settings
@@ -7,9 +7,12 @@ from django.core.mail import EmailMessage
 from django.core.validators import validate_email
 from django.http import HttpRequest, HttpResponse, JsonResponse
 
+from classes.exceptions import AjaxException
 from classes.models import BaseModel
-from utils import generate, get, render
+from utils import generate, get
+from utils.decorators import ajax_handler
 from utils.logger import get_logger
+from utils.render import ajax_response
 from . import models
 
 logger = get_logger(__name__)
@@ -17,17 +20,15 @@ logger = get_logger(__name__)
 base_url = settings.WHATSAPP_API_BASE_URL
 
 
-def email_pdf_view(
+@ajax_handler
+def email_view(
     request: HttpRequest,
-    model: Type[BaseModel] = models.EnvioEmail,
+    filepath: str,
+    subject: str,
+    body: str,
+    *,
+    model: Optional[Type[BaseModel]] = models.EnvioEmail,
 ) -> HttpResponse | JsonResponse:
-    previous_context = request.session.get("context_data", {})
-    id = previous_context.get("id", "")
-    nombre_sujeto = previous_context.get("nombre_sujeto", "")
-    nombre_objetos = previous_context.get("nombre_objetos", "")
-    fecha_especificada = previous_context.get("fecha")
-    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
-
     if request.method != "POST":
         logger.warning(f"Método no permitido: {request.method}")
         return JsonResponse({"error": "Método no permitido"}, status=405)
@@ -35,27 +36,23 @@ def email_pdf_view(
     correo = request.POST.get("email")
     logger.debug(f"Email recibido: {correo}")
 
+    previous_context = request.session.get("context_data", {})
+    id = previous_context.get("id", "")
+    nombre_sujeto = previous_context.get("nombre_sujeto", "")
+    nombre_objetos = previous_context.get("nombre_objetos", "")
+    fecha_especificada = previous_context.get("fecha")
+    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
+    mensaje = "\n".join((subject, body))
+
     try:
         validate_email(correo)
     except ValidationError:
         logger.error("Email inválido")
-        return render.ajax_response(
-            request,
-            context={
-                "mensaje_ajax": "Dirección de correo inválida.",
-                "tipo_ajax": "error",
-            },
-        ) or JsonResponse({"error": "Email inválido"}, status=400)
-
-    filename = generate.pdf(previous_context, color=True)
-    subject = f"Datos del {nombre_sujeto}"
-    body = "Adjuntamos el archivo solicitado en formato PDF."
-    mensaje = "\n".join((subject, body))
-    pdf_path = f"media/pdf/{filename}"
+        raise AjaxException("Dirección de correo inválida.")
 
     try:
         email = EmailMessage(subject, body, to=[correo])
-        email.attach_file(pdf_path)
+        email.attach_file(filepath)
         email.send()
     except Exception as e:
         logger.exception("Error enviando correo")
@@ -67,17 +64,11 @@ def email_pdf_view(
                 ip_cliente=get.client_ip(request),
                 correo_destino=correo,
                 mensaje=mensaje,
-                archivo_pdf=pdf_path,
+                archivo=filepath,
                 estado="Fallido",
                 detalle_error=str(e),
             )
-        return render.ajax_response(
-            request,
-            context={
-                "mensaje_ajax": "Ocurrió un error al enviar el correo.",
-                "tipo_ajax": "error",
-            },
-        ) or JsonResponse({"error": str(e)}, status=500)
+        raise AjaxException("Ocurrió un error al enviar el correo.")
 
     if model:
         model.objects.create(
@@ -87,16 +78,18 @@ def email_pdf_view(
             ip_cliente=get.client_ip(request),
             correo_destino=correo,
             mensaje=mensaje,
-            archivo_pdf=pdf_path,
+            archivo=filepath,
             estado="Enviado",
         )
-    return render.ajax_response(
+
+    logger.info("Correo enviado exitosamente.")
+    return ajax_response(
         request,
         context={
             "mensaje_ajax": "Correo enviado exitosamente.",
             "tipo_ajax": "success",
         },
-    ) or JsonResponse({"status": "enviado"})
+    )
 
 
 def whatsapp_pdf_view(
@@ -152,7 +145,7 @@ Nombre: {sujeto['Nombre']}
                 ip_cliente=get.client_ip(request),
                 numero_destino=numero,
                 mensaje=mensaje,
-                archivo_pdf=payload["image_path"],
+                archivo=payload["image_path"],
                 estado=estado,
                 detalle_error=detalle_error,
             )
@@ -177,7 +170,7 @@ Nombre: {sujeto['Nombre']}
                 ip_cliente=get.client_ip(request),
                 numero_destino=numero,
                 mensaje=mensaje,
-                archivo_pdf=payload["image_path"],
+                archivo=payload["image_path"],
                 estado="Fallido",
                 detalle_error=str(e),
             )

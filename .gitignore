@@ -33,6 +33,7 @@ dist/
 staticfiles/
 
 # Archivos de medios cargados por el usuario
+media/
 */media/
 
 # Archivos temporales

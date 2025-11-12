@@ -11,21 +11,30 @@ from .logger import get_logger
 logger = get_logger(__name__)
 
 
+def filter_objects(context: Dict, data, sql_data) -> None:
+    if not "objetos" in context:
+        return
+
+    context["tabla"] = get.filtered_objects(
+        context["objetos"],
+        campos=data.get("campos", {}),
+        sql_campos=sql_data.get("campos", {}),
+    )
+    context["tabla_columnas"] = map.columns(data, sql_data=sql_data)
+
+
 def pdf(context: Dict, color: bool = False) -> str:
     validate.context(context)
     pdf_data = context.get("pdf_data")
     sql_data = context.get("sql_data")
+    filter_objects(context, pdf_data, sql_data)
     css_path = finders.find(f"previews/css/pdf{'-color' if color else ''}.css")
     css_files = (css_path,) if css_path else ()
 
     try:
         html = render_to_string(
             "previews/pdf.html",
-            {
-                **pdf_data.get("context", {}),
-                **context,
-                "tabla_columnas": map.columns(pdf_data, sql_data=sql_data),
-            },
+            pdf_data.get("context", {}) | context,
         )
     except Exception:
         logger.exception("Error al renderizar HTML")
@@ -50,9 +59,10 @@ def excel(context: Dict) -> str:
     validate.context(context)
     pdf_data = context.get("pdf_data")
     sql_data = context.get("sql_data")
+    filter_objects(context, pdf_data, sql_data)
 
     df = pl.DataFrame(
-        data=context.get("tabla"),
+        data=context["tabla"],
         orient="row",
         schema=map.columns(pdf_data, sql_data=sql_data),
     )

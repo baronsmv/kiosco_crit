@@ -73,6 +73,11 @@ function activarEnvioAjax(element) {
     if (!forms.length) return;
 
     forms.forEach(form => {
+        // Evitar múltiples listeners
+        if (form.dataset.ajaxBound === "true") return;
+
+        form.dataset.ajaxBound = "true"; // Marcar como enlazado
+
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
             limpiarErrores();
@@ -94,7 +99,7 @@ function activarEnvioAjax(element) {
                 const html = await response.text();
                 const doc = new DOMParser().parseFromString(html, "text/html");
 
-                // Si hay un modal con resultados
+                // Si hay un nuevo modal en la respuesta
                 const nuevoModal = doc.getElementById("modal");
                 if (nuevoModal) {
                     document.getElementById("modal")?.remove();
@@ -113,18 +118,20 @@ function activarEnvioAjax(element) {
                 }
 
                 // Mostrar mensajes inline (status.html)
-                const container = form.querySelector(".ajax-response") || document.querySelector(".ajax-response");
-                const contenido = doc.querySelector(".mensaje-flotante");
-                container.innerHTML = contenido ? contenido.outerHTML : "";
+                const container = form.closest(".modal")?.querySelector(".ajax-response");
+                if (container) {
+                    const contenido = doc.querySelector(".mensaje-flotante");
+                    container.innerHTML = contenido ? contenido.outerHTML : "";
 
-                const mensaje = container.querySelector(".mensaje-flotante");
-                if (mensaje) {
-                    setTimeout(() => {
-                        mensaje.classList.add("fade-out");
-                        mensaje.addEventListener("transitionend", () => mensaje.remove());
-                    }, 5000);
+                    const mensaje = container.querySelector(".mensaje-flotante");
+                    if (mensaje) {
+                        mensaje.scrollIntoView({behavior: "smooth", block: "center"});
+                        setTimeout(() => {
+                            mensaje.classList.add("fade-out");
+                            mensaje.addEventListener("transitionend", () => mensaje.remove());
+                        }, 5000);
+                    }
                 }
-
             } catch (error) {
                 console.error("Error en envío AJAX:", error);
             } finally {

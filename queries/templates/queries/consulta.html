@@ -76,12 +76,9 @@
     <div>{{ main.search_button.message }}</div>
 </div>
 
-<!-- Modal si hay resultados -->
-{% if tabla %}
-    {% include 'queries/partials/modal_buscar.html' %}
-    {% include 'queries/partials/modal_enviar_email.html' %}
-    {% include 'queries/partials/modal_enviar_whatsapp.html' %}
-{% endif %}
+{% include 'queries/partials/modal_buscar.html' %}
+{% include 'queries/partials/modal_enviar_email.html' %}
+{% include 'queries/partials/modal_enviar_whatsapp.html' %}
 
 <!-- Scripts -->
 <script>

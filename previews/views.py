@@ -7,7 +7,8 @@ logger = get_logger(__name__)
 
 
 def pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
-    filename = generate.pdf(request.session.get("context_data", {}), color=False)
+    previous_context = request.session.get("context_data", {})
+    filename = generate.pdf(previous_context, color=False)
     file_url = f"/media/pdf/{filename}"
 
     if request.GET.get("abrir") == "1":
@@ -22,7 +23,8 @@ def pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
 
 
 def excel(request: HttpRequest) -> HttpResponse:
-    filename = generate.excel(request.session.get("context_data", {}))
+    previous_context = request.session.get("context_data", {})
+    filename = generate.excel(previous_context)
     file_url = f"/media/excel/{filename}"
 
     return HttpResponseRedirect(file_url)

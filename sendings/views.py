@@ -6,9 +6,9 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from utils import config
+from utils import config, generate
 from utils.logger import get_logger
-from .utils import email_pdf_view, whatsapp_pdf_view
+from .utils import whatsapp_pdf_view, email_view
 
 logger = get_logger(__name__)
 
@@ -16,7 +16,29 @@ base_url = settings.WHATSAPP_API_BASE_URL
 
 
 def email_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
-    return email_pdf_view(request)
+    previous_context = request.session.get("context_data", {})
+    nombre_sujeto = previous_context.get("nombre_sujeto", "")
+
+    subject = f"Datos del {nombre_sujeto}"
+    body = "Adjuntamos el archivo solicitado en formato PDF."
+
+    filename = generate.pdf(previous_context, color=True)
+    filepath = f"media/pdf/{filename}"
+
+    return email_view(request, filepath, subject, body)
+
+
+def email_excel(request: HttpRequest) -> HttpResponse | JsonResponse:
+    previous_context = request.session.get("context_data", {})
+    nombre_sujeto = previous_context.get("nombre_sujeto", "")
+
+    subject = f"Datos del {nombre_sujeto}"
+    body = "Adjuntamos el archivo solicitado en formato Excel."
+
+    filename = generate.excel(previous_context)
+    filepath = f"media/excel/{filename}"
+
+    return email_view(request, filepath, subject, body)
 
 
 @csrf_exempt
