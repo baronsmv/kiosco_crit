@@ -1,8 +1,10 @@
 from django.urls import path
 
 from . import views
+from .apis.urls import urlpatterns as api_urlpatterns
 
 urlpatterns = [
+    *api_urlpatterns,
     path(
         route="paciente/datos/",
         view=views.datos_paciente,

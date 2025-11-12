@@ -138,7 +138,7 @@ def query_view(
     nombre_id: Optional[str] = None,
     nombre_sujeto: Optional[str] = None,
     exist_query: Optional[Callable] = None,
-    testing: bool = True,
+    testing: bool = False,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
