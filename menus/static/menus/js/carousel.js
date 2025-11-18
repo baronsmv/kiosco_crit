@@ -1,5 +1,12 @@
+let currentData = [];
+let currentIndex = 0;
+let slides = [];
+let dotsContainer;
+let carouselContainer;
+
 async function loadCarouselData(jsonUrl) {
-    const carouselContainer = document.getElementById("espacios-carousel");
+    carouselContainer = document.getElementById("espacios-carousel");
+    dotsContainer = document.getElementById("carousel-dots");
     if (!carouselContainer) return;
 
     try {
@@ -59,34 +66,19 @@ async function loadCarouselData(jsonUrl) {
             carouselContainer.appendChild(div);
         });
 
-        // Animate
-        const slides = carouselContainer.querySelectorAll(".carousel-item");
-        if (slides.length > 0) {
-            let index = 0;
-            slides[index].classList.add("active");
+        slides = carouselContainer.querySelectorAll(".carousel-item");
+        currentIndex = 0;
+        slides[currentIndex].classList.add("active");
 
-            // Clear any previous interval
-            if (carouselContainer._intervalId) {
-                clearInterval(carouselContainer._intervalId);
-            }
-
-            carouselContainer._intervalId = setInterval(() => {
-                slides[index].classList.remove("active");
-                index = (index + 1) % slides.length;
-                slides[index].classList.add("active");
-            }, 5000);
-        }
+        animateDots();
     } catch (err) {
         carouselContainer.innerHTML = "<p>Error al cargar los datos.</p>";
         console.error("Error cargando carrusel:", err);
     }
 }
 
-let currentData = [];
-let currentIndex = 0;
-
 async function updateCarousel(jsonUrl) {
-    const carouselContainer = document.getElementById("espacios-carousel");
+    carouselContainer = document.getElementById("espacios-carousel");
     if (!carouselContainer) return;
 
     const response = await fetch(jsonUrl + `?t=${Date.now()}`);
@@ -111,23 +103,14 @@ async function updateCarousel(jsonUrl) {
     const newData = JSON.stringify(futuros);
     if (newData === JSON.stringify(currentData)) return;
     currentData = futuros;
-    const oldIndex = currentIndex;
 
     // Smooth update: fade out, replace, fade in
     carouselContainer.classList.add("fade-out");
     setTimeout(() => {
         carouselContainer.innerHTML = "";
         futuros.forEach(row => {
-            const servicio = row[idxServicio];
-            const fechaHora = row[idxFechaHora];
-            const colaborador = row[idxColaborador];
-            const disponibles = row[columnas.indexOf("Disponibles")];
-            const duracion = row[columnas.indexOf("Duración")];
-
             const div = document.createElement("div");
             div.className = "carousel-item";
-
-            // Build a card with all info
             div.innerHTML = `
               <div class="espacio-card">
                 <h4 class="servicio">${servicio}</h4>
@@ -137,46 +120,57 @@ async function updateCarousel(jsonUrl) {
                 <p class="duracion"><strong>Duración:</strong> ${duracion}</p>
               </div>
             `;
-
             carouselContainer.appendChild(div);
         });
 
+        slides = carouselContainer.querySelectorAll(".carousel-item");
+        currentIndex = 0;
+        slides[currentIndex].classList.add("active");
+
+        animateDots();
+
         carouselContainer.classList.remove("fade-out");
         carouselContainer.classList.add("fade-in");
-    }, 500); // half-second fade
+    }, 500);
 }
 
 function animateDots() {
-    const slides = carouselContainer.querySelectorAll(".carousel-item");
-    const dotsContainer = document.getElementById("carousel-dots");
-    dotsContainer.innerHTML = ""; // clear old dots
+    if (!dotsContainer) return;
+    dotsContainer.innerHTML = "";
 
     slides.forEach((_, i) => {
         const dot = document.createElement("span");
-        dot.className = "dot" + (i === 0 ? " active" : "");
+        dot.className = "dot" + (i === currentIndex ? " active" : "");
         dotsContainer.appendChild(dot);
     });
+}
 
-    let index = 0;
-    slides[index].classList.add("active");
+function startSlideshow() {
+    if (slides.length === 0) return;
 
     if (carouselContainer._intervalId) {
         clearInterval(carouselContainer._intervalId);
     }
 
     carouselContainer._intervalId = setInterval(() => {
-        slides[index].classList.remove("active");
-        dotsContainer.children[index].classList.remove("active");
+        slides[currentIndex].classList.remove("active");
+        slides[currentIndex].classList.add("exit-left");
 
-        index = (index + 1) % slides.length;
+        currentIndex = (currentIndex + 1) % slides.length;
 
-        slides[index].classList.add("active");
-        dotsContainer.children[index].classList.add("active");
+        slides[currentIndex].classList.remove("exit-left");
+        slides[currentIndex].classList.add("active");
+
+        dotsContainer.querySelectorAll(".dot").forEach(dot => dot.classList.remove("active"));
+        dotsContainer.children[currentIndex].classList.add("active");
     }, 5000);
+
 }
 
+
 function startCarousel(jsonUrl) {
-    loadCarouselData(jsonUrl);
-    animateDots();
-    setInterval(() => updateCarousel(jsonUrl), 300000); // 5 min
+    loadCarouselData(jsonUrl).then(() => {
+        startSlideshow();
+    });
+    setInterval(() => updateCarousel(jsonUrl), 300000); // refresh every 5 min
 }
