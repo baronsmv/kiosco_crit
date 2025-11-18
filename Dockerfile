@@ -50,7 +50,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copiar código
-COPY backend .
+COPY . .
 
 # Cambiar propietario para el usuario django
 RUN chown -R django:django /app
