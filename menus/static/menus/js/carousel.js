@@ -146,8 +146,37 @@ async function updateCarousel(jsonUrl) {
     }, 500); // half-second fade
 }
 
+function animateDots() {
+    const slides = carouselContainer.querySelectorAll(".carousel-item");
+    const dotsContainer = document.getElementById("carousel-dots");
+    dotsContainer.innerHTML = ""; // clear old dots
+
+    slides.forEach((_, i) => {
+        const dot = document.createElement("span");
+        dot.className = "dot" + (i === 0 ? " active" : "");
+        dotsContainer.appendChild(dot);
+    });
+
+    let index = 0;
+    slides[index].classList.add("active");
+
+    if (carouselContainer._intervalId) {
+        clearInterval(carouselContainer._intervalId);
+    }
+
+    carouselContainer._intervalId = setInterval(() => {
+        slides[index].classList.remove("active");
+        dotsContainer.children[index].classList.remove("active");
+
+        index = (index + 1) % slides.length;
+
+        slides[index].classList.add("active");
+        dotsContainer.children[index].classList.add("active");
+    }, 5000);
+}
 
 function startCarousel(jsonUrl) {
     loadCarouselData(jsonUrl);
+    animateDots();
     setInterval(() => updateCarousel(jsonUrl), 300000); // 5 min
 }

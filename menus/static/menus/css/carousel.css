@@ -111,6 +111,27 @@
     color: #6a0dad;
 }
 
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.carousel-dots .dot {
+    width: 10px;
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+}
+
+.carousel-dots .dot.active {
+    background-color: #ffd700; /* highlighted color */
+    transform: scale(1.2);
+}
+
 /* Responsive: stack columns on small screens */
 @media (max-width: 860px) {
     .split-container {
