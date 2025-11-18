@@ -1,7 +1,6 @@
 from datetime import date
 from typing import Callable, Dict, Optional, Type
 
-from django.db import OperationalError
 from django.forms import Form
 from django.http import HttpRequest
 from django.http import HttpResponse
@@ -18,7 +17,15 @@ from .models import Consulta
 logger = get_logger(__name__)
 
 
-def parse_form(
+def parse_form(form: Form):
+    if not form.is_valid():
+        logger.warning(f"Errores de validación en formulario: {form.errors.as_json()}")
+        raise AjaxException()
+
+    return dict(form.cleaned_data.items())
+
+
+def parse_queries(
     request: HttpRequest,
     context: Dict,
     config_data: Dict,
@@ -30,9 +37,11 @@ def parse_form(
     nombre_sujeto: str = "",
     nombre_objetos: str = "",
 ) -> None:
-    form_fields = form.fields.keys()
-    has_id = "id" in form_fields
-    has_fecha = "fecha" in form_fields
+    form_data = parse_form(form)
+    id = form_data.get("id")
+    fecha = form_data.get("fecha")
+    context.update(form_data)
+
     ip_cliente = get.client_ip(request)
     tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
 
@@ -40,64 +49,29 @@ def parse_form(
     pdf_data = config_data["pdf"]
     sql_data = config_data["sql"]
 
-    if not form.is_valid():
-        logger.warning(f"Errores de validación en formulario: {form.errors.as_json()}")
-        raise AjaxException()
+    if id:
+        if not validate.id(id=id, context=context):
+            raise AjaxException(f"{nombre_id.capitalize()} no válido.")
 
-    id = form.cleaned_data["id"] if has_id else None
-    fecha = form.cleaned_data["fecha"] if has_fecha else None
-
-    if has_id and not validate.id(
-        id=id,
-        fecha=fecha,
-        has_fecha=has_fecha,
-        context=context,
-        model=model,
-        reg_form=form,
-        ip_cliente=ip_cliente,
-        tipo=tipo,
-    ):
-        raise AjaxException(f"{nombre_id.capitalize()} no válido.")
-
-    context.update({"id": id or "", "fecha": fecha})
-
-    try:
         sujeto = get.subject(
-            id,
+            id=id,
             exist_query=exist_query,
             nombre_sujeto=nombre_sujeto,
             nombre_id=nombre_id,
+            tipo=tipo,
+            ip_cliente=ip_cliente,
         )
-        objetos = get.all_objects(
-            id,
-            fecha,
-            data_query=data_query,
-            nombre_objetos=nombre_objetos,
-            nombre_id=nombre_id,
-        )
-    except OperationalError as e:
-        logger.error(f"Error de conexión a la base de datos: {e}")
-        if model:
-            model.objects.create(
-                tipo=tipo,
-                identificador=id if has_id else None,
-                fecha_especificada=fecha,
-                ip_cliente=ip_cliente,
-                estado="Error de conexión",
-            )
-        raise AjaxException("❌ No se pudo conectar con la base de datos.")
-    except AjaxException as e:
-        if model:
-            model.objects.create(
-                tipo=tipo,
-                identificador=id if has_id else None,
-                fecha_especificada=fecha,
-                ip_cliente=ip_cliente,
-                estado=e.causa,
-            )
-        raise
+    else:
+        sujeto = None
 
-    context["sujeto"] = sujeto
+    objetos = get.all_objects(
+        data=form_data,
+        data_query=data_query,
+        nombre_objetos=nombre_objetos,
+        nombre_id=nombre_id,
+        tipo=tipo,
+        ip_cliente=ip_cliente,
+    )
     context["tabla"] = get.filtered_objects(
         objetos,
         campos=web_data.get("campos", {}),
@@ -107,7 +81,7 @@ def parse_form(
     if model:
         model.objects.create(
             tipo=tipo,
-            **({"identificador": id} if has_id else {}),
+            identificador=id,
             fecha_especificada=fecha,
             ip_cliente=ip_cliente,
             estado="Exitoso",
@@ -171,7 +145,7 @@ def query_view(
         }
 
     if not testing and request.method == "POST":
-        parse_form(
+        parse_queries(
             request=request,
             config_data=config_data,
             context=context,

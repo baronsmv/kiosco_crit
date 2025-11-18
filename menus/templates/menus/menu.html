@@ -6,9 +6,11 @@
     <title>{{ title }}</title>
     {% load static %}
     <link href="{% static 'main/css/main.css' %}" rel="stylesheet"/>
+    <link href="{% static 'menus/css/carousel.css' %}" rel="stylesheet"/>
 </head>
 <body>
 <div class="container home-menu">
+
     {% if mostrar_inicio %}
     <a class="home-link" href="{{ home_url }}">{{ home_label }}</a>
     {% endif %}
@@ -19,6 +21,35 @@
         {{ select_text }}
     </p>
 
+    {% if carousel and carousel.mostrar %}
+    <div class="split-container">
+        <!-- Menú a la izquierda -->
+        <div class="menu-left">
+            <div class="menu-options">
+                {% for option_url, option_title, option_description in menu_options %}
+                <a class="menu-card" href="{{ option_url }}">
+                    <h2>{{ option_title }}</h2>
+                    <p>{{ option_description }}</p>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Carrusel a la derecha -->
+        <div class="carousel-right">
+            <h3>{{ carousel_title|default:"Espacios Disponibles" }}</h3>
+            <div class="carousel" id="espacios-carousel"></div>
+        </div>
+    </div>
+
+    <script src="{% static 'menus/js/carousel.js' %}"></script>
+    <script>
+        // Cargar desde el JSON estático generado por el contenedor
+        initHomeCarousel("{% static 'data/espacios_disponibles.json' %}");
+    </script>
+
+    {% else %}
+    <!-- Menú normal si no hay carrusel -->
     <div class="menu-options">
         {% for option_url, option_title, option_description in menu_options %}
         <a class="menu-card" href="{{ option_url }}">
@@ -27,6 +58,7 @@
         </a>
         {% endfor %}
     </div>
+    {% endif %}
 </div>
 </body>
 </html>

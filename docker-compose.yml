@@ -18,6 +18,10 @@ services:
         condition: service_healthy
     networks:
       - app_net
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000/ || exit 1" ]
+      interval: 5s
+      retries: 12
 
   # node:
   #   build: ./whatsapp_node
@@ -77,6 +81,34 @@ services:
     env_file:
       - .env
     command: [ "/scripts/clean_output.sh" ]
+    networks:
+      - app_net
+    restart: unless-stopped
+
+  carousel:
+    image: alpine
+    container_name: carousel_kiosco
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+    working_dir: /app
+    env_file:
+      - .env
+    command: >
+      sh -c "
+        apk add --no-cache curl jq &&
+        chmod +x /app/scripts/fetch_espacios.sh &&
+        until curl -sf http://django:8000/; do
+          echo 'Waiting for Django...'
+          sleep 5
+        done &&
+        while true; do
+          /app/scripts/fetch_espacios.sh;
+          sleep 3600;
+        done
+      "
+    depends_on:
+      - django
     networks:
       - app_net
     restart: unless-stopped

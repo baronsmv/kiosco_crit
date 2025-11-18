@@ -4,7 +4,7 @@ import os
 import re
 from datetime import date
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 from django.conf import settings
@@ -14,6 +14,7 @@ from django.urls import reverse_lazy
 
 from classes.exceptions import AjaxException
 from . import map
+from .decorators import query_handler
 from .logger import get_logger
 
 logger = get_logger(__name__)
@@ -76,11 +77,12 @@ def client_ip(request: HttpRequest) -> str:
     return ip
 
 
-def evaluate_query(func: Callable, **kwargs) -> Tuple[str, Tuple[str, ...]]:
+def evaluate_query(data: Dict, func: Callable) -> Tuple[str, Tuple[str, ...]]:
     sig = inspect.signature(func)
-    return func(**{k: v for k, v in kwargs.items() if k in sig.parameters})
+    return func(**{k: v for k, v in data.items() if k in sig.parameters})
 
 
+@query_handler
 def subject(
     id: Optional[str],
     exist_query: Optional[Callable],
@@ -88,8 +90,10 @@ def subject(
     nombre_id: str,
     *,
     db_name: str = "crit",
+    **_,
 ) -> Optional[Dict[str, str]]:
     if not id or not exist_query:
+        logger.info(f"ID o query de {nombre_sujeto} no configurados.")
         return None
 
     logger.info(f"Buscando datos para {nombre_sujeto} con {nombre_id}: '{id}'")
@@ -115,19 +119,20 @@ def subject(
     }
 
 
+@query_handler
 def all_objects(
-    id: Optional[str],
-    fecha: Optional[datetime],
+    data: Dict[str, Union[str, date]],
     data_query: Optional[Callable],
     nombre_objetos: str,
     nombre_id: str,
     *,
     db_name: str = "crit",
+    **_,
 ) -> Optional[List[Dict]]:
     if not data_query:
         return None
 
-    query, params = evaluate_query(data_query, id=id, fecha=fecha)
+    query, params = evaluate_query(data, data_query)
     logger.debug(f"Ejecutando consulta: '{query}', con parámetros: '{params}'.")
 
     try:
@@ -143,7 +148,7 @@ def all_objects(
         raise AjaxException()
 
     if not objetos:
-        if fecha:
+        if "fecha" in data:
             message = (
                 f"❌ No se encontraron {nombre_objetos} con la fecha especificada."
             )
@@ -151,7 +156,7 @@ def all_objects(
             message = f"❌ No se encontraron {nombre_objetos} para este {nombre_id}."
         logger.info(message)
         raise AjaxException(
-            message, target="fecha" if fecha else "id", causa="Sin resultados"
+            message, target="fecha" if "fecha" in data else "id", causa="Sin resultados"
         )
 
     logger.info(f"Se encontraron {len(objetos)} objetos para ID: '{id}'")

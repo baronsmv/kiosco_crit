@@ -77,6 +77,7 @@ function activarEnvioAjax(element) {
         if (form.dataset.ajaxBound === "true") return;
 
         form.dataset.ajaxBound = "true"; // Marcar como enlazado
+        console.log("Bound AJAX handler to", form.id);
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -118,7 +119,15 @@ function activarEnvioAjax(element) {
                 }
 
                 // Mostrar mensajes inline (status.html)
-                const container = form.closest(".modal")?.querySelector(".ajax-response");
+                const container =
+                    form.closest(".modal")?.querySelector(".ajax-response") ||
+                    form.querySelector(".ajax-response");
+
+                console.log("Submit handler triggered for", form.id);
+                console.log("Response HTML:", html);
+                console.log("Parsed mensaje:", doc.querySelector(".mensaje-flotante"));
+                console.log("Target container:", container);
+
                 if (container) {
                     const contenido = doc.querySelector(".mensaje-flotante");
                     container.innerHTML = contenido ? contenido.outerHTML : "";

@@ -1,0 +1,38 @@
+.split-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.menu-left {
+    flex: 1;
+    margin-right: 2rem;
+}
+
+.carousel-right {
+    flex: 1;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.carousel {
+    position: relative;
+    height: 150px;
+    overflow: hidden;
+}
+
+.carousel-item {
+    opacity: 0;
+    position: absolute;
+    transition: opacity 1s ease-in-out;
+    width: 100%;
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 1rem;
+}
+
+.carousel-item.active {
+    opacity: 1;
+}
