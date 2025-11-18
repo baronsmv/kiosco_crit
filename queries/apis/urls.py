@@ -4,6 +4,11 @@ from . import views
 
 urlpatterns = [
     path(
+        route="api/csrf/",
+        view=views.api_csrf,
+        name="csrf",
+    ),
+    path(
         route="api/paciente/datos/",
         view=views.api_datos_paciente,
         name="datos_paciente",
@@ -14,7 +19,7 @@ urlpatterns = [
         name="citas_paciente",
     ),
     path(
-        route="api/colaborador/espacios/disponibles/",
+        route="api/espacios/disponibles/",
         view=views.api_espacios_disponibles,
         name="espacios_disponibles",
     ),

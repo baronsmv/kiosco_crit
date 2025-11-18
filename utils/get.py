@@ -159,7 +159,7 @@ def all_objects(
             message, target="fecha" if "fecha" in data else "id", causa="Sin resultados"
         )
 
-    logger.info(f"Se encontraron {len(objetos)} objetos para ID: '{id}'")
+    logger.info(f"Se encontraron {len(objetos)} objetos.")
     return objetos
 
 

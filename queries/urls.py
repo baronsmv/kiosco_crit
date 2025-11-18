@@ -14,7 +14,7 @@ urlpatterns = [
         name="citas_paciente",
     ),
     path(
-        route="colaborador/espacios/disponibles/",
+        route="espacios/disponibles/",
         view=views.espacios_disponibles,
         name="espacios_disponibles",
     ),

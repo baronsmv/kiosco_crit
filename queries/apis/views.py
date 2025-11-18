@@ -1,8 +1,14 @@
 from django.http import HttpRequest, JsonResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from utils import config
 from .utils import api_query_view
 from .. import forms, queries
+
+
+@ensure_csrf_cookie
+def api_csrf(_: HttpRequest) -> JsonResponse:
+    return JsonResponse({"detail": "CSRF cookie set"})
 
 
 def api_citas_paciente(request: HttpRequest) -> JsonResponse:

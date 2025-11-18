@@ -1,3 +1,4 @@
+import json
 from typing import Callable, Dict, Optional, Type
 
 from django.forms import Form
@@ -24,11 +25,20 @@ def api_query_view(
     context = get.initial_context(config_data)
 
     if request.method == "POST":
+        if request.content_type == "application/json":
+            try:
+                data = json.loads(request.body.decode("utf-8"))
+            except json.JSONDecodeError:
+                return JsonResponse({"error": "JSON inválido"}, status=400)
+            form_instance = form(data)
+        else:
+            form_instance = form(request.POST)
+
         parse_queries(
             request=request,
             config_data=config_data,
             context=context,
-            form=form(request.POST),
+            form=form_instance,
             model=model,
             exist_query=exist_query,
             data_query=data_query,
@@ -40,6 +50,7 @@ def api_query_view(
         payload = {
             "sujeto": context.get("sujeto"),
             "tabla": context.get("tabla"),
+            "tabla_columnas": context.get("tabla_columnas"),
         }
         return JsonResponse(payload, safe=False)
 

@@ -64,10 +64,6 @@ default_config: Dict = {
                     "title": "👤 Citas por Colaborador",
                     "description": "Busca citas de un colaborador.",
                 },
-                "espacios_disponibles": {
-                    "title": "📅 Espacios disponibles",
-                    "description": "Busca espacios disponibles para agendar.",
-                },
             },
         },
     },

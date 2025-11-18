@@ -112,14 +112,14 @@ def query_view(
     nombre_id: Optional[str] = None,
     nombre_sujeto: Optional[str] = None,
     exist_query: Optional[Callable] = None,
-    testing: bool = False,
+    TESTING: bool = False,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
 
     context = get.initial_context(config_data)
 
-    if testing:
+    if TESTING:
         rows = 100
         text = "Ejemplo"
         sql_campos = config_data["sql"]["campos"]
@@ -144,7 +144,7 @@ def query_view(
             "sql_data": config_data["sql"],
         }
 
-    if not testing and request.method == "POST":
+    if not TESTING and request.method == "POST":
         parse_queries(
             request=request,
             config_data=config_data,
