@@ -37,7 +37,7 @@ async function loadCarouselData(jsonUrl) {
         carouselContainer.innerHTML = "";
 
         if (!futuros.length) {
-            carouselContainer.innerHTML = "<p>No hay espacios disponibles futuros.</p>";
+            carouselContainer.innerHTML = "<p>No hay espacios disponibles para este día.</p>";
             return;
         }
 
@@ -56,7 +56,7 @@ async function loadCarouselData(jsonUrl) {
             div.innerHTML = `
               <div class="espacio-card">
                 <h4 class="servicio">${servicio}</h4>
-                <p class="hora"><strong>Hora:</strong> ${fechaHora}</p>
+                <p class="hora"><strong>Hora:</strong> ${fechaHora.split(" ")[1]}</p>
                 <p class="colaborador"><strong>Colaborador:</strong> ${colaborador}</p>
                 <p class="disponibles"><strong>Disponibles:</strong> ${disponibles}</p>
                 <p class="duracion"><strong>Duración:</strong> ${duracion}</p>
@@ -114,7 +114,7 @@ async function updateCarousel(jsonUrl) {
             div.innerHTML = `
               <div class="espacio-card">
                 <h4 class="servicio">${servicio}</h4>
-                <p class="hora"><strong>Hora:</strong> ${fechaHora}</p>
+                <p class="hora"><strong>Hora:</strong> ${fechaHora.split(" ")[1]}</p>
                 <p class="colaborador"><strong>Colaborador:</strong> ${colaborador}</p>
                 <p class="disponibles"><strong>Disponibles:</strong> ${disponibles}</p>
                 <p class="duracion"><strong>Duración:</strong> ${duracion}</p>
