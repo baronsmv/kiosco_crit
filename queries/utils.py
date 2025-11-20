@@ -1,5 +1,6 @@
 import inspect
 import json
+from dataclasses import asdict
 from datetime import date
 from typing import Callable, Dict, List, Optional, Tuple, Union
 from typing import Type
@@ -13,8 +14,10 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 
+from classes.contexts import IdSubContext, ContextList
 from classes.exceptions import AjaxException
 from classes.models import BaseModel
+from classes.selections import SelectionList
 from utils import get, validate
 from utils.decorators import ajax_handler, query_handler
 from utils.logger import get_logger
@@ -32,16 +35,8 @@ def whatsapp_status(url: str = f"{base_url}/status") -> Dict:
 
 
 def initial_context(context: Dict) -> Dict:
-
-    home_url = reverse_lazy(context_data["main"].get("home", {}).get("url", "home"))
-    initial_date = (
-        date.today() if context_data["main"].get("date", {}).get("initial") else ""
-    )
-
     return {
-        **context_data,
-        "home_url": home_url,
-        "initial_date": initial_date,
+        **context,
         "whatsapp_status": whatsapp_status(),
         "id": "",
         "sujeto": None,
@@ -65,7 +60,7 @@ def get_subject(
     exist_query: Optional[Callable],
     nombre_sujeto: str,
     nombre_id: str,
-    context: Dict,
+    id_context: IdSubContext,
     *,
     db_name: str = "crit",
     **_,
@@ -74,7 +69,7 @@ def get_subject(
         logger.info(f"ID o query de {nombre_sujeto} no configurados.")
         return None
 
-    if not validate.id(id=id, context=context):
+    if not validate.id_by_context(id=id, id_context=id_context):
         raise AjaxException(f"{nombre_id.capitalize()} no válido.")
 
     logger.info(f"Buscando datos para {nombre_sujeto} con {nombre_id}: '{id}'")
@@ -163,8 +158,8 @@ def parse_form(form: Type[Form], request: HttpRequest) -> Dict[str, Union[str, d
 def parse_queries(
     request: HttpRequest,
     form_data: Dict[str, Union[str, date]],
-    context: Dict,
-    config_data: Dict,
+    context_list: ContextList,
+    selection_list: SelectionList,
     exist_query: Optional[Callable] = None,
     data_query: Optional[Callable] = None,
     nombre_id: str = "",
@@ -173,24 +168,19 @@ def parse_queries(
     *,
     model: Optional[Type[BaseModel]] = Consulta,
     save_context: bool = True,
-) -> None:
+) -> Dict:
     id = form_data.get("id")
     fecha = form_data.get("fecha")
-    context.update(form_data)
 
     ip_cliente = get.client_ip(request)
     tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
-
-    web_data = config_data["web"]
-    pdf_data = config_data["pdf"]
-    sql_data = config_data["sql"]
 
     sujeto = get_subject(
         id=id,
         exist_query=exist_query,
         nombre_sujeto=nombre_sujeto,
         nombre_id=nombre_id,
-        context=context,
+        id_context=context_list.initial.id,
         tipo=tipo,
         ip_cliente=ip_cliente,
     )
@@ -202,12 +192,10 @@ def parse_queries(
         tipo=tipo,
         ip_cliente=ip_cliente,
     )
-    get.tabla_with_columns(
-        context=context,
-        data=web_data,
-        sql_data=sql_data,
-        objetos=objetos,
+    tabla = get.tabla(
+        objetos=objetos, selection=selection_list.web, sql_selection=selection_list.sql
     )
+    tabla_columnas = tuple(select.name for select in selection_list.web)
 
     if model:
         model.objects.create(
@@ -227,14 +215,19 @@ def parse_queries(
             "nombre_objetos": nombre_objetos,
             "nombre_sujeto": nombre_sujeto,
             "nombre_id": nombre_id,
-            "pdf_data": pdf_data,
-            "sql_data": sql_data,
+            "pdf_context": asdict(context_list.pdf),
+            "pdf_selection": tuple(asdict(s) for s in selection_list.pdf),
+            "sql_selection": tuple(asdict(s) for s in selection_list.sql),
         }
+
+    return {"sujeto": sujeto, "tabla": tabla, "tabla_columnas": tabla_columnas}
 
 
 @ajax_handler
 def query_view(
     request: HttpRequest,
+    context_list: ContextList,
+    selection_list: SelectionList,
     form: Type[Form],
     data_query: Callable,
     nombre_objetos: str,
@@ -248,39 +241,31 @@ def query_view(
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
 
-    context = initial_context(config_data)
-
     if testing:
         rows = 100
         text = "Ejemplo"
-        sql_campos = config_data["sql"]["campos"]
-        model = None
-        context.update(
-            {
-                "tabla": tuple((text,) * len(sql_campos) for _ in range(rows)),
-                "objetos": [{campo: text for campo in sql_campos} for _ in range(rows)],
-            }
-        )
 
         request.session["context_data"] = {
             "sujeto": None,
-            "tabla": context["tabla"],
-            "objetos": context["objetos"],
+            "tabla": tuple((text,) * len(selection_list.web) for _ in range(rows)),
+            "objetos": [
+                {campo: text for campo in selection_list.sql} for _ in range(rows)
+            ],
             "id": "ID de ejemplo",
             "fecha": "2025-10-17",
             "nombre_objetos": nombre_objetos,
             "nombre_sujeto": nombre_sujeto,
             "nombre_id": nombre_id,
-            "pdf_data": config_data["pdf"],
-            "sql_data": config_data["sql"],
+            "context_list": context_list,
+            "selections": selection_list,
         }
 
     if not testing and request.method == "POST":
-        parse_queries(
+        ajax_context = parse_queries(
             request=request,
             form_data=parse_form(form=form, request=request),
-            context=context,
-            config_data=config_data,
+            context_list=context_list,
+            selection_list=selection_list,
             exist_query=exist_query,
             data_query=data_query,
             nombre_id=nombre_id,
@@ -288,10 +273,20 @@ def query_view(
             nombre_objetos=nombre_objetos,
             model=model,
         )
-        logger.debug(f"Datos de contexto procesados:\n{context}")
+        logger.debug(f"Datos de contexto procesados:\n{ajax_context}")
 
-        if context.get("tabla"):
-            raise AjaxException(context=context, filename="modal_buscar.html")
+        if ajax_context.get("tabla"):
+            raise AjaxException(
+                context={"modal": asdict(context_list.modal), **ajax_context},
+                filename="modal_buscar.html",
+            )
 
     logger.debug("Renderizando vista completa con contexto inicial.")
-    return render(request, f"queries/consulta.html", context)
+    return render(
+        request,
+        f"queries/consulta.html",
+        {
+            "initial": asdict(context_list.initial),
+            "home_url": reverse_lazy(context_list.initial.home.url),
+        },
+    )

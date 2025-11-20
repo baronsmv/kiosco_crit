@@ -1,8 +1,7 @@
 from django.http import HttpRequest, HttpResponse
 
-from utils import config
 from utils.logger import get_logger
-from . import forms, sql
+from . import forms, contexts, sql, selections
 from .utils import query_view
 
 logger = get_logger(__name__)
@@ -11,7 +10,8 @@ logger = get_logger(__name__)
 def citas_paciente(request: HttpRequest) -> HttpResponse:
     return query_view(
         request=request,
-        config_data=config.cfg_citas_paciente,
+        context_list=contexts.citas_paciente,
+        selection_list=selections.citas_paciente,
         form=forms.BuscarIdFechaForm,
         exist_query=sql.exist.paciente,
         data_query=sql.data.citas_paciente,
@@ -24,7 +24,8 @@ def citas_paciente(request: HttpRequest) -> HttpResponse:
 def datos_paciente(request: HttpRequest) -> HttpResponse:
     return query_view(
         request=request,
-        config_data=config.cfg_datos_paciente,
+        context_list=contexts.datos_paciente,
+        selection_list=selections.datos_paciente,
         form=forms.BuscarIdForm,
         exist_query=sql.exist.paciente,
         data_query=sql.data.datos_paciente,
@@ -37,7 +38,8 @@ def datos_paciente(request: HttpRequest) -> HttpResponse:
 def citas_colaborador(request: HttpRequest) -> HttpResponse:
     return query_view(
         request=request,
-        config_data=config.cfg_citas_colaborador,
+        context_list=contexts.citas_colaborador,
+        selection_list=selections.citas_colaborador,
         form=forms.BuscarIdFechaForm,
         exist_query=sql.exist.colaborador,
         data_query=sql.data.citas_colaborador,
@@ -50,7 +52,8 @@ def citas_colaborador(request: HttpRequest) -> HttpResponse:
 def espacios_disponibles(request: HttpRequest) -> HttpResponse:
     return query_view(
         request=request,
-        config_data=config.cfg_espacios_disponibles,
+        context_list=contexts.citas_colaborador,
+        selection_list=selections.citas_colaborador,
         form=forms.BuscarFechaForm,
         data_query=sql.data.espacios_disponibles,
         nombre_objetos="espacios disponibles",

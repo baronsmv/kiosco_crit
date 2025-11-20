@@ -1,35 +1,7 @@
-from dataclasses import dataclass
-from typing import Tuple
-
+from classes.selections import SelectionList
 from .sql import select
-from .sql.select import Select
 
-SubSelection = Tuple[Select, ...]
-
-
-@dataclass(frozen=True)
-class Selection:
-    web: SubSelection
-    subject: SubSelection = ()
-    api: SubSelection = ()
-    pdf: SubSelection = ()
-    excel: SubSelection = ()
-    sql: SubSelection = ()
-
-    def __post_init__(self):
-        merged = {
-            select
-            for sub in (self.web, self.subject, self.api, self.pdf, self.excel)
-            for select in sub
-        }
-        object.__setattr__(self, "sql", tuple(merged))
-
-        for field_name in ("api", "pdf", "excel"):
-            if not getattr(self, field_name):
-                object.__setattr__(self, field_name, self.web)
-
-
-citas_paciente = Selection(
+citas_paciente = SelectionList(
     web=(
         select.nombre_servicio,
         select.fecha_cita,
@@ -45,7 +17,7 @@ citas_paciente = Selection(
     ),
 )
 
-datos_paciente = Selection(
+datos_paciente = SelectionList(
     web=(
         select.no_carnet,
         select.nombre_paciente,
@@ -56,7 +28,7 @@ datos_paciente = Selection(
     ),
 )
 
-citas_colaborador = Selection(
+citas_colaborador = SelectionList(
     web=(
         select.nombre_servicio,
         select.fecha_cita,
@@ -67,7 +39,7 @@ citas_colaborador = Selection(
     ),
 )
 
-espacios_disponibles = Selection(
+espacios_disponibles = SelectionList(
     web=(
         select.nombre_servicio,
         select.fecha_cita,

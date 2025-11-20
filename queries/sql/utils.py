@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Dict, Tuple, Optional
 
-from queries.selections import Selection
+from classes.selections import SelectionList
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -23,9 +23,9 @@ def subject_exists(query: str, id: str, cursor) -> Optional[Dict[str, str]]:
         return None
 
 
-def sql_selection(selection: Selection) -> str:
+def sql_selection(selection: SelectionList) -> str:
     seleccion = ", ".join(
-        f"{select.sql} AS {select.nombre}" for select in selection.sql
+        f"{select.sql_expression} AS {select.sql_name}" for select in selection.sql
     )
     logger.info(f"Campos seleccionados para query: {seleccion}")
     return seleccion

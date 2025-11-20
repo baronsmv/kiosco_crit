@@ -1,7 +1,6 @@
 from datetime import date
 from typing import Tuple, Optional
 
-from utils import config
 from utils.logger import get_logger
 from .utils import parse_query, sql_selection
 from .. import selections
@@ -11,7 +10,6 @@ logger = get_logger(__name__)
 
 def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de citas por carnet: {id}, fecha: {fecha}")
-    sql_config = config.cfg_citas_paciente.get("sql", {})
     query = f"""
         SELECT {sql_selection(selections.citas_paciente)}
         FROM SCRITS2.C_PACIENTE cp
@@ -27,14 +25,18 @@ def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]
         query=query,
         id=id,
         fecha=fecha,
-        filters=sql_config.get("filtros", {}),
+        filters={
+            "kpc.CL_ESTATUS_CITA": {
+                "con_fecha": ["A", "N"],
+                "sin_fecha": ["A"],
+            },
+        },
         order_by="kc.FE_CITA ASC",
     )
 
 
 def citas_colaborador(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de citas por colaborador ID: {id}, fecha: {fecha}")
-    sql_config = config.cfg_citas_colaborador.get("sql", {})
     query = f"""
         SELECT {sql_selection(selections.citas_colaborador)}
         FROM SCRITS2.K_CITA kc
@@ -56,14 +58,12 @@ def citas_colaborador(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, .
         query=query,
         id=id,
         fecha=fecha,
-        filters=sql_config.get("filtros", {}),
         order_by="kc.FE_CITA ASC",
     )
 
 
 def espacios_disponibles(fecha: date) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de espacios disponibles por fecha: {fecha}")
-    sql_config = config.cfg_espacios_disponibles.get("sql", {})
     query = f"""
         SELECT {sql_selection(selections.espacios_disponibles)}
         FROM SCRITS2.K_CITA kc
@@ -81,14 +81,12 @@ def espacios_disponibles(fecha: date) -> Tuple[str, Tuple[str, ...]]:
     return parse_query(
         query=query,
         fecha=fecha,
-        filters=sql_config.get("filtros", {}),
         order_by="kc.FE_CITA ASC",
     )
 
 
 def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de datos del paciente por carnet: {id}")
-    sql_config = config.cfg_datos_paciente.get("sql", {})
     query = f"""
     SELECT {sql_selection(selections.datos_paciente)}
     FROM SCRITS2.K_SERVICIO_DETALLE AS ksd
@@ -129,6 +127,5 @@ def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
     return parse_query(
         query=query,
         id=id,
-        filters=sql_config.get("filtros", {}),
         order_by="deuda_total_paciente DESC",
     )

@@ -4,25 +4,27 @@ from typing import Dict, Optional
 
 from django.core.exceptions import ValidationError
 
+from classes.contexts import IdSubContext
 from .logger import get_logger
 
 logger = get_logger(__name__)
 
 
-def id_pattern(id: str, max_length: int, pattern: str) -> None:
+def id_patterns(id: str, max_length: int, pattern: str) -> None:
     if len(id) > max_length:
         raise ValidationError("El ID es demasiado largo.")
     if not re.match(pattern, id):
         raise ValidationError("El ID contiene caracteres inválidos.")
 
 
-def id(id: str, context: Optional[Dict] = None) -> bool:
-    context = context or {}
+def id_by_context(id: str, id_context: Optional[IdSubContext] = None) -> bool:
+    if not id_context:
+        return True
     try:
-        id_pattern(
+        id_patterns(
             id=id,
-            max_length=context.get("id_max_length", 20),
-            pattern=context.get("id_pattern", r"^[a-zA-Z0-9. \-]+$"),
+            max_length=id_context.max_length,
+            pattern=id_context.pattern,
         )
         return True
     except ValidationError:

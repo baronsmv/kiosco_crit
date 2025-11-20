@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from utils import config, generate
+from utils import generate
 from utils.logger import get_logger
 from .utils import whatsapp_pdf_view, email_view
 
@@ -83,7 +83,8 @@ def whatsapp_admin(request: HttpRequest):
         request,
         "admin/whatsapp_admin.html",
         {
-            **config.cfg_whatsapp_admin.get("context", {}),
+            "title": "Administración de WhatsApp",
+            "header": "Administración de WhatsApp",
             "qr_data_url": qr_data_url,
             "error_qr": error_qr,
             "status_message": status_message,

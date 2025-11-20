@@ -1,64 +1,69 @@
-from dataclasses import dataclass
+from classes.selections import SelectClause
 
-
-@dataclass(frozen=True)
-class Select:
-    nombre: str
-    sql: str
-    formatear: str | None = None
-
-
-nombre_paciente = Select(
-    nombre="Paciente",
-    sql="CONCAT(cp.NB_PACIENTE,' ',cp.NB_PATERNO,' ',cp.NB_MATERNO)",
-    formatear="nombre",
+nombre_paciente = SelectClause(
+    name="Paciente",
+    sql_name="nombre_paciente",
+    sql_expression="CONCAT(cp.NB_PACIENTE,' ',cp.NB_PATERNO,' ',cp.NB_MATERNO)",
+    format="name",
 )
-nombre_colaborador = Select(
-    nombre="Colaborador",
-    sql="CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO, ' ', cu.NB_MATERNO)",
-    formatear="nombre",
+nombre_colaborador = SelectClause(
+    name="Colaborador",
+    sql_name="nombre_colaborador",
+    sql_expression="CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO, ' ', cu.NB_MATERNO)",
+    format="name",
 )
-no_carnet = Select(
-    nombre="Carnet",
-    sql="cp.NO_CARNET",
+no_carnet = SelectClause(
+    name="Carnet",
+    sql_name="no_carnet",
+    sql_expression="cp.NO_CARNET",
 )
-nombre_servicio = Select(
-    nombre="Servicio",
-    sql="cs.NB_SERVICIO",
+nombre_servicio = SelectClause(
+    name="Servicio",
+    sql_name="nombre_servicio",
+    sql_expression="cs.NB_SERVICIO",
 )
-fecha_cita = Select(
-    nombre="Fecha y hora",
-    sql="FORMAT(kc.FE_CITA, 'dd/MM/yyyy HH:mm')",
+fecha_cita = SelectClause(
+    name="Fecha y hora",
+    sql_name="fecha_cita",
+    sql_expression="FORMAT(kc.FE_CITA, 'dd/MM/yyyy HH:mm')",
 )
-clinica = Select(
-    nombre="Clínica",
-    sql="cc.DS_CLINICA",
+clinica = SelectClause(
+    name="Clínica",
+    sql_name="clinica",
+    sql_expression="cc.DS_CLINICA",
 )
-clinica_abrev = Select(
-    nombre="Clínica",
-    sql="cc.NB_ABREVIADO",
+clinica_abrev = SelectClause(
+    name="Clínica",
+    sql_name="clinica_abrev",
+    sql_expression="cc.NB_ABREVIADO",
 )
-estatus_cita = Select(
-    nombre="Estatus",
-    sql="cec.NB_ESTATUS_CITA",
+estatus_cita = SelectClause(
+    name="Estatus",
+    sql_name="estatus_cita",
+    sql_expression="cec.NB_ESTATUS_CITA",
 )
-espacios_disponibles = Select(
-    nombre="Disponibles",
-    sql="kc.NO_DISPONIBLES",
+espacios_disponibles = SelectClause(
+    name="Disponibles",
+    sql_name="espacios_disponibles",
+    sql_expression="kc.NO_DISPONIBLES",
 )
-duracion_servicio = Select(
-    nombre="Duración",
-    sql="CONCAT(kc.NO_DURACION,' min')",
+duracion_servicio = SelectClause(
+    name="Duración",
+    sql_name="duracion_servicio",
+    sql_expression="CONCAT(kc.NO_DURACION,' min')",
 )
-inasistencias_paciente = Select(
-    nombre="Inasistencias",
-    sql="CP.NO_INASISTENCIAS",
+inasistencias_paciente = SelectClause(
+    name="Inasistencias",
+    sql_name="inasistencias_paciente",
+    sql_expression="CP.NO_INASISTENCIAS",
 )
-aniversario_paciente = Select(
-    nombre="Aniversario",
-    sql="CP.FE_ULTANIVERSARIO",
+aniversario_paciente = SelectClause(
+    name="Aniversario",
+    sql_name="aniversario_paciente",
+    sql_expression="CP.FE_ULTANIVERSARIO",
 )
-deuda_total_paciente = Select(
-    nombre="Deuda total",
-    sql="CONVERT(DECIMAL(10,2), SUM(KSD.MN_TOTAL - KSD.MN_PAGADO))",
+deuda_total_paciente = SelectClause(
+    name="Deuda total",
+    sql_name="deuda_total_paciente",
+    sql_expression="CONVERT(DECIMAL(10,2), SUM(KSD.MN_TOTAL - KSD.MN_PAGADO))",
 )
