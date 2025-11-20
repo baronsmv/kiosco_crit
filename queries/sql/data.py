@@ -4,6 +4,7 @@ from typing import Tuple, Optional
 from utils import config
 from utils.logger import get_logger
 from .utils import parse_query, sql_selection
+from .. import selections
 
 logger = get_logger(__name__)
 
@@ -12,7 +13,7 @@ def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]
     logger.info(f"Construyendo query de citas por carnet: {id}, fecha: {fecha}")
     sql_config = config.cfg_citas_paciente.get("sql", {})
     query = f"""
-        SELECT {sql_selection(sql_config)}
+        SELECT {sql_selection(selections.citas_paciente)}
         FROM SCRITS2.C_PACIENTE cp
         INNER JOIN SCRITS2.K_PACIENTE_CITA kpc ON cp.FL_PACIENTE = kpc.FL_PACIENTE
         INNER JOIN SCRITS2.K_CITA kc ON kpc.FL_CITA = kc.FL_CITA
@@ -35,7 +36,7 @@ def citas_colaborador(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, .
     logger.info(f"Construyendo query de citas por colaborador ID: {id}, fecha: {fecha}")
     sql_config = config.cfg_citas_colaborador.get("sql", {})
     query = f"""
-        SELECT {sql_selection(sql_config)}
+        SELECT {sql_selection(selections.citas_colaborador)}
         FROM SCRITS2.K_CITA kc
         INNER JOIN SCRITS2.C_USUARIO cu
             ON kc.FL_USUARIO = cu.FL_USUARIO
@@ -64,7 +65,7 @@ def espacios_disponibles(fecha: date) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de espacios disponibles por fecha: {fecha}")
     sql_config = config.cfg_espacios_disponibles.get("sql", {})
     query = f"""
-        SELECT {sql_selection(sql_config)}
+        SELECT {sql_selection(selections.espacios_disponibles)}
         FROM SCRITS2.K_CITA kc
         INNER JOIN SCRITS2.C_SERVICIO cs
             ON kc.FL_SERVICIO = cs.FL_SERVICIO
@@ -89,7 +90,7 @@ def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de datos del paciente por carnet: {id}")
     sql_config = config.cfg_datos_paciente.get("sql", {})
     query = f"""
-    SELECT {sql_selection(sql_config)}
+    SELECT {sql_selection(selections.datos_paciente)}
     FROM SCRITS2.K_SERVICIO_DETALLE AS ksd
     INNER JOIN SCRITS2.K_PACIENTE_CITA AS kpc 
         ON ksd.FL_PACIENTE_CITA = kpc.FL_PACIENTE_CITA

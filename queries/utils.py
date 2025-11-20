@@ -31,9 +31,7 @@ def whatsapp_status(url: str = f"{base_url}/status") -> Dict:
         return {"status": "desconocido", "connected": False}
 
 
-def initial_context(config_data: Dict) -> Dict:
-    web_data = config_data["web"]
-    context_data = web_data["context"]
+def initial_context(context: Dict) -> Dict:
 
     home_url = reverse_lazy(context_data["main"].get("home", {}).get("url", "home"))
     initial_date = (
@@ -237,7 +235,6 @@ def parse_queries(
 @ajax_handler
 def query_view(
     request: HttpRequest,
-    config_data: Dict,
     form: Type[Form],
     data_query: Callable,
     nombre_objetos: str,

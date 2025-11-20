@@ -13,76 +13,9 @@ default_config: Dict = {
             "header": "Administración de WhatsApp",
         }
     },
-    "common_resources": {
-        "sql": {
-            "campos": {
-                "nombre_paciente": {
-                    "nombre": "Paciente",
-                    "sql": "CONCAT(cp.NB_PACIENTE,' ',cp.NB_PATERNO,' ',cp.NB_MATERNO)",
-                    "formatear": "nombre",
-                },
-                "nombre_colaborador": {
-                    "nombre": "Colaborador",
-                    "sql": "CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO, ' ', cu.NB_MATERNO)",
-                    "formatear": "nombre",
-                },
-                "no_carnet": {
-                    "nombre": "Carnet",
-                    "sql": "cp.NO_CARNET",
-                },
-                "nombre_servicio": {
-                    "nombre": "Servicio",
-                    "sql": "cs.NB_SERVICIO",
-                },
-                "fecha_cita": {
-                    "nombre": "Fecha y hora",
-                    "sql": "FORMAT(kc.FE_CITA, 'dd/MM/yyyy HH:mm')",
-                },
-                "clinica": {
-                    "nombre": "Clínica",
-                    "sql": "cc.DS_CLINICA",
-                },
-                "clinica_abrev": {
-                    "nombre": "Clínica",
-                    "sql": "cc.NB_ABREVIADO",
-                },
-                "estatus_cita": {
-                    "nombre": "Estatus",
-                    "sql": "cec.NB_ESTATUS_CITA",
-                },
-                "espacios_disponibles": {
-                    "nombre": "Disponibles",
-                    "sql": "kc.NO_DISPONIBLES",
-                },
-                "duracion_servicio": {
-                    "nombre": "Duración",
-                    "sql": "CONCAT(kc.NO_DURACION,' min')",
-                },
-                "inasistencias_paciente": {
-                    "nombre": "Inasistencias",
-                    "sql": "CP.NO_INASISTENCIAS",
-                },
-                "aniversario_paciente": {
-                    "nombre": "Aniversario",
-                    "sql": "CP.FE_ULTANIVERSARIO",
-                },
-                "deuda_total_paciente": {
-                    "nombre": "Deuda total",
-                    "sql": "CONVERT(DECIMAL(10,2), SUM(KSD.MN_TOTAL - KSD.MN_PAGADO))",
-                },
-            },
-        },
-    },
     "paciente": {
         "citas": {
             "web": {
-                "campos": [
-                    "nombre_servicio",
-                    "fecha_cita",
-                    "nombre_colaborador",
-                    "clinica",
-                    "estatus_cita",
-                ],
                 "context": {
                     "main": {
                         "title": "Búsqueda de citas",
@@ -149,12 +82,6 @@ default_config: Dict = {
                 },
             },
             "pdf": {
-                "campos": [
-                    "nombre_servicio",
-                    "fecha_cita",
-                    "nombre_colaborador",
-                    "estatus_cita",
-                ],
                 "context": {
                     "title": "Ficha del Paciente",
                     "header": "Ficha del Paciente",
@@ -164,13 +91,6 @@ default_config: Dict = {
                 },
             },
             "sql": {
-                "campos": [
-                    "nombre_servicio",
-                    "fecha_cita",
-                    "nombre_colaborador",
-                    "clinica",
-                    "estatus_cita",
-                ],
                 "filtros": {
                     "kpc.CL_ESTATUS_CITA": {
                         "con_fecha": ["A", "N"],
@@ -181,14 +101,6 @@ default_config: Dict = {
         },
         "datos": {
             "web": {
-                "campos": [
-                    "no_carnet",
-                    "nombre_paciente",
-                    "clinica",
-                    "inasistencias_paciente",
-                    "aniversario_paciente",
-                    "deuda_total_paciente",
-                ],
                 "context": {
                     "main": {
                         "title": "Datos del paciente",
@@ -266,29 +178,11 @@ default_config: Dict = {
                     "footer": "Fundación Teletón México A.C.",
                 },
             },
-            "sql": {
-                "campos": [
-                    "no_carnet",
-                    "nombre_paciente",
-                    "clinica",
-                    "inasistencias_paciente",
-                    "aniversario_paciente",
-                    "deuda_total_paciente",
-                ],
-            },
         },
     },
     "colaborador": {
         "citas": {
             "web": {
-                "campos": [
-                    "nombre_servicio",
-                    "fecha_cita",
-                    "nombre_paciente",
-                    "no_carnet",
-                    "clinica_abrev",
-                    "estatus_cita",
-                ],
                 "context": {
                     "main": {
                         "title": "Agenda del Colaborador",
@@ -355,14 +249,6 @@ default_config: Dict = {
                 },
             },
             "pdf": {
-                "campos": [
-                    "nombre_servicio",
-                    "fecha_cita",
-                    "nombre_paciente",
-                    "no_carnet",
-                    "clinica_abrev",
-                    "estatus_cita",
-                ],
                 "context": {
                     "title": "Agenda del Colaborador",
                     "header": "Agenda del Colaborador",
@@ -371,26 +257,9 @@ default_config: Dict = {
                     "footer": "Fundación Teletón México A.C.",
                 },
             },
-            "sql": {
-                "campos": [
-                    "nombre_servicio",
-                    "fecha_cita",
-                    "nombre_paciente",
-                    "no_carnet",
-                    "clinica_abrev",
-                    "estatus_cita",
-                ],
-            },
         },
         "espacios disponibles": {
             "web": {
-                "campos": [
-                    "nombre_servicio",
-                    "fecha_cita",
-                    "nombre_colaborador",
-                    "espacios_disponibles",
-                    "duracion_servicio",
-                ],
                 "context": {
                     "main": {
                         "title": "Espacios Disponibles",
@@ -451,13 +320,6 @@ default_config: Dict = {
                 },
             },
             "pdf": {
-                "campos": [
-                    "nombre_servicio",
-                    "fecha_cita",
-                    "nombre_colaborador",
-                    "espacios_disponibles",
-                    "duracion_servicio",
-                ],
                 "context": {
                     "title": "Espacios Disponibles",
                     "header": "Espacios Disponibles",
@@ -465,15 +327,6 @@ default_config: Dict = {
                     "table_title": "",
                     "footer": "Fundación Teletón México A.C.",
                 },
-            },
-            "sql": {
-                "campos": [
-                    "nombre_servicio",
-                    "fecha_cita",
-                    "nombre_colaborador",
-                    "espacios_disponibles",
-                    "duracion_servicio",
-                ],
             },
         },
     },

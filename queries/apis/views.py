@@ -5,7 +5,7 @@ from django.http import HttpRequest, JsonResponse
 
 from utils import config
 from .utils import api_query_view
-from .. import queries
+from .. import sql
 
 
 def api_citas_paciente(
@@ -14,8 +14,8 @@ def api_citas_paciente(
     return api_query_view(
         request=request,
         config_data=config.cfg_citas_paciente,
-        exist_query=queries.exist.paciente,
-        data_query=queries.data.citas_paciente,
+        exist_query=sql.exist.paciente,
+        data_query=sql.data.citas_paciente,
         nombre_id="carnet",
         nombre_sujeto="paciente",
         nombre_objetos="citas",
@@ -27,8 +27,8 @@ def api_datos_paciente(request: HttpRequest, id: str) -> JsonResponse:
     return api_query_view(
         request=request,
         config_data=config.cfg_datos_paciente,
-        exist_query=queries.exist.paciente,
-        data_query=queries.data.datos_paciente,
+        exist_query=sql.exist.paciente,
+        data_query=sql.data.datos_paciente,
         nombre_id="carnet",
         nombre_sujeto="paciente",
         nombre_objetos="datos",
@@ -42,8 +42,8 @@ def api_citas_colaborador(
     return api_query_view(
         request=request,
         config_data=config.cfg_citas_colaborador,
-        exist_query=queries.exist.colaborador,
-        data_query=queries.data.citas_colaborador,
+        exist_query=sql.exist.colaborador,
+        data_query=sql.data.citas_colaborador,
         nombre_id="nombre de usuario",
         nombre_sujeto="colaborador",
         nombre_objetos="citas",
@@ -57,7 +57,7 @@ def api_espacios_disponibles(
     return api_query_view(
         request=request,
         config_data=config.cfg_espacios_disponibles,
-        data_query=queries.data.espacios_disponibles,
+        data_query=sql.data.espacios_disponibles,
         nombre_objetos="espacios disponibles",
         url_params={"fecha": fecha},
     )
