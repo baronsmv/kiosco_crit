@@ -13,60 +13,6 @@ default_config: Dict = {
             "header": "Administración de WhatsApp",
         }
     },
-    "menus": {
-        "inicio": {
-            "context": {
-                "title": "Kiosco de Información",
-                "header": "Kiosco de Información",
-                "select_text": "Selecciona una opción para continuar:",
-                "mostrar_inicio": False,
-            },
-            "options": {
-                "menu_paciente": {
-                    "title": "👤 Pacientes",
-                    "description": "Información relevante para pacientes.",
-                },
-                "menu_colaborador": {
-                    "title": "👤 Colaboradores",
-                    "description": "Información relevante para colaboradores.",
-                },
-            },
-        },
-        "paciente": {
-            "context": {
-                "title": "Kiosco de Información",
-                "header": "Información para Pacientes",
-                "select_text": "Selecciona una opción para continuar:",
-                "mostrar_inicio": True,
-                "home_label": "Inicio",
-            },
-            "options": {
-                "citas_paciente": {
-                    "title": "🪪 Citas por Paciente",
-                    "description": "Busca citas con el carnet de un paciente.",
-                },
-                "datos_paciente": {
-                    "title": "📝 Datos del Paciente",
-                    "description": "Muestra los datos de un paciente.",
-                },
-            },
-        },
-        "colaborador": {
-            "context": {
-                "title": "Kiosco de Información",
-                "header": "Información para Colaboradores",
-                "select_text": "Selecciona una opción para continuar:",
-                "mostrar_inicio": True,
-                "home_label": "Inicio",
-            },
-            "options": {
-                "citas_colaborador": {
-                    "title": "👤 Citas por Colaborador",
-                    "description": "Busca citas de un colaborador.",
-                },
-            },
-        },
-    },
     "common_resources": {
         "sql": {
             "campos": {
@@ -558,11 +504,6 @@ def parse_campos(
 
 
 cfg_whatsapp_admin = config.get("admin_whatsapp", {})
-
-cfg_menus = config.get("menus", {})
-cfg_home = cfg_menus.get("inicio", {})
-cfg_menu_paciente = cfg_menus.get("paciente", {})
-cfg_menu_colaborador = cfg_menus.get("colaborador", {})
 
 cfg_paciente = config.get("paciente", {})
 cfg_citas_paciente = parse_campos(cfg_paciente.get("citas", {}))
