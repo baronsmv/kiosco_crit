@@ -16,7 +16,8 @@ def id_pattern(id: str, max_length: int, pattern: str) -> None:
         raise ValidationError("El ID contiene caracteres inválidos.")
 
 
-def id(id: str, context: Dict) -> bool:
+def id(id: str, context: Optional[Dict] = None) -> bool:
+    context = context or {}
     try:
         id_pattern(
             id=id,

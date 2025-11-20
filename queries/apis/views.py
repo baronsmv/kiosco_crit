@@ -1,60 +1,63 @@
+from datetime import date
+from typing import Optional
+
 from django.http import HttpRequest, JsonResponse
-from django.views.decorators.csrf import ensure_csrf_cookie
 
 from utils import config
 from .utils import api_query_view
-from .. import forms, queries
+from .. import queries
 
 
-@ensure_csrf_cookie
-def api_csrf(_: HttpRequest) -> JsonResponse:
-    return JsonResponse({"detail": "CSRF cookie set"})
-
-
-def api_citas_paciente(request: HttpRequest) -> JsonResponse:
+def api_citas_paciente(
+    request: HttpRequest, id: str, fecha: Optional[date] = None
+) -> JsonResponse:
     return api_query_view(
         request=request,
         config_data=config.cfg_citas_paciente,
-        form=forms.BuscarIdFechaForm,
         exist_query=queries.exist.paciente,
         data_query=queries.data.citas_paciente,
         nombre_id="carnet",
         nombre_sujeto="paciente",
         nombre_objetos="citas",
+        url_params={"id": id, "fecha": fecha},
     )
 
 
-def api_datos_paciente(request: HttpRequest) -> JsonResponse:
+def api_datos_paciente(request: HttpRequest, id: str) -> JsonResponse:
     return api_query_view(
         request=request,
         config_data=config.cfg_datos_paciente,
-        form=forms.BuscarIdForm,
         exist_query=queries.exist.paciente,
         data_query=queries.data.datos_paciente,
         nombre_id="carnet",
         nombre_sujeto="paciente",
         nombre_objetos="datos",
+        url_params={"id": id},
     )
 
 
-def api_citas_colaborador(request: HttpRequest) -> JsonResponse:
+def api_citas_colaborador(
+    request: HttpRequest, id: str, fecha: Optional[date] = None
+) -> JsonResponse:
     return api_query_view(
         request=request,
         config_data=config.cfg_citas_colaborador,
-        form=forms.BuscarIdFechaForm,
         exist_query=queries.exist.colaborador,
         data_query=queries.data.citas_colaborador,
         nombre_id="nombre de usuario",
         nombre_sujeto="colaborador",
         nombre_objetos="citas",
+        url_params={"id": id, "fecha": fecha},
     )
 
 
-def api_espacios_disponibles(request: HttpRequest) -> JsonResponse:
+def api_espacios_disponibles(
+    request: HttpRequest, fecha: date = date.today()
+) -> JsonResponse:
     return api_query_view(
         request=request,
         config_data=config.cfg_espacios_disponibles,
-        form=forms.BuscarFechaForm,
         data_query=queries.data.espacios_disponibles,
         nombre_objetos="espacios disponibles",
+        url_params={"fecha": fecha},
     )

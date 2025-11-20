@@ -1,4 +1,5 @@
-from typing import Type, Optional
+import re
+from typing import Dict, Type, Optional
 
 import requests
 from django.conf import settings
@@ -13,7 +14,7 @@ from utils import generate, get
 from utils.decorators import ajax_handler
 from utils.logger import get_logger
 from utils.render import ajax_response
-from . import models
+from .models import EnvioEmail, EnvioWhatsapp
 
 logger = get_logger(__name__)
 
@@ -27,7 +28,7 @@ def email_view(
     subject: str,
     body: str,
     *,
-    model: Optional[Type[BaseModel]] = models.EnvioEmail,
+    model: Optional[Type[BaseModel]] = EnvioEmail,
 ) -> HttpResponse | JsonResponse:
     if request.method != "POST":
         logger.warning(f"Método no permitido: {request.method}")
@@ -92,9 +93,17 @@ def email_view(
     )
 
 
+def whatsapp_payload(number: str, mensaje: str, filename: str) -> Dict:
+    return {
+        "number": "521" + re.sub(r"\D", "", number) + "@c.us",
+        "message": mensaje,
+        "image_path": f"media/pdf/{filename}",
+    }
+
+
 def whatsapp_pdf_view(
     request: HttpRequest,
-    model: Type[BaseModel] = models.EnvioWhatsapp,
+    model: Type[BaseModel] = EnvioWhatsapp,
 ) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
     id = previous_context.get("id", "")
