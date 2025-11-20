@@ -18,7 +18,7 @@
         <!-- Formulario -->
         <form action="{% url 'send_email_pdf' %}" data-ajax="true" method="POST">
             {% csrf_token %}
-            <label for="email">{{ modal.send_email.email_label }}</label>
+            <label for="email">{{ modal.send_email.label }}</label>
             <input
                     id="email"
                     name="email"
@@ -31,7 +31,7 @@
                 {{ modal.send_email.send_label }}
             </button>
         </form>
-        
+
         <!-- Contenedor para respuesta AJAX -->
         <div class="ajax-response"></div>
     </div>

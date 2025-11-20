@@ -18,7 +18,7 @@
         <!-- Formulario -->
         <form action="{% url 'send_whatsapp_pdf' %}" data-ajax="true" method="POST">
             {% csrf_token %}
-            <label for="numero-whatsapp">{{ modal.send_whatsapp.number_label }}</label>
+            <label for="numero-whatsapp">{{ modal.send_whatsapp.label }}</label>
             <input
                     id="numero-whatsapp"
                     name="numero"

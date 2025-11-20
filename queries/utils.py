@@ -167,6 +167,7 @@ def parse_queries(
     nombre_objetos: str = "",
     *,
     model: Optional[Type[BaseModel]] = Consulta,
+    api: bool = False,
     save_context: bool = True,
 ) -> Dict:
     id = form_data.get("id")
@@ -192,10 +193,14 @@ def parse_queries(
         tipo=tipo,
         ip_cliente=ip_cliente,
     )
+
+    selection = selection_list.api if api else selection_list.web
     tabla = get.tabla(
-        objetos=objetos, selection=selection_list.web, sql_selection=selection_list.sql
+        objetos=objetos,
+        selection=selection,
+        sql_selection=selection_list.sql,
     )
-    tabla_columnas = tuple(select.name for select in selection_list.web)
+    tabla_columnas = tuple(select.name for select in selection)
 
     if model:
         model.objects.create(
@@ -209,15 +214,26 @@ def parse_queries(
     if save_context:
         request.session["context_data"] = {
             "sujeto": sujeto,
-            "objetos": objetos,
             "id": id,
             "fecha": (fecha.isoformat() if isinstance(fecha, date) else fecha),
             "nombre_objetos": nombre_objetos,
             "nombre_sujeto": nombre_sujeto,
             "nombre_id": nombre_id,
-            "pdf_context": asdict(context_list.pdf),
-            "pdf_selection": tuple(asdict(s) for s in selection_list.pdf),
-            "sql_selection": tuple(asdict(s) for s in selection_list.sql),
+            "pdf": asdict(context_list.pdf),
+            "tabla_pdf": get.tabla(
+                objetos=objetos,
+                selection=selection_list.pdf,
+                sql_selection=selection_list.sql,
+            ),
+            "tabla_columnas_pdf": tuple(select.name for select in selection_list.pdf),
+            "tabla_excel": get.tabla(
+                objetos=objetos,
+                selection=selection_list.excel,
+                sql_selection=selection_list.sql,
+            ),
+            "tabla_columnas_excel": tuple(
+                select.name for select in selection_list.excel
+            ),
         }
 
     return {"sujeto": sujeto, "tabla": tabla, "tabla_columnas": tabla_columnas}

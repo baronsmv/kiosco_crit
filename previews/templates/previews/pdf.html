@@ -2,23 +2,23 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8"/>
-    <title>{{ title }}</title>
+    <title>{{ pdf.title }}</title>
     {% load static %}
     <link href="{% static 'previews/css/pdf.css' %}" rel="stylesheet"/>
 </head>
 <body>
 
-{% if header %}
+{% if pdf.header %}
 <header>
-    <h1 id="titulo-principal">{{ header }}</h1>
+    <h1 id="titulo-principal">{{ pdf.header }}</h1>
 </header>
 {% endif %}
 
 <main>
     {% if sujeto %}
     <section aria-labelledby="data-title" class="info">
-        {% if data_title %}
-        <h2 class="section-title" id="data-title">{{ data_title }}</h2>
+        {% if pdf.data_title %}
+        <h2 class="section-title" id="data-title">{{ pdf.data_title }}</h2>
         {% endif %}
 
         <dl>
@@ -32,24 +32,24 @@
     </section>
     {% endif %}
 
-    {% if tabla %}
+    {% if tabla_pdf %}
     <section aria-labelledby="tabla-titulo" class="tabla-seccion">
 
-        {% if table_title %}
-        <h2 class="section-title" id="tabla-titulo">{{ table_title }}</h2>
+        {% if pdf.table_title %}
+        <h2 class="section-title" id="tabla-titulo">{{ pdf.table_title }}</h2>
         {% endif %}
 
-        <div aria-label="{{ table_title }}" class="tabla-scrollable" role="region">
-            <table summary="Tabla de {{ table_title }}">
+        <div aria-label="{{ pdf.table_title }}" class="tabla-scrollable" role="region">
+            <table>
                 <thead>
                 <tr>
-                    {% for columna in tabla_columnas %}
+                    {% for columna in tabla_columnas_pdf %}
                     <th scope="col">{{ columna }}</th>
                     {% endfor %}
                 </tr>
                 </thead>
                 <tbody>
-                {% for fila in tabla %}
+                {% for fila in tabla_pdf %}
                 <tr>
                     {% for dato in fila %}
                     <td>{{ dato|default_if_none:"" }}</td>
@@ -64,9 +64,9 @@
     {% endif %}
 </main>
 
-{% if footer %}
+{% if pdf.footer %}
 <footer>
-    <p class="footer-text">{{ footer }}</p>
+    <p class="footer-text">{{ pdf.footer }}</p>
 </footer>
 {% endif %}
 

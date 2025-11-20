@@ -26,6 +26,9 @@ paciente_context: MenuContext = {
     "select_text": "Selecciona una opción para continuar:",
     "mostrar_inicio": True,
     "home_label": "Inicio",
+    "carousel": {
+        "show": True,
+    },
 }
 paciente_options: MenuOptions = {
     "citas_paciente": {

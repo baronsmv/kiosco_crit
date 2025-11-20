@@ -13,16 +13,14 @@ logger = get_logger(__name__)
 
 def pdf(context: Dict, color: bool = False) -> str:
     validate.context(context)
-    pdf_data = context.get("pdf_data")
-    sql_data = context.get("sql_data")
-    get.tabla_with_columns(context, pdf_data, sql_data)
+
     css_path = finders.find(f"previews/css/pdf{'-color' if color else ''}.css")
     css_files = (css_path,) if css_path else ()
 
     try:
         html = render_to_string(
             "previews/pdf.html",
-            pdf_data.get("context", {}) | context,
+            context,
         )
     except Exception:
         logger.exception("Error al renderizar HTML")
@@ -45,14 +43,11 @@ def pdf(context: Dict, color: bool = False) -> str:
 
 def excel(context: Dict) -> str:
     validate.context(context)
-    pdf_data = context.get("pdf_data")
-    sql_data = context.get("sql_data")
-    get.tabla_with_columns(context, pdf_data, sql_data)
 
     df = pl.DataFrame(
-        data=context["tabla"],
+        data=context["tabla_excel"],
         orient="row",
-        schema=context["tabla_columnas"],
+        schema=context["tabla_columnas_excel"],
     )
     logger.debug(f"DataFrame generado:\n{df.head()}")
     filename = get.filename(context, ext="xlsx", buffer=df.write_csv().encode())
