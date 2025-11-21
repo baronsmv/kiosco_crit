@@ -23,11 +23,11 @@ def subject_exists(query: str, id: str, cursor) -> Optional[Dict[str, str]]:
         return None
 
 
-def sql_selection(selection: SelectionList) -> str:
-    seleccion = ", ".join(
+def sql_selection(selection: SelectionList, sep: str = f",\n{' ' * 12}") -> str:
+    seleccion = sep.join(
         f"{select.sql_expression} AS {select.sql_name}" for select in selection.sql
     )
-    logger.info(f"Campos seleccionados para query: {seleccion}")
+    logger.debug(f"Campos seleccionados para query: {seleccion}")
     return seleccion
 
 

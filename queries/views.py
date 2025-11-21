@@ -13,7 +13,6 @@ def citas_paciente(request: HttpRequest) -> HttpResponse:
         context_list=contexts.citas_paciente,
         selection_list=selections.citas_paciente,
         form=forms.BuscarIdFechaForm,
-        exist_query=sql.exist.paciente,
         data_query=sql.data.citas_paciente,
         nombre_id="carnet",
         nombre_sujeto="paciente",

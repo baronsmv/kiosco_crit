@@ -2,8 +2,7 @@ import inspect
 import json
 from dataclasses import asdict
 from datetime import date
-from typing import Callable, Dict, List, Optional, Tuple, Union
-from typing import Type
+from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import requests
 from django.conf import settings
@@ -14,12 +13,12 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 
-from classes.contexts import IdSubContext, ContextList
+from classes.contexts import ContextList
 from classes.exceptions import AjaxException
 from classes.models import BaseModel
 from classes.selections import SelectionList
-from utils import get, validate
-from utils.decorators import ajax_handler, query_handler
+from utils import get
+from utils.decorators import ajax_handler
 from utils.logger import get_logger
 from .models import Consulta
 
@@ -49,94 +48,70 @@ def initial_context(context: Dict) -> Dict:
     }
 
 
-def evaluate_query(data: Dict, func: Callable) -> Tuple[str, Tuple[str, ...]]:
-    sig = inspect.signature(func)
-    return func(**{k: v for k, v in data.items() if k in sig.parameters})
+def evaluate_query(query: Callable, params: Dict) -> Tuple[str, Tuple[str, ...]]:
+    sig = inspect.signature(query)
+    return query(**{k: v for k, v in params.items() if k in sig.parameters})
 
 
-@query_handler
-def get_subject(
-    id: Optional[str],
-    exist_query: Optional[Callable],
-    nombre_sujeto: str,
-    nombre_id: str,
-    id_context: IdSubContext,
-    *,
+def get_rows(
+    query_func: Callable,
+    query_params: Dict,
     db_name: str = "crit",
-    **_,
-) -> Optional[Dict[str, str]]:
-    if not id or not exist_query:
-        logger.info(f"ID o query de {nombre_sujeto} no configurados.")
-        return None
-
-    if not validate.id_by_context(id=id, id_context=id_context):
-        raise AjaxException(f"{nombre_id.capitalize()} no válido.")
-
-    logger.info(f"Buscando datos para {nombre_sujeto} con {nombre_id}: '{id}'")
-
-    try:
-        with connections[db_name].cursor() as cursor:
-            sujeto = exist_query(id, cursor) if exist_query else None
-    except OperationalError as e:
-        logger.error(f"Error al obtener datos para ID: '{id}': {e}")
-        raise
-    except Exception as e:
-        logger.exception(f"Error al obtener datos del ID: '{id}': {str(e)}")
-        raise AjaxException()
-
-    if not sujeto:
-        message = f"❌ No se encontró ningún {nombre_sujeto} con ese {nombre_id}."
-        logger.info(message)
-        raise AjaxException(message, causa="ID Inexistente")
-
-    return {
-        f"Nombre de {nombre_sujeto.capitalize()}": sujeto.get("nombre", "").title(),
-        nombre_id.capitalize(): sujeto.get("id", ""),
-    }
-
-
-@query_handler
-def get_objects(
-    data: Dict[str, Union[str, date]],
-    data_query: Optional[Callable],
-    nombre_objetos: str,
-    nombre_id: str,
-    *,
-    db_name: str = "crit",
-    **_,
-) -> Optional[List[Dict]]:
-    if not data or not data_query:
-        return None
-
-    query, params = evaluate_query(data, data_query)
+):
+    query, params = evaluate_query(query_func, query_params)
     logger.debug(f"Ejecutando consulta: '{query}', con parámetros: '{params}'.")
 
     try:
         with connections[db_name].cursor() as cursor:
             cursor.execute(query, params)
             columnas = tuple(col[0] for col in cursor.description)
-            objetos = [dict(zip(columnas, row)) for row in cursor.fetchall()]
+            return [dict(zip(columnas, row)) for row in cursor.fetchall()]
     except OperationalError as e:
-        logger.error(f"Error al obtener objetos para ID: '{id}': {e}")
-        raise
+        logger.error(f"No se pudo conectar con la base de datos: {e}")
+        raise AjaxException("❌ No se pudo conectar con la base de datos.")
     except Exception as e:
-        logger.exception(f"Error al obtener objetos para ID: '{id}': {str(e)}")
+        logger.exception(f"Error al obtener objetos: {str(e)}")
         raise AjaxException()
 
-    if not objetos:
-        if "fecha" in data:
-            message = (
-                f"❌ No se encontraron {nombre_objetos} con la fecha especificada."
-            )
-        else:
-            message = f"❌ No se encontraron {nombre_objetos} para este {nombre_id}."
-        logger.info(message)
-        raise AjaxException(
-            message, target="fecha" if "fecha" in data else "id", causa="Sin resultados"
-        )
 
-    logger.info(f"Se encontraron {len(objetos)} objetos.")
-    return objetos
+def get_objects(
+    rows: List[Dict],
+    selection_list: SelectionList,
+    nombre_id: str,
+    nombre_sujeto: str,
+    nombre_objetos: str,
+) -> Optional[Dict]:
+
+    sujeto = None
+    objetos = []
+
+    if selection_list.subject:
+        if not rows:
+            raise AjaxException(
+                f"❌ No se encontró ningún {nombre_sujeto} con ese {nombre_id}.",
+                causa="Sin resultados",
+            )
+        sujeto = {
+            clause.name: rows[0].get(clause.sql_name, "")
+            for clause in selection_list.subject
+        }
+
+    if selection_list.web:
+        subject_keys = [cl.sql_name for cl in (selection_list.subject or [])]
+        objetos = [
+            {k: v for k, v in row.items() if k not in subject_keys}
+            for row in rows
+            if any(row.get(k) is not None for k in row if k not in subject_keys)
+        ]
+        if not objetos:
+            logger.info(f"Se encontró {nombre_sujeto}, pero sin {nombre_objetos}.")
+            return {"sujeto": sujeto, "objetos": []}
+
+    if sujeto:
+        logger.info(f"Se encontraron datos de {nombre_sujeto}.")
+    if objetos:
+        logger.info(f"Se encontraron {len(objetos)} {nombre_objetos}.")
+    return {"sujeto": sujeto, "objetos": objetos}
 
 
 def parse_form(form: Type[Form], request: HttpRequest) -> Dict[str, Union[str, date]]:
@@ -158,20 +133,18 @@ def parse_form(form: Type[Form], request: HttpRequest) -> Dict[str, Union[str, d
 def get_media_resources(
     objetos, context_list: ContextList, selection_list: SelectionList
 ) -> Dict:
+    pdf_selection = selection_list.pdf or selection_list.web
+    excel_selection = selection_list.excel or selection_list.web
     return {
         "pdf": asdict(context_list.pdf),
         "tabla_pdf": get.tabla(
-            objetos=objetos,
-            selection=selection_list.pdf,
-            sql_selection=selection_list.sql,
+            objetos=objetos, selection=pdf_selection, sql_selection=selection_list.sql
         ),
-        "tabla_columnas_pdf": tuple(select.name for select in selection_list.pdf),
+        "tabla_columnas_pdf": tuple(select.name for select in pdf_selection),
         "tabla_excel": get.tabla(
-            objetos=objetos,
-            selection=selection_list.excel,
-            sql_selection=selection_list.sql,
+            objetos=objetos, selection=excel_selection, sql_selection=selection_list.sql
         ),
-        "tabla_columnas_excel": tuple(select.name for select in selection_list.excel),
+        "tabla_columnas_excel": tuple(select.name for select in excel_selection),
     }
 
 
@@ -196,25 +169,18 @@ def parse_queries(
     ip_cliente = get.client_ip(request)
     tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
 
-    sujeto = get_subject(
-        id=id,
-        exist_query=exist_query,
+    sujeto, objetos = get_objects(
+        rows=get_rows(
+            query_func=data_query,
+            query_params=form_data,
+        ),
+        selection_list=selection_list,
+        nombre_id=nombre_id,
         nombre_sujeto=nombre_sujeto,
-        nombre_id=nombre_id,
-        id_context=context_list.initial.id,
-        tipo=tipo,
-        ip_cliente=ip_cliente,
-    )
-    objetos = get_objects(
-        data=form_data,
-        data_query=data_query,
         nombre_objetos=nombre_objetos,
-        nombre_id=nombre_id,
-        tipo=tipo,
-        ip_cliente=ip_cliente,
     )
 
-    selection = selection_list.api if api else selection_list.web
+    selection = selection_list.api if api and selection_list.api else selection_list.web
     tabla = get.tabla(
         objetos=objetos,
         selection=selection,
@@ -258,7 +224,7 @@ def query_view(
     nombre_id: Optional[str] = None,
     nombre_sujeto: Optional[str] = None,
     exist_query: Optional[Callable] = None,
-    testing: bool = True,
+    testing: bool = False,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")

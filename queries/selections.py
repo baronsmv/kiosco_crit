@@ -1,7 +1,11 @@
 from classes.selections import SelectionList
 from .sql import select
 
+paciente = (select.nombre_paciente,)
+colaborador = (select.nombre_colaborador,)
+
 citas_paciente = SelectionList(
+    subject=paciente,
     web=(
         select.nombre_servicio,
         select.fecha_cita,
@@ -18,7 +22,7 @@ citas_paciente = SelectionList(
 )
 
 datos_paciente = SelectionList(
-    web=(
+    subject=(
         select.no_carnet,
         select.nombre_paciente,
         select.clinica,
@@ -29,6 +33,7 @@ datos_paciente = SelectionList(
 )
 
 citas_colaborador = SelectionList(
+    subject=colaborador,
     web=(
         select.nombre_servicio,
         select.fecha_cita,

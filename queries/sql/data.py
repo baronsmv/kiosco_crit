@@ -39,9 +39,9 @@ def citas_colaborador(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, .
     logger.info(f"Construyendo query de citas por colaborador ID: {id}, fecha: {fecha}")
     query = f"""
         SELECT {sql_selection(selections.citas_colaborador)}
-        FROM SCRITS2.K_CITA kc
-        INNER JOIN SCRITS2.C_USUARIO cu
-            ON kc.FL_USUARIO = cu.FL_USUARIO
+        FROM SCRITS2.C_USUARIO cu
+        INNER JOIN SCRITS2.K_CITA kc
+            ON cu.FL_USUARIO =kc.FL_USUARIO
         INNER JOIN SCRITS2.C_SERVICIO cs
             ON kc.FL_SERVICIO = cs.FL_SERVICIO
         LEFT JOIN SCRITS2.K_PACIENTE_CITA kpc

@@ -15,8 +15,8 @@ Selection = Tuple[SelectClause, ...]
 
 @dataclass(frozen=True)
 class SelectionList:
-    web: Selection
     subject: Selection = ()
+    web: Selection = ()
     api: Selection = ()
     pdf: Selection = ()
     excel: Selection = ()
@@ -29,7 +29,3 @@ class SelectionList:
             for select in sub
         }
         object.__setattr__(self, "sql", tuple(merged))
-
-        for field_name in ("api", "pdf", "excel"):
-            if not getattr(self, field_name):
-                object.__setattr__(self, field_name, self.web)
