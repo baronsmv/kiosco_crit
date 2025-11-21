@@ -58,8 +58,8 @@ def api_espacios_disponibles(
 ) -> JsonResponse:
     return api_query_view(
         request=request,
-        context_list=contexts.citas_colaborador,
-        selection_list=selections.citas_paciente,
+        context_list=contexts.espacios_disponibles,
+        selection_list=selections.espacios_disponibles,
         data_query=sql.data.espacios_disponibles,
         nombre_objetos="espacios disponibles",
         url_params={"fecha": fecha},

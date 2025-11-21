@@ -52,8 +52,8 @@ def citas_colaborador(request: HttpRequest) -> HttpResponse:
 def espacios_disponibles(request: HttpRequest) -> HttpResponse:
     return query_view(
         request=request,
-        context_list=contexts.citas_colaborador,
-        selection_list=selections.citas_colaborador,
+        context_list=contexts.espacios_disponibles,
+        selection_list=selections.espacios_disponibles,
         form=forms.BuscarFechaForm,
         data_query=sql.data.espacios_disponibles,
         nombre_objetos="espacios disponibles",
