@@ -11,15 +11,23 @@ logger = get_logger(__name__)
 def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de citas por carnet: {id}, fecha: {fecha}")
     query = f"""
-        SELECT {sql_selection(selections.citas_paciente)}
+        SELECT
+            {sql_selection(selections.citas_paciente)}
         FROM SCRITS2.C_PACIENTE cp
-        INNER JOIN SCRITS2.K_PACIENTE_CITA kpc ON cp.FL_PACIENTE = kpc.FL_PACIENTE
-        INNER JOIN SCRITS2.K_CITA kc ON kpc.FL_CITA = kc.FL_CITA
-        INNER JOIN SCRITS2.C_SERVICIO cs ON kc.FL_SERVICIO = cs.FL_SERVICIO
-        INNER JOIN SCRITS2.C_USUARIO cu ON kc.FL_USUARIO = cu.FL_USUARIO
-        INNER JOIN SCRITS2.C_CLINICA cc ON cp.FL_CLINICA = cc.FL_CLINICA
-        LEFT JOIN SCRITS2.C_ESTATUS_CITA cec ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
-        WHERE cp.NO_CARNET = %s
+        INNER JOIN SCRITS2.K_PACIENTE_CITA kpc
+            ON cp.FL_PACIENTE = kpc.FL_PACIENTE
+        INNER JOIN SCRITS2.K_CITA kc
+            ON kpc.FL_CITA = kc.FL_CITA
+        INNER JOIN SCRITS2.C_SERVICIO cs
+            ON kc.FL_SERVICIO = cs.FL_SERVICIO
+        INNER JOIN SCRITS2.C_USUARIO cu
+            ON kc.FL_USUARIO = cu.FL_USUARIO
+        INNER JOIN SCRITS2.C_CLINICA cc
+            ON cp.FL_CLINICA = cc.FL_CLINICA
+        LEFT JOIN SCRITS2.C_ESTATUS_CITA cec
+            ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
+        WHERE
+            cp.NO_CARNET = %s
     """
     return parse_query(
         query=query,
@@ -38,7 +46,8 @@ def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]
 def citas_colaborador(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de citas por colaborador ID: {id}, fecha: {fecha}")
     query = f"""
-        SELECT {sql_selection(selections.citas_colaborador)}
+        SELECT
+            {sql_selection(selections.citas_colaborador)}
         FROM SCRITS2.C_USUARIO cu
         INNER JOIN SCRITS2.K_CITA kc
             ON cu.FL_USUARIO =kc.FL_USUARIO
@@ -52,7 +61,8 @@ def citas_colaborador(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, .
             ON cp.FL_CLINICA = cc.FL_CLINICA
         LEFT JOIN SCRITS2.C_ESTATUS_CITA cec
             ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
-        WHERE cu.CL_LOGIN= %s
+        WHERE
+            cu.CL_LOGIN= %s
     """
     return parse_query(
         query=query,
@@ -65,18 +75,20 @@ def citas_colaborador(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, .
 def espacios_disponibles(fecha: date) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de espacios disponibles por fecha: {fecha}")
     query = f"""
-        SELECT {sql_selection(selections.espacios_disponibles)}
+        SELECT
+            {sql_selection(selections.espacios_disponibles)}
         FROM SCRITS2.K_CITA kc
         INNER JOIN SCRITS2.C_SERVICIO cs
             ON kc.FL_SERVICIO = cs.FL_SERVICIO
         INNER JOIN SCRITS2.C_USUARIO cu
             ON kc.FL_USUARIO = cu.FL_USUARIO
-        WHERE kc.NO_DISPONIBLES > 0
-        AND kc.NO_DURACION >= 30
-        AND cs.NB_SERVICIO NOT LIKE '%%dummy%%'
-        AND cs.NB_SERVICIO NOT LIKE '%%análisis%%'
-        AND cs.NB_SERVICIO NOT LIKE '%%EEG%%'
-        AND kc.FG_BLOQUEADA = 0
+        WHERE 
+            kc.NO_DISPONIBLES > 0
+            AND kc.NO_DURACION >= 30
+            AND cs.NB_SERVICIO NOT LIKE '%%dummy%%'
+            AND cs.NB_SERVICIO NOT LIKE '%%análisis%%'
+            AND cs.NB_SERVICIO NOT LIKE '%%EEG%%'
+            AND kc.FG_BLOQUEADA = 0
     """
     return parse_query(
         query=query,
@@ -88,7 +100,8 @@ def espacios_disponibles(fecha: date) -> Tuple[str, Tuple[str, ...]]:
 def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
     logger.info(f"Construyendo query de datos del paciente por carnet: {id}")
     query = f"""
-    SELECT {sql_selection(selections.datos_paciente)}
+    SELECT
+        {sql_selection(selections.datos_paciente)}
     FROM SCRITS2.K_SERVICIO_DETALLE AS ksd
     INNER JOIN SCRITS2.K_PACIENTE_CITA AS kpc 
         ON ksd.FL_PACIENTE_CITA = kpc.FL_PACIENTE_CITA
@@ -100,7 +113,8 @@ def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
         ON cp.FL_CLINICA = cc.FL_CLINICA
     INNER JOIN SCRITS2.C_SERVICIO AS cs
         ON kc.FL_SERVICIO = cs.FL_SERVICIO
-    WHERE cp.NO_CARNET = %s
+    WHERE
+        cp.NO_CARNET = %s
         AND ksd.FG_CANCELADO = 0
         AND ksd.MN_TOTAL > KSD.MN_PAGADO
         AND (
