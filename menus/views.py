@@ -8,14 +8,12 @@ logger = get_logger(__name__)
 
 
 def home(request: HttpRequest) -> HttpResponse:
-    return menu_view(request, contexts.inicio_context, contexts.inicio_options)
+    return menu_view(request, contexts.inicio)
 
 
 def paciente(request: HttpRequest) -> HttpResponse:
-    return menu_view(request, contexts.paciente_context, contexts.paciente_options)
+    return menu_view(request, contexts.paciente)
 
 
 def colaborador(request: HttpRequest) -> HttpResponse:
-    return menu_view(
-        request, contexts.colaborador_context, contexts.colaborador_options
-    )
+    return menu_view(request, contexts.colaborador)

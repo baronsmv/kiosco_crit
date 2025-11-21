@@ -1,8 +1,41 @@
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
+from typing import Optional, Tuple
 
 
+# Menús
+@dataclass(frozen=True)
+class MenuOptionSubContext:
+    title: str
+    description: str
+    url_name: str
+
+
+@dataclass(frozen=True)
+class HomeSubContext:
+    url_name: str = ""
+    label: str = "Volver"
+    show: bool = True
+
+
+@dataclass(frozen=True)
+class CarouselSubContext:
+    title: str = "Espacios Disponibles"
+    show: bool = False
+
+
+@dataclass(frozen=True)
+class MenuContext:
+    title: str
+    header: str
+    url_name: str
+    select_text: str = "Selecciona una opción para continuar:"
+    options: Tuple[MenuOptionSubContext, ...] = ()
+    carousel: CarouselSubContext = CarouselSubContext()
+    home: HomeSubContext = HomeSubContext("home")
+
+
+# Queries
 @dataclass(frozen=True)
 class IdSubContext:
     label: str
@@ -40,23 +73,6 @@ class DateSubContext:
 class SearchButtonSubContext:
     label: str = "Buscar"
     message: str = "Procesando..."
-
-
-@dataclass(frozen=True)
-class HomeSubContext:
-    url: str
-    label: str = "Volver"
-    show: bool = True
-
-
-@dataclass(frozen=True)
-class PacienteHomeSubContext(HomeSubContext):
-    url: str = "menu_paciente"
-
-
-@dataclass(frozen=True)
-class ColaboradorHomeSubContext(HomeSubContext):
-    url: str = "menu_colaborador"
 
 
 @dataclass(frozen=True)

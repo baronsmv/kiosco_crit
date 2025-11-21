@@ -1,14 +1,27 @@
+from dataclasses import dataclass
+
 from classes.contexts import (
     CarnetSubContext,
     NombreUsuarioSubContext,
-    PacienteHomeSubContext,
-    ColaboradorHomeSubContext,
     DateSubContext,
     InitialWebContext,
     ModalContext,
     PDFContext,
     ContextList,
+    HomeSubContext,
 )
+from menus import contexts
+
+
+@dataclass(frozen=True)
+class PacienteHomeSubContext(HomeSubContext):
+    url_name: str = contexts.paciente.url_name
+
+
+@dataclass(frozen=True)
+class ColaboradorHomeSubContext(HomeSubContext):
+    url_name: str = contexts.colaborador.url_name
+
 
 citas_paciente = ContextList(
     initial=InitialWebContext(

@@ -261,7 +261,7 @@ def query_view(
             "queries/consulta_testing.html",
             {
                 "initial": asdict(context_list.initial),
-                "home_url": reverse_lazy(context_list.initial.home.url),
+                "home_url": reverse_lazy(context_list.initial.home.url_name),
                 "modal": asdict(context_list.modal),
                 **ajax_context,
             },
@@ -294,6 +294,6 @@ def query_view(
         "queries/consulta.html",
         {
             "initial": asdict(context_list.initial),
-            "home_url": reverse_lazy(context_list.initial.home.url),
+            "home_url": reverse_lazy(context_list.initial.home.url_name),
         },
     )
