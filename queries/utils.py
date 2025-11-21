@@ -155,6 +155,26 @@ def parse_form(form: Type[Form], request: HttpRequest) -> Dict[str, Union[str, d
     return dict(form_instance.cleaned_data.items())
 
 
+def get_media_resources(
+    objetos, context_list: ContextList, selection_list: SelectionList
+) -> Dict:
+    return {
+        "pdf": asdict(context_list.pdf),
+        "tabla_pdf": get.tabla(
+            objetos=objetos,
+            selection=selection_list.pdf,
+            sql_selection=selection_list.sql,
+        ),
+        "tabla_columnas_pdf": tuple(select.name for select in selection_list.pdf),
+        "tabla_excel": get.tabla(
+            objetos=objetos,
+            selection=selection_list.excel,
+            sql_selection=selection_list.sql,
+        ),
+        "tabla_columnas_excel": tuple(select.name for select in selection_list.excel),
+    }
+
+
 def parse_queries(
     request: HttpRequest,
     form_data: Dict[str, Union[str, date]],
@@ -219,21 +239,7 @@ def parse_queries(
             "nombre_objetos": nombre_objetos,
             "nombre_sujeto": nombre_sujeto,
             "nombre_id": nombre_id,
-            "pdf": asdict(context_list.pdf),
-            "tabla_pdf": get.tabla(
-                objetos=objetos,
-                selection=selection_list.pdf,
-                sql_selection=selection_list.sql,
-            ),
-            "tabla_columnas_pdf": tuple(select.name for select in selection_list.pdf),
-            "tabla_excel": get.tabla(
-                objetos=objetos,
-                selection=selection_list.excel,
-                sql_selection=selection_list.sql,
-            ),
-            "tabla_columnas_excel": tuple(
-                select.name for select in selection_list.excel
-            ),
+            **get_media_resources(objetos, context_list, selection_list),
         }
 
     return {"sujeto": sujeto, "tabla": tabla, "tabla_columnas": tabla_columnas}
@@ -252,7 +258,7 @@ def query_view(
     nombre_id: Optional[str] = None,
     nombre_sujeto: Optional[str] = None,
     exist_query: Optional[Callable] = None,
-    testing: bool = False,
+    testing: bool = True,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
@@ -260,21 +266,40 @@ def query_view(
     if testing:
         rows = 100
         text = "Ejemplo"
+        sujeto = None
+        tabla = tuple((text,) * len(selection_list.web) for _ in range(rows))
+        tabla_columnas = tuple(select.name for select in selection_list.web)
+        objetos = [
+            {campo.sql_name: text for campo in selection_list.sql} for _ in range(rows)
+        ]
+        ajax_context = {
+            "sujeto": sujeto,
+            "tabla": tabla,
+            "tabla_columnas": tabla_columnas,
+        }
 
         request.session["context_data"] = {
-            "sujeto": None,
-            "tabla": tuple((text,) * len(selection_list.web) for _ in range(rows)),
-            "objetos": [
-                {campo: text for campo in selection_list.sql} for _ in range(rows)
-            ],
+            "sujeto": sujeto,
+            "objetos": objetos,
             "id": "ID de ejemplo",
             "fecha": "2025-10-17",
             "nombre_objetos": nombre_objetos,
             "nombre_sujeto": nombre_sujeto,
             "nombre_id": nombre_id,
-            "context_list": context_list,
-            "selections": selection_list,
+            **get_media_resources(objetos, context_list, selection_list),
         }
+
+        logger.debug("Renderizando vista completa con contexto inicial.")
+        return render(
+            request,
+            "queries/consulta_testing.html",
+            {
+                "initial": asdict(context_list.initial),
+                "home_url": reverse_lazy(context_list.initial.home.url),
+                "modal": asdict(context_list.modal),
+                **ajax_context,
+            },
+        )
 
     if not testing and request.method == "POST":
         ajax_context = parse_queries(
@@ -300,7 +325,7 @@ def query_view(
     logger.debug("Renderizando vista completa con contexto inicial.")
     return render(
         request,
-        f"queries/consulta.html",
+        "queries/consulta.html",
         {
             "initial": asdict(context_list.initial),
             "home_url": reverse_lazy(context_list.initial.home.url),

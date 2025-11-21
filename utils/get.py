@@ -19,7 +19,7 @@ def model_type(nombre_objetos: str, nombre_sujeto: str) -> str:
     return tipo
 
 
-def formatted_campo(campo: str, format_option: Optional[str]):
+def formatted_campo(campo: str, format_option: Optional[str]) -> str:
     if not format_option:
         return campo
 
