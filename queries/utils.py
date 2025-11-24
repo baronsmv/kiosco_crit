@@ -1,7 +1,8 @@
 import inspect
 import json
 from dataclasses import asdict
-from datetime import date
+from datetime import date, datetime
+from pprint import pformat
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import requests
@@ -131,7 +132,7 @@ def get_media_resources(
 
     return {
         "id": id,
-        "fecha": (fecha.isoformat() if isinstance(fecha, date) else fecha),
+        "fecha": (fecha.isoformat() if isinstance(fecha, datetime) else fecha),
         "sujeto": subject,
         "id_name": context_list.id_name,
         "subject_name": context_list.subject_name,
@@ -179,6 +180,8 @@ def parse_queries(
         subject_name=subject_name,
         objects_name=objects_name,
     )
+    logger.info(f"Datos de {subject_name}: {pformat(subject)}")
+    logger.info(f"Datos de {objects_name}: {pformat(objects)}")
 
     selection = selection_list.api if api and selection_list.api else selection_list.web
     table = get.tabla(

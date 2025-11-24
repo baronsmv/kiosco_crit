@@ -60,10 +60,10 @@ inasistencias_paciente = SelectClause(
 aniversario_paciente = SelectClause(
     name="Aniversario",
     sql_name="aniversario_paciente",
-    sql_expression="CP.FE_ULTANIVERSARIO",
+    sql_expression="FORMAT(CP.FE_ULTANIVERSARIO, 'dd/MM/yyyy')",
 )
 deuda_total_paciente = SelectClause(
     name="Deuda total",
     sql_name="deuda_total_paciente",
-    sql_expression="CONVERT(DECIMAL(10,2), SUM(KSD.MN_TOTAL - KSD.MN_PAGADO))",
+    sql_expression="STR(SUM(KSD.MN_TOTAL - KSD.MN_PAGADO), 10, 2)",
 )
