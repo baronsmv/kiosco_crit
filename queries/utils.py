@@ -227,7 +227,7 @@ def query_view(
     data_query: Callable,
     *,
     model: Optional[Type[BaseModel]] = Consulta,
-    testing: bool = True,
+    testing: bool = False,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")

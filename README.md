@@ -3,7 +3,7 @@
 Plataforma web que sirve información relevante a los pacientes y colaboradores
 de CRIT Hidalgo a partir de consultas y envíos de formatos como PDF y Excel.
 
-## Especificaciones técnicas
+## Estructura
 
 ### Proyecto
 
@@ -82,7 +82,7 @@ Los contenedores, configurados en `docker-compose.yml`, son:
 
 Cada consulta se divide en varias partes:
 
-### Campos SQL
+### 1. Campos SQL
 
 En `queries/sql/select.py`, se encuentran los campos SQL reutilizables. Cada
 uno se implementa usando la clase `SelectClause`, que contiene:
@@ -96,7 +96,7 @@ uno se implementa usando la clase `SelectClause`, que contiene:
 
 De no existir el campo que se requiere, se puede agregar y usar.
 
-### Selección de campos SQL
+### 2. Selección de campos SQL
 
 Una vez estén los campos SQL con su respectiva instancia, se seleccionan para
 cada consulta en `queries/sql/selections.py`. Cada consulta debe contener su
@@ -112,7 +112,7 @@ tuplas de campos para cada caso:
 
 Estas selecciones son opcionales, y la tupla `sql` agrupa todos los usados.
 
-### Query SQL
+### 3. Query SQL
 
 Es en `queries/sql/queries.py` que se implementan las queries como funciones.
 
@@ -121,6 +121,32 @@ respectivos `JOIN` a las tablas correspondientes, y condiciones. Finalmente,
 se incluye en la función `parse_query` con los parámetros de la consulta, que
 se encarga de incluir condiciones y filtros dependientes de la fecha.
 
-### Context web
+### 4. Contexto web
+
+En `queries/contexts.py` se definen los contextos web a usar en la vista de la
+consulta. Los contextos web pasan variables a las plantillas para personalizar
+su contenido.
+
+Para los contextos, se usan diversas clases (ubicadas en `classes.contexts`),
+pero la principal es `ContextList`, que contiene el contexto general necesario
+para cada consulta.
+
+`ContextList` se compone de los siguientes campos:
+
+- `initial`: Una instancia de `InitialWebContext`, que contiene variables de la
+  página web principal de cada consulta, donde se piden los datos y se incluye
+  un botón de búsqueda. Los campos relevantes de esta instancia son:
+    - `title`: El campo HTML `title`, que configura el nombre de la pestaña en
+      el navegador.
+    - `header`: El campo HTML de título, `h1`, que configura el título.
+    - `id`: Una instancia de `IdSubContext`, que configura
+    - home: HomeSubContext
+    - date: DateSubContext = DateSubContext()
+    - search_button: SearchButtonSubContext = SearchButtonSubContext()
+- `modal`: ModalContext
+- `pdf`: PDFContext
+- `id_name`: str = ""
+- `subject_name`: str = ""
+- `objects_name`: str = ""
 
 ### Vista web

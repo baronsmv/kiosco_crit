@@ -8,7 +8,6 @@ services:
              python manage.py collectstatic --noinput &&
              gunicorn kiosco_crit.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - .:/app
       - static_volume:/app/static
       - ./media:/app/media
     env_file:
@@ -89,7 +88,6 @@ services:
     build: ./scripts/carousel
     container_name: carousel_kiosco
     volumes:
-      - .:/app
       - static_volume:/app/static
     working_dir: /app
     env_file:
