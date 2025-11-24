@@ -37,10 +37,12 @@ def parse_query(
     order_by: Optional[str] = None,
     fecha_query: str = " AND CAST(kc.FE_CITA AS DATE) = %s",
 ) -> Tuple[str, Tuple[str, ...]]:
+    id = params.get("id")
     fecha = params.get("fecha")
 
-    logger.info(f"Generando consulta con parametros: {params}")
-    params = tuple(filter(None, params.keys()))
+    logger.info(f"Generando consulta con parámetros: {params.items()}")
+    logger.debug(f"ID: {id}, fecha: {fecha}")
+    params = tuple(filter(None, (id, fecha)))
 
     if fecha:
         query += fecha_query

@@ -9,6 +9,9 @@
 </head>
 <body>
 
+{% include 'sendings/partials/modal_enviar_email.html' %}
+{% include 'sendings/partials/modal_enviar_whatsapp.html' %}
+
 <div aria-labelledby="initial-title" class="container" role="initial">
     {% if initial.home.show %}
     <a href="{{ home_url }}" class="home-link">{{ initial.home.label }}</a>

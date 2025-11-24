@@ -19,6 +19,7 @@ from classes.models import BaseModel
 from classes.selections import SelectionList
 from utils import get
 from utils.decorators import ajax_handler
+from utils.get import formatted_campo
 from utils.logger import get_logger
 from .models import Consulta
 
@@ -76,7 +77,9 @@ def get_objects(
                 causa="Sin resultados",
             )
         sujeto = {
-            clause.name: rows[0].get(clause.sql_name, "")
+            clause.name: formatted_campo(
+                rows[0].get(clause.sql_name, ""), format_option=clause.format
+            )
             for clause in selection_list.subject
         }
 
@@ -202,20 +205,19 @@ def parse_queries(
     return {"sujeto": subject, "tabla": table, "tabla_columnas": table_columns}
 
 
-def get_modal_resources(context_list: ContextList, ajax_context: Dict) -> Dict:
-    return {
-        "modal": asdict(context_list.modal),
-        "send_email_pdf_url": reverse_lazy(context_list.modal.send_email.pdf.url_name),
-        "send_email_excel_url": reverse_lazy(
-            context_list.modal.send_email.excel.url_name
-        ),
-        "send_whatsapp_pdf_url": reverse_lazy(
-            context_list.modal.send_whatsapp.pdf.url_name
-        ),
-        "send_whatsapp_excel_url": reverse_lazy(
-            context_list.modal.send_whatsapp.excel.url_name
-        ),
-    } | ajax_context
+def initial_context(context_list: ContextList) -> Dict:
+    context = {
+        "initial": asdict(context_list.initial),
+        "home_url": reverse_lazy(context_list.initial.home.url_name),
+    }
+    logger.debug(f"Initial context: {context}")
+    return context
+
+
+def modal_context(context_list: ContextList, ajax_context: Dict) -> Dict:
+    context = {"modal": asdict(context_list.modal)} | ajax_context
+    logger.debug(f"Modal context: {context}")
+    return context
 
 
 @ajax_handler
@@ -258,12 +260,8 @@ def query_view(
         logger.debug("Renderizando vista completa con contexto inicial.")
         return render(
             request,
-            "queries/consulta_testing.html",
-            {
-                "initial": asdict(context_list.initial),
-                "home_url": reverse_lazy(context_list.initial.home.url_name),
-            }
-            | get_modal_resources(context_list, ajax_context),
+            "queries/consulta.html",
+            initial_context(context_list) | modal_context(context_list, ajax_context),
         )
 
     if not testing and request.method == "POST":
@@ -279,7 +277,7 @@ def query_view(
 
         if ajax_context.get("tabla"):
             raise AjaxException(
-                context=get_modal_resources(context_list, ajax_context),
+                context=modal_context(context_list, ajax_context),
                 filename="modal_buscar.html",
             )
 
@@ -287,8 +285,5 @@ def query_view(
     return render(
         request,
         "queries/consulta.html",
-        {
-            "initial": asdict(context_list.initial),
-            "home_url": reverse_lazy(context_list.initial.home.url_name),
-        },
+        initial_context(context_list) | modal_context(context_list, {}),
     )

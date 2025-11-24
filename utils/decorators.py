@@ -1,3 +1,4 @@
+from pprint import pformat
 from typing import Callable
 
 from django.http import HttpRequest, HttpResponse
@@ -16,7 +17,7 @@ def ajax_handler(func: Callable) -> Callable:
         except AjaxException as e:
             logger.info(
                 f"Función {func.__name__} solicitando respuesta AJAX, "
-                f"con contexto {e.get_context()} y template '{e.filename}'."
+                f"con contexto:\n{pformat(e.get_context())}\ny template '{e.filename}'."
             )
             return ajax_response(request, context=e.get_context(), filename=e.filename)
 
