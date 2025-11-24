@@ -85,6 +85,10 @@ function activarEnvioAjax(element) {
             toggleMensajeProcesando(true);
 
             const formData = new FormData(form);
+            if (e.submitter && e.submitter.name) {
+                formData.append(e.submitter.name, e.submitter.value);
+            }
+            
             const csrfToken = form.querySelector("[name='csrfmiddlewaretoken']")?.value;
 
             try {

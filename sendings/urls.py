@@ -15,18 +15,13 @@ urlpatterns = [
         name="admin_whatsapp",
     ),
     path(
-        route="send/whatsapp/pdf/",
-        view=views.whatsapp_pdf,
-        name="send_whatsapp_pdf",
+        route="send/whatsapp/",
+        view=views.whatsapp,
+        name="send_whatsapp",
     ),
     path(
-        route="send/email/pdf/",
-        view=views.email_pdf,
-        name="send_email_pdf",
-    ),
-    path(
-        route="send/email/excel/",
-        view=views.email_excel,
-        name="send_email_excel",
+        route="send/email/",
+        view=views.email,
+        name="send_email",
     ),
 ]

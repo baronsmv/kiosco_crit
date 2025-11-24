@@ -16,7 +16,8 @@
         {% endif %}
 
         <!-- Formulario -->
-        <form data-ajax="true" method="POST">
+        <form action="{% url 'send_whatsapp' %}" data-ajax="true"
+              method="POST">
             {% csrf_token %}
             <label for="whatsapp">{{ modal.send_whatsapp.label }}</label>
             <input
@@ -29,15 +30,13 @@
             />
             <div class="botones-agrupados">
                 {% if modal.send_whatsapp.pdf.show %}
-                <button class="btn btn-primary" formaction="{{ send_whatsapp_pdf_url }}"
-                        type="submit">
+                <button class="btn btn-primary" name="format" type="submit" value="pdf">
                     {{ modal.send_whatsapp.pdf.label }}
                 </button>
                 {% endif %}
 
                 {% if modal.send_whatsapp.excel.show %}
-                <button class="btn btn-primary" formaction="{{ send_whatsapp_excel_url }}"
-                        type="submit">
+                <button class="btn btn-primary" name="format" type="submit" value="excel">
                     {{ modal.send_whatsapp.excel.label }}
                 </button>
                 {% endif %}

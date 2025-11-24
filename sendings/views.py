@@ -41,9 +41,26 @@ def email_excel(request: HttpRequest) -> HttpResponse | JsonResponse:
     return email_view(request, filepath, subject, body)
 
 
+def email(request: HttpRequest) -> HttpResponse | JsonResponse:
+    format_type = request.POST.get("format")
+    print("A" * 1000, format_type, request.POST)
+    if format_type == "pdf":
+        return email_pdf(request)
+    else:
+        return email_excel(request)
+
+
 @csrf_exempt
 def whatsapp_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
     return whatsapp_pdf_view(request)
+
+
+def whatsapp(request: HttpRequest) -> HttpResponse | JsonResponse:
+    format_type = request.POST.get("format")
+    if format_type == "pdf":
+        return whatsapp_pdf(request)
+    else:
+        return whatsapp_pdf(request)  # Excel no implementado
 
 
 @login_required
