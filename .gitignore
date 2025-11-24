@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 # Archivos de entorno
+!.env.copy
 .env
 *.env
 
