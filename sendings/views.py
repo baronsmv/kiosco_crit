@@ -42,8 +42,10 @@ def email_excel(request: HttpRequest) -> HttpResponse | JsonResponse:
 
 
 def email(request: HttpRequest) -> HttpResponse | JsonResponse:
+    email = request.POST.get("email")
     format_type = request.POST.get("format")
-    print("A" * 1000, format_type, request.POST)
+    logger.info(f"Enviando archivo de tipo '{format_type}' a '{email}'.")
+
     if format_type == "pdf":
         return email_pdf(request)
     else:
