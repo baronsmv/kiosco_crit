@@ -72,7 +72,7 @@ async function loadCarouselData(jsonUrl) {
 
         animateDots();
     } catch (err) {
-        carouselContainer.innerHTML = "<p>Error al cargar los datos.</p>";
+        carouselContainer.innerHTML = "<p>No hay espacios disponibles para este día.</p>";
         console.error("Error cargando carrusel:", err);
     }
 }
