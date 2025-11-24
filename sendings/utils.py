@@ -42,7 +42,7 @@ def email_view(
     nombre_sujeto = previous_context.get("nombre_sujeto", "")
     nombre_objetos = previous_context.get("nombre_objetos", "")
     fecha_especificada = previous_context.get("fecha")
-    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
+    tipo = get.model_type(objects_name=nombre_objetos, subject_name=nombre_sujeto)
     mensaje = "\n".join((subject, body))
 
     try:
@@ -112,7 +112,7 @@ def whatsapp_pdf_view(
     nombre_sujeto = previous_context.get("nombre_sujeto")
     nombre_objetos = previous_context.get("nombre_objetos", "")
     fecha_especificada = previous_context.get("fecha", None)
-    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
+    tipo = get.model_type(objects_name=nombre_objetos, subject_name=nombre_sujeto)
 
     logger.debug(
         f"enviar_pdf_whatsapp called with method {request.method} and {nombre_id} {id}"

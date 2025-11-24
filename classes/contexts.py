@@ -92,6 +92,13 @@ class PreviewSubContext:
 
 
 @dataclass(frozen=True)
+class SendResourceSubContext:
+    label: str = "Enviar"
+    url_name: str = ""
+    show: bool = True
+
+
+@dataclass(frozen=True)
 class SendSubContext:
     title: str = "Envío"
     label: str = "A:"
@@ -101,6 +108,12 @@ class SendSubContext:
     pattern: Optional[str] = None
     send_label: str = "Enviar"
     show: bool = True
+    pdf: SendResourceSubContext = SendResourceSubContext(
+        label="Enviar PDF", url_name="send_email_pdf"
+    )
+    excel: SendResourceSubContext = SendResourceSubContext(
+        label="Enviar Excel", url_name="send_email_excel"
+    )
 
 
 @dataclass(frozen=True)
@@ -142,3 +155,6 @@ class ContextList:
     initial: InitialWebContext
     modal: ModalContext
     pdf: PDFContext
+    id_name: str = ""
+    subject_name: str = ""
+    objects_name: str = ""

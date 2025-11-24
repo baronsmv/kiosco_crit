@@ -33,21 +33,6 @@ def whatsapp_status(url: str = f"{base_url}/status") -> Dict:
         return {"status": "desconocido", "connected": False}
 
 
-def initial_context(context: Dict) -> Dict:
-    return {
-        **context,
-        "whatsapp_status": whatsapp_status(),
-        "id": "",
-        "sujeto": None,
-        "tabla": (),
-        "id_proporcionado": False,
-        "id_error": False,
-        "date_error": False,
-        "mensaje_ajax": "",
-        "error_target": "",
-    }
-
-
 def evaluate_query(query: Callable, params: Dict) -> Tuple[str, Tuple[str, ...]]:
     sig = inspect.signature(query)
     return query(**{k: v for k, v in params.items() if k in sig.parameters})
@@ -55,7 +40,7 @@ def evaluate_query(query: Callable, params: Dict) -> Tuple[str, Tuple[str, ...]]
 
 def get_rows(
     query_func: Callable,
-    query_params: Dict,
+    query_params: Dict[str, Union[str, date]],
     db_name: str = "crit",
 ):
     query, params = evaluate_query(query_func, query_params)
@@ -77,18 +62,17 @@ def get_rows(
 def get_objects(
     rows: List[Dict],
     selection_list: SelectionList,
-    nombre_id: str,
-    nombre_sujeto: str,
-    nombre_objetos: str,
-) -> Optional[Dict]:
-
+    id_name: str,
+    subject_name: str,
+    objects_name: str,
+) -> Tuple[Dict[str, str], List[Dict[str, str]]]:
     sujeto = None
     objetos = []
 
     if selection_list.subject:
         if not rows:
             raise AjaxException(
-                f"❌ No se encontró ningún {nombre_sujeto} con ese {nombre_id}.",
+                f"❌ No se encontró ningún {subject_name} con ese {id_name}.",
                 causa="Sin resultados",
             )
         sujeto = {
@@ -104,14 +88,13 @@ def get_objects(
             if any(row.get(k) is not None for k in row if k not in subject_keys)
         ]
         if not objetos:
-            logger.info(f"Se encontró {nombre_sujeto}, pero sin {nombre_objetos}.")
-            return {"sujeto": sujeto, "objetos": []}
+            logger.info(f"Se encontró {subject_name}, pero sin {objects_name}.")
 
     if sujeto:
-        logger.info(f"Se encontraron datos de {nombre_sujeto}.")
+        logger.info(f"Se encontraron datos de {subject_name}.")
     if objetos:
-        logger.info(f"Se encontraron {len(objetos)} {nombre_objetos}.")
-    return {"sujeto": sujeto, "objetos": objetos}
+        logger.info(f"Se encontraron {len(objetos)} {objects_name}.")
+    return sujeto, objetos
 
 
 def parse_form(form: Type[Form], request: HttpRequest) -> Dict[str, Union[str, date]]:
@@ -131,18 +114,32 @@ def parse_form(form: Type[Form], request: HttpRequest) -> Dict[str, Union[str, d
 
 
 def get_media_resources(
-    objetos, context_list: ContextList, selection_list: SelectionList
-) -> Dict:
+    subject: Dict[str, str],
+    objects: List[Dict[str, str]],
+    url_params: Dict[str, Union[str, date]],
+    context_list: ContextList,
+    selection_list: SelectionList,
+) -> Dict[str, Union[str, Tuple[str, ...], Tuple[Tuple[str, ...], ...]]]:
+    id = url_params.get("id")
+    fecha = url_params.get("fecha")
+
     pdf_selection = selection_list.pdf or selection_list.web
     excel_selection = selection_list.excel or selection_list.web
+
     return {
+        "id": id,
+        "fecha": (fecha.isoformat() if isinstance(fecha, date) else fecha),
+        "sujeto": subject,
+        "id_name": context_list.id_name,
+        "subject_name": context_list.subject_name,
+        "objects_name": context_list.objects_name,
         "pdf": asdict(context_list.pdf),
         "tabla_pdf": get.tabla(
-            objetos=objetos, selection=pdf_selection, sql_selection=selection_list.sql
+            objetos=objects, selection=pdf_selection, sql_selection=selection_list.sql
         ),
         "tabla_columnas_pdf": tuple(select.name for select in pdf_selection),
         "tabla_excel": get.tabla(
-            objetos=objetos, selection=excel_selection, sql_selection=selection_list.sql
+            objetos=objects, selection=excel_selection, sql_selection=selection_list.sql
         ),
         "tabla_columnas_excel": tuple(select.name for select in excel_selection),
     }
@@ -153,11 +150,7 @@ def parse_queries(
     form_data: Dict[str, Union[str, date]],
     context_list: ContextList,
     selection_list: SelectionList,
-    exist_query: Optional[Callable] = None,
     data_query: Optional[Callable] = None,
-    nombre_id: str = "",
-    nombre_sujeto: str = "",
-    nombre_objetos: str = "",
     *,
     model: Optional[Type[BaseModel]] = Consulta,
     api: bool = False,
@@ -166,49 +159,63 @@ def parse_queries(
     id = form_data.get("id")
     fecha = form_data.get("fecha")
 
-    ip_cliente = get.client_ip(request)
-    tipo = get.model_type(nombre_objetos=nombre_objetos, nombre_sujeto=nombre_sujeto)
+    id_name = context_list.id_name
+    subject_name = context_list.subject_name
+    objects_name = context_list.objects_name
 
-    sujeto, objetos = get_objects(
+    client_ip = get.client_ip(request)
+    query_type = get.model_type(objects_name=objects_name, subject_name=subject_name)
+
+    subject, objects = get_objects(
         rows=get_rows(
             query_func=data_query,
             query_params=form_data,
         ),
         selection_list=selection_list,
-        nombre_id=nombre_id,
-        nombre_sujeto=nombre_sujeto,
-        nombre_objetos=nombre_objetos,
+        id_name=id_name,
+        subject_name=subject_name,
+        objects_name=objects_name,
     )
 
     selection = selection_list.api if api and selection_list.api else selection_list.web
-    tabla = get.tabla(
-        objetos=objetos,
+    table = get.tabla(
+        objetos=objects,
         selection=selection,
         sql_selection=selection_list.sql,
     )
-    tabla_columnas = tuple(select.name for select in selection)
+    table_columns = tuple(select.name for select in selection)
 
     if model:
         model.objects.create(
-            tipo=tipo,
+            tipo=query_type,
             identificador=id,
             fecha_especificada=fecha,
-            ip_cliente=ip_cliente,
+            ip_cliente=client_ip,
             estado="Exitoso",
         )
 
     if save_context:
-        request.session["context_data"] = {
-            "sujeto": sujeto,
-            "id": id,
-            "fecha": (fecha.isoformat() if isinstance(fecha, date) else fecha),
-            "nombre_objetos": nombre_objetos,
-            "nombre_sujeto": nombre_sujeto,
-            "nombre_id": nombre_id,
-            **get_media_resources(objetos, context_list, selection_list),
-        }
+        request.session["context_data"] = get_media_resources(
+            subject, objects, form_data, context_list, selection_list
+        )
 
-    return {"sujeto": sujeto, "tabla": tabla, "tabla_columnas": tabla_columnas}
+    return {"sujeto": subject, "tabla": table, "tabla_columnas": table_columns}
+
+
+def get_modal_resources(context_list: ContextList, ajax_context: Dict) -> Dict:
+    return {
+        "modal": asdict(context_list.modal),
+        "send_email_pdf_url": reverse_lazy(context_list.modal.send_email.pdf.url_name),
+        "send_email_excel_url": reverse_lazy(
+            context_list.modal.send_email.excel.url_name
+        ),
+        "send_whatsapp_pdf_url": reverse_lazy(
+            context_list.modal.send_whatsapp.pdf.url_name
+        ),
+        "send_whatsapp_excel_url": reverse_lazy(
+            context_list.modal.send_whatsapp.excel.url_name
+        ),
+    } | ajax_context
 
 
 @ajax_handler
@@ -218,13 +225,9 @@ def query_view(
     selection_list: SelectionList,
     form: Type[Form],
     data_query: Callable,
-    nombre_objetos: str,
     *,
     model: Optional[Type[BaseModel]] = Consulta,
-    nombre_id: Optional[str] = None,
-    nombre_sujeto: Optional[str] = None,
-    exist_query: Optional[Callable] = None,
-    testing: bool = False,
+    testing: bool = True,
 ) -> HttpResponse:
     logger.info(f"Request method: {request.method}")
     logger.debug(f"POST data: {request.POST}")
@@ -232,28 +235,25 @@ def query_view(
     if testing:
         rows = 100
         text = "Ejemplo"
-        sujeto = None
-        tabla = tuple((text,) * len(selection_list.web) for _ in range(rows))
-        tabla_columnas = tuple(select.name for select in selection_list.web)
-        objetos = [
+        subject = None
+        table = tuple((text,) * len(selection_list.web) for _ in range(rows))
+        column_tables = tuple(select.name for select in selection_list.web)
+        objects = [
             {campo.sql_name: text for campo in selection_list.sql} for _ in range(rows)
         ]
         ajax_context = {
-            "sujeto": sujeto,
-            "tabla": tabla,
-            "tabla_columnas": tabla_columnas,
+            "sujeto": subject,
+            "tabla": table,
+            "tabla_columnas": column_tables,
         }
-
-        request.session["context_data"] = {
-            "sujeto": sujeto,
-            "objetos": objetos,
+        test_params = {
             "id": "ID de ejemplo",
             "fecha": "2025-10-17",
-            "nombre_objetos": nombre_objetos,
-            "nombre_sujeto": nombre_sujeto,
-            "nombre_id": nombre_id,
-            **get_media_resources(objetos, context_list, selection_list),
         }
+
+        request.session["context_data"] = get_media_resources(
+            subject, objects, test_params, context_list, selection_list
+        )
 
         logger.debug("Renderizando vista completa con contexto inicial.")
         return render(
@@ -262,9 +262,8 @@ def query_view(
             {
                 "initial": asdict(context_list.initial),
                 "home_url": reverse_lazy(context_list.initial.home.url_name),
-                "modal": asdict(context_list.modal),
-                **ajax_context,
-            },
+            }
+            | get_modal_resources(context_list, ajax_context),
         )
 
     if not testing and request.method == "POST":
@@ -273,18 +272,14 @@ def query_view(
             form_data=parse_form(form=form, request=request),
             context_list=context_list,
             selection_list=selection_list,
-            exist_query=exist_query,
             data_query=data_query,
-            nombre_id=nombre_id,
-            nombre_sujeto=nombre_sujeto,
-            nombre_objetos=nombre_objetos,
             model=model,
         )
         logger.debug(f"Datos de contexto procesados:\n{ajax_context}")
 
         if ajax_context.get("tabla"):
             raise AjaxException(
-                context={"modal": asdict(context_list.modal), **ajax_context},
+                context=get_modal_resources(context_list, ajax_context),
                 filename="modal_buscar.html",
             )
 

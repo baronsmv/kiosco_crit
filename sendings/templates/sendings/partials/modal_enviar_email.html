@@ -16,7 +16,7 @@
         {% endif %}
 
         <!-- Formulario -->
-        <form action="{% url 'send_email_pdf' %}" data-ajax="true" method="POST">
+        <form data-ajax="true" method="POST">
             {% csrf_token %}
             <label for="email">{{ modal.send_email.label }}</label>
             <input
@@ -27,9 +27,21 @@
                     title="{{ modal.send_email.pattern_text }}"
                     type="email"
             />
-            <button class="btn btn-primary" type="submit">
-                {{ modal.send_email.send_label }}
-            </button>
+            <div class="botones-agrupados">
+                {% if modal.send_email.pdf.show %}
+                <button class="btn btn-primary" formaction="{% url 'send_email_pdf' %}"
+                        type="submit">
+                    {{ modal.send_email.pdf.label }}
+                </button>
+                {% endif %}
+
+                {% if modal.send_email.excel.show %}
+                <button class="btn btn-primary" formaction="{% url 'send_email_excel' %}"
+                        type="submit">
+                    {{ modal.send_email.excel.label }}
+                </button>
+                {% endif %}
+            </div>
         </form>
 
         <!-- Contenedor para respuesta AJAX -->

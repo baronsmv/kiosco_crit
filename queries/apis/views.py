@@ -4,7 +4,8 @@ from typing import Optional
 from django.http import HttpRequest, JsonResponse
 
 from .utils import api_query_view
-from .. import contexts, sql, selections
+from .. import contexts, selections
+from ..sql import queries
 
 
 def api_citas_paciente(
@@ -14,11 +15,7 @@ def api_citas_paciente(
         request=request,
         context_list=contexts.citas_paciente,
         selection_list=selections.citas_paciente,
-        exist_query=sql.exist.paciente,
-        data_query=sql.data.citas_paciente,
-        nombre_id="carnet",
-        nombre_sujeto="paciente",
-        nombre_objetos="citas",
+        data_query=queries.citas_paciente,
         url_params={"id": id, "fecha": fecha},
     )
 
@@ -28,11 +25,7 @@ def api_datos_paciente(request: HttpRequest, id: str) -> JsonResponse:
         request=request,
         context_list=contexts.datos_paciente,
         selection_list=selections.datos_paciente,
-        exist_query=sql.exist.paciente,
-        data_query=sql.data.datos_paciente,
-        nombre_id="carnet",
-        nombre_sujeto="paciente",
-        nombre_objetos="datos",
+        data_query=queries.datos_paciente,
         url_params={"id": id},
     )
 
@@ -44,11 +37,7 @@ def api_citas_colaborador(
         request=request,
         context_list=contexts.citas_colaborador,
         selection_list=selections.citas_colaborador,
-        exist_query=sql.exist.colaborador,
-        data_query=sql.data.citas_colaborador,
-        nombre_id="nombre de usuario",
-        nombre_sujeto="colaborador",
-        nombre_objetos="citas",
+        data_query=queries.citas_colaborador,
         url_params={"id": id, "fecha": fecha},
     )
 
@@ -60,7 +49,6 @@ def api_espacios_disponibles(
         request=request,
         context_list=contexts.espacios_disponibles,
         selection_list=selections.espacios_disponibles,
-        data_query=sql.data.espacios_disponibles,
-        nombre_objetos="espacios disponibles",
+        data_query=queries.espacios_disponibles,
         url_params={"fecha": fecha},
     )

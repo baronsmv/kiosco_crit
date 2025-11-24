@@ -35,6 +35,9 @@ citas_paciente = ContextList(
     pdf=PDFContext(
         title="Ficha del Paciente", header="Ficha del Paciente", table_title="Citas"
     ),
+    id_name="carnet",
+    subject_name="paciente",
+    objects_name="citas",
 )
 
 citas_colaborador = ContextList(
@@ -50,6 +53,9 @@ citas_colaborador = ContextList(
         header="Agenda del Colaborador",
         table_title="Citas",
     ),
+    id_name="nombre de usuario",
+    subject_name="colaborador",
+    objects_name="citas",
 )
 
 datos_paciente = ContextList(
@@ -62,6 +68,9 @@ datos_paciente = ContextList(
     ),
     modal=ModalContext(title="Datos del paciente"),
     pdf=PDFContext(title="Datos del paciente", header="Datos del paciente"),
+    id_name="carnet",
+    subject_name="paciente",
+    objects_name="datos",
 )
 
 espacios_disponibles = ContextList(
@@ -74,4 +83,5 @@ espacios_disponibles = ContextList(
     ),
     modal=ModalContext(title="Espacios Disponibles"),
     pdf=PDFContext(title="Espacios Disponibles", header="Espacios Disponibles"),
+    objects_name="espacios disponibles",
 )

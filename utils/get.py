@@ -12,10 +12,10 @@ logger = get_logger(__name__)
 base_url = settings.WHATSAPP_API_BASE_URL
 
 
-def model_type(nombre_objetos: str, nombre_sujeto: str) -> str:
-    tipo = nombre_objetos.title()
-    if nombre_sujeto:
-        tipo += f" de {nombre_sujeto.title()}"
+def model_type(objects_name: str, subject_name: str) -> str:
+    tipo = objects_name.title()
+    if subject_name:
+        tipo += f" de {subject_name.title()}"
     return tipo
 
 
@@ -60,8 +60,8 @@ def filename(
     previous_context: Dict[str, Optional[str]],
     ext: str,
     keys: Tuple[str, ...] = (
-        "nombre_objetos",
-        "nombre_sujeto",
+        "objects_name",
+        "subject_name",
         "id",
         "fecha",
     ),

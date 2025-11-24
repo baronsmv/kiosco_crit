@@ -16,20 +16,35 @@
         {% endif %}
 
         <!-- Formulario -->
-        <form action="{% url 'send_whatsapp_pdf' %}" data-ajax="true" method="POST">
+        <form data-ajax="true" method="POST">
             {% csrf_token %}
-            <label for="numero-whatsapp">{{ modal.send_whatsapp.label }}</label>
+            <label for="whatsapp">{{ modal.send_whatsapp.label }}</label>
             <input
-                    id="numero-whatsapp"
-                    name="numero"
-                    pattern="{{ modal.send_whatsapp.pattern }}"
+                    id="whatsapp"
+                    name="whatsapp"
                     placeholder="{{ modal.send_whatsapp.placeholder }}"
                     required
                     title="{{ modal.send_whatsapp.pattern_text }}"
                     type="text"
             />
-            <button class="btn-whatsapp" type="submit">{{ modal.send_whatsapp.send_label }}</button>
+            <div class="botones-agrupados">
+                {% if modal.send_whatsapp.pdf.show %}
+                <button class="btn btn-primary" formaction="{{ send_whatsapp_pdf_url }}"
+                        type="submit">
+                    {{ modal.send_whatsapp.pdf.label }}
+                </button>
+                {% endif %}
+
+                {% if modal.send_whatsapp.excel.show %}
+                <button class="btn btn-primary" formaction="{{ send_whatsapp_excel_url }}"
+                        type="submit">
+                    {{ modal.send_whatsapp.excel.label }}
+                </button>
+                {% endif %}
+            </div>
         </form>
+
+        <!-- Contenedor para respuesta AJAX -->
         <div class="ajax-response"></div>
     </div>
 </div>
