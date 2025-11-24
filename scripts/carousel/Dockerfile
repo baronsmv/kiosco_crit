@@ -4,11 +4,11 @@ RUN apk add --no-cache curl jq bash
 
 WORKDIR /app
 
-COPY run_carousel.sh /app/scripts/carousel/run-carousel.sh
+COPY run_carousel.sh /app/scripts/carousel/run_carousel.sh
 COPY fetch_espacios.sh /app/scripts/carousel/fetch_espacios.sh
 
 RUN chmod +x \
     /app/scripts/carousel/fetch_espacios.sh \
     /app/scripts/carousel/run_carousel.sh
 
-CMD ["/app/scripts/carousel/run-carousel.sh"]
+CMD ["/app/scripts/carousel/run_carousel.sh"]

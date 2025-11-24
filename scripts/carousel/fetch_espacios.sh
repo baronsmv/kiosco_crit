@@ -2,7 +2,7 @@
 
 API_URL="http://django:8000/api/espacios/disponibles/"
 OUTPUT_FILE="/app/static/data/espacios_disponibles.json"
-MINUTES_TO_WAIT=30
+MINUTES_TO_WAIT=0
 
 mkdir -p "$(dirname "$OUTPUT_FILE")"
 chmod 777 "$(dirname "$OUTPUT_FILE")"
