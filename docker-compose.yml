@@ -22,6 +22,14 @@ services:
       interval: 5s
       retries: 12
 
+  redis:
+    image: redis:7
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    networks:
+      - app_net
+
   # node:
   #   build: ./whatsapp_node
   #   container_name: node_whatsapp_kiosco

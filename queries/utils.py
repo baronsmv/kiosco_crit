@@ -1,5 +1,4 @@
 import inspect
-import json
 from dataclasses import asdict
 from datetime import date, datetime
 from pprint import pformat
@@ -40,11 +39,28 @@ def evaluate_query(query: Callable, params: Dict) -> Tuple[str, Tuple[str, ...]]
     return query(**{k: v for k, v in params.items() if k in sig.parameters})
 
 
+from django.core.cache import cache
+import hashlib
+import json
+
+
 def get_rows(
     query_func: Callable,
     query_params: Dict[str, Union[str, date]],
     db_name: str = "crit",
+    cache_timeout: int = 300,
 ):
+    key_raw = (
+        f"{query_func.__name__}:{json.dumps(query_params, sort_keys=True, default=str)}"
+    )
+    cache_key = hashlib.sha256(key_raw.encode()).hexdigest()
+
+    # Si está en caché
+    cached = cache.get(cache_key)
+    if cached is not None:
+        logger.debug(f"Cache hit for {cache_key}")
+        return cached
+
     query, params = evaluate_query(query_func, query_params)
     logger.debug(f"Ejecutando consulta: '{query}', con parámetros: '{params}'.")
 
@@ -52,7 +68,9 @@ def get_rows(
         with connections[db_name].cursor() as cursor:
             cursor.execute(query, params)
             columnas = tuple(col[0] for col in cursor.description)
-            return [dict(zip(columnas, row)) for row in cursor.fetchall()]
+            rows = [dict(zip(columnas, row)) for row in cursor.fetchall()]
+            cache.set(cache_key, rows, timeout=cache_timeout)  # Guardar en cache
+            return rows
     except OperationalError as e:
         logger.error(f"No se pudo conectar con la base de datos: {e}")
         raise AjaxException("❌ No se pudo conectar con la base de datos.")
@@ -278,7 +296,7 @@ def query_view(
         )
         logger.debug(f"Datos de contexto procesados:\n{ajax_context}")
 
-        if ajax_context.get("tabla"):
+        if ajax_context.get("sujeto") or ajax_context.get("tabla"):
             raise AjaxException(
                 context=modal_context(context_list, ajax_context),
                 filename="modal_buscar.html",
