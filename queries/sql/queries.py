@@ -2,8 +2,8 @@ from datetime import date
 from typing import Tuple, Optional
 
 from utils.logger import get_logger
+from . import selections
 from .utils import parse_query, sql_selection
-from .. import selections
 
 logger = get_logger(__name__)
 
@@ -31,8 +31,7 @@ def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]
     """
     return parse_query(
         query=query,
-        id=id,
-        fecha=fecha,
+        params={"id": id, "fecha": fecha},
         filters={
             "kpc.CL_ESTATUS_CITA": {
                 "con_fecha": ["A", "N"],
@@ -66,8 +65,7 @@ def citas_colaborador(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, .
     """
     return parse_query(
         query=query,
-        id=id,
-        fecha=fecha,
+        params={"id": id, "fecha": fecha},
         order_by="kc.FE_CITA ASC",
     )
 
@@ -92,7 +90,7 @@ def espacios_disponibles(fecha: date) -> Tuple[str, Tuple[str, ...]]:
     """
     return parse_query(
         query=query,
-        fecha=fecha,
+        params={"fecha": fecha},
         order_by="kc.FE_CITA ASC",
     )
 
@@ -140,6 +138,6 @@ def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
     """
     return parse_query(
         query=query,
-        id=id,
+        params={"id": id},
         order_by="deuda_total_paciente DESC",
     )

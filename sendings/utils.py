@@ -101,16 +101,16 @@ def whatsapp_payload(number: str, mensaje: str, filename: str) -> Dict:
     }
 
 
-def whatsapp_pdf_view(
+def whatsapp_pdf_view(  # Requiere actualización y pruebas
     request: HttpRequest,
     model: Type[BaseModel] = EnvioWhatsapp,
 ) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
     id = previous_context.get("id", "")
-    sujeto = previous_context.get("sujeto", {})
-    nombre_id = previous_context.get("nombre_id")
-    nombre_sujeto = previous_context.get("nombre_sujeto")
-    nombre_objetos = previous_context.get("nombre_objetos", "")
+    sujeto = previous_context.get("subject", {})
+    nombre_id = previous_context.get("id_name")
+    nombre_sujeto = previous_context.get("subject_name")
+    nombre_objetos = previous_context.get("objects_name", "")
     fecha_especificada = previous_context.get("fecha", None)
     tipo = get.model_type(objects_name=nombre_objetos, subject_name=nombre_sujeto)
 

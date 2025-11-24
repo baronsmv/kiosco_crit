@@ -4,8 +4,8 @@ from typing import Optional
 from django.http import HttpRequest, JsonResponse
 
 from .utils import api_query_view
-from .. import contexts, selections
-from ..sql import queries
+from .. import contexts
+from ..sql import queries, selections
 
 
 def api_citas_paciente(

@@ -1,5 +1,5 @@
 from classes.selections import SelectionList
-from .sql import select
+from queries.sql import select
 
 paciente = (select.nombre_paciente,)
 colaborador = (select.nombre_colaborador,)

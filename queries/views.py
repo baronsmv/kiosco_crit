@@ -1,8 +1,8 @@
 from django.http import HttpRequest, HttpResponse
 
 from utils.logger import get_logger
-from . import forms, contexts, selections
-from .sql import queries
+from . import forms, contexts
+from .sql import queries, selections
 from .utils import query_view
 
 logger = get_logger(__name__)

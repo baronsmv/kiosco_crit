@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Dict, Tuple, Optional
+from typing import Dict, Optional, Tuple, Union
 
 from classes.selections import SelectionList
 from utils.logger import get_logger
@@ -31,15 +31,16 @@ def sql_selection(selection: SelectionList, sep: str = f",\n{' ' * 12}") -> str:
 
 def parse_query(
     query: str,
-    id: Optional[str] = None,
-    fecha: Optional[date] = None,
+    params: Dict[str, Union[str, date]],
     *,
     filters: Optional[Dict] = None,
     order_by: Optional[str] = None,
     fecha_query: str = " AND CAST(kc.FE_CITA AS DATE) = %s",
 ) -> Tuple[str, Tuple[str, ...]]:
-    logger.info(f"Generando consulta para ID: {id} con fecha: {fecha}")
-    params = tuple(filter(None, (id, fecha)))
+    fecha = params.get("fecha")
+
+    logger.info(f"Generando consulta con parametros: {params}")
+    params = tuple(filter(None, params.keys()))
 
     if fecha:
         query += fecha_query
