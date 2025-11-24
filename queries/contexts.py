@@ -9,6 +9,9 @@ from classes.contexts import (
     PDFContext,
     ContextList,
     HomeSubContext,
+    PreviewSubContext,
+    SendSubContext,
+    SendResourceSubContext,
 )
 from menus import contexts
 
@@ -31,7 +34,11 @@ citas_paciente = ContextList(
         home=PacienteHomeSubContext(),
         date=DateSubContext(initial_date=None, preserve=False),
     ),
-    modal=ModalContext(title="Ficha del Paciente", table_title="Citas"),
+    modal=ModalContext(
+        title="Ficha del Paciente",
+        table_title="Citas",
+        pdf_preview=PreviewSubContext(show=False),
+    ),
     pdf=PDFContext(
         title="Ficha del Paciente", header="Ficha del Paciente", table_title="Citas"
     ),
@@ -66,7 +73,12 @@ datos_paciente = ContextList(
         home=PacienteHomeSubContext(),
         date=DateSubContext(show=False),
     ),
-    modal=ModalContext(title="Datos del paciente"),
+    modal=ModalContext(
+        title="Datos del paciente",
+        excel_preview=PreviewSubContext(show=False),
+        send_email=SendSubContext(excel=SendResourceSubContext(show=False)),
+        send_whatsapp=SendSubContext(excel=SendResourceSubContext(show=False)),
+    ),
     pdf=PDFContext(title="Datos del paciente", header="Datos del paciente"),
     id_name="carnet",
     subject_name="paciente",

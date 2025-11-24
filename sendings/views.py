@@ -17,9 +17,8 @@ base_url = settings.WHATSAPP_API_BASE_URL
 
 def email_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
     previous_context = request.session.get("context_data", {})
-    subject_name = previous_context.get("subject_name", "")
 
-    subject = f"Datos del {subject_name}"
+    subject = "Datos solitados, CRIT Hidalgo"
     body = "Adjuntamos el archivo solicitado en formato PDF."
 
     filename = generate.pdf(previous_context, color=True)
@@ -30,9 +29,8 @@ def email_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
 
 def email_excel(request: HttpRequest) -> HttpResponse | JsonResponse:
     previous_context = request.session.get("context_data", {})
-    subject_name = previous_context.get("subject_name", "")
 
-    subject = f"Datos del {subject_name}"
+    subject = "Datos solitados, CRIT Hidalgo"
     body = "Adjuntamos el archivo solicitado en formato Excel."
 
     filename = generate.excel(previous_context)

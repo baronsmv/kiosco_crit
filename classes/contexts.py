@@ -87,7 +87,7 @@ class InitialWebContext:
 
 @dataclass(frozen=True)
 class PreviewSubContext:
-    button_label: str
+    button_label: str = "Descargar"
     show: bool = True
 
 
