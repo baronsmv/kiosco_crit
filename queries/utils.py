@@ -145,6 +145,9 @@ def get_media_resources(
     id = url_params.get("id")
     fecha = url_params.get("fecha")
 
+    if isinstance(fecha, (date, datetime)):
+        fecha = fecha.isoformat()
+
     pdf_selection = selection_list.pdf or selection_list.web
     excel_selection = selection_list.excel or selection_list.web
 

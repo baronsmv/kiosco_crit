@@ -28,6 +28,7 @@ def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple[str, ...]
             ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
         WHERE
             cp.NO_CARNET = %s
+            AND kpc.CL_ESTATUS_CITA NOT IN ('C')
     """
     return parse_query(
         query=query,
@@ -139,5 +140,4 @@ def datos_paciente(id: str) -> Tuple[str, Tuple[str, ...]]:
     return parse_query(
         query=query,
         params={"id": id},
-        order_by="deuda_total_paciente DESC",
     )

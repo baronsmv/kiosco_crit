@@ -73,6 +73,7 @@ citas_colaborador = ContextList(
         title="Agenda del Colaborador",
         header="Agenda del Colaborador",
         id=NombreUsuarioSubContext(),
+        date=DateSubContext(sublabel=None, required=True),
         home=ColaboradorHomeSubContext(),
     ),
     modal=ModalContext(title="Agenda del Colaborador", table_title="Citas"),

@@ -65,7 +65,7 @@ class DateSubContext:
     sublabel: Optional[str] = "(Dejar vacío para mostrar todas)"
     show: bool = field(default=True)
     required: bool = field(default=False)
-    initial_date: Optional[date] = date.today()
+    initial_date: Optional[date] = field(default_factory=lambda: date.today())
     preserve: bool = field(default=True)
 
 

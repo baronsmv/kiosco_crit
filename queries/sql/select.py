@@ -65,5 +65,5 @@ aniversario_paciente = SelectClause(
 deuda_total_paciente = SelectClause(
     name="Deuda total",
     sql_name="deuda_total_paciente",
-    sql_expression="STR(SUM(KSD.MN_TOTAL - KSD.MN_PAGADO), 10, 2)",
+    sql_expression="FORMAT(SUM(KSD.MN_TOTAL - KSD.MN_PAGADO), '$#,##0.00', 'en-US')",
 )
