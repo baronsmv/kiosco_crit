@@ -23,21 +23,20 @@ def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple]:
         FROM SCRITS2.C_PACIENTE AS cp
         LEFT JOIN SCRITS2.K_PACIENTE_CITA AS kpc
             ON cp.FL_PACIENTE = kpc.FL_PACIENTE
-        LEFT JOIN SCRITS2.C_CLINICA AS cc
-            ON cp.FL_CLINICA = cc.FL_CLINICA
+            {estatus_filter}
         LEFT JOIN SCRITS2.K_CITA AS kc
-            ON kpc.FL_CITA = kc.FL_CITA {fecha_filter}
+            ON kpc.FL_CITA = kc.FL_CITA
+            {fecha_filter}
         LEFT JOIN SCRITS2.C_SERVICIO AS cs
             ON kc.FL_SERVICIO = cs.FL_SERVICIO
         LEFT JOIN SCRITS2.C_USUARIO AS cu
             ON kc.FL_USUARIO = cu.FL_USUARIO
+        LEFT JOIN SCRITS2.C_CLINICA AS cc
+            ON cp.FL_CLINICA = cc.FL_CLINICA
         LEFT JOIN SCRITS2.C_ESTATUS_CITA AS cec
             ON kpc.CL_ESTATUS_CITA = cec.CL_ESTATUS_CITA
-        WHERE
-            cp.NO_CARNET = %s
-            AND kpc.CL_ESTATUS_CITA NOT IN ('C')
-            {estatus_filter}
-        ORDER BY kc.FE_CITA ASC
+        WHERE cp.NO_CARNET = %s
+        ORDER BY kc.FE_CITA ASC;
     """
     params = (fecha, id) if fecha else (id,)
     return query, params

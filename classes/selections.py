@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Tuple
 
 
@@ -8,6 +8,7 @@ class SelectClause:
     sql_name: str
     sql_expression: str
     format: Optional[str] = None
+    required: bool = field(default=False)
 
 
 Selection = Tuple[SelectClause, ...]

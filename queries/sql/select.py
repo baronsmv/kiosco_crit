@@ -5,27 +5,32 @@ nombre_paciente = SelectClause(
     sql_name="nombre_paciente",
     sql_expression="CONCAT(cp.NB_PACIENTE,' ',cp.NB_PATERNO,' ',cp.NB_MATERNO)",
     format="name",
+    required=True,
 )
 nombre_colaborador = SelectClause(
     name="Colaborador",
     sql_name="nombre_colaborador",
     sql_expression="CONCAT(cu.NB_USUARIO, ' ', cu.NB_PATERNO, ' ', cu.NB_MATERNO)",
     format="name",
+    required=True,
 )
 no_carnet = SelectClause(
     name="Carnet",
     sql_name="no_carnet",
     sql_expression="cp.NO_CARNET",
+    required=True,
 )
 nombre_servicio = SelectClause(
     name="Servicio",
     sql_name="nombre_servicio",
     sql_expression="cs.NB_SERVICIO",
+    required=True,
 )
 fecha_cita = SelectClause(
     name="Fecha y hora",
     sql_name="fecha_cita",
     sql_expression="FORMAT(kc.FE_CITA, 'dd/MM/yyyy HH:mm')",
+    required=True,
 )
 clinica = SelectClause(
     name="Clínica",

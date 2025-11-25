@@ -79,14 +79,13 @@ def get_rows(
         raise AjaxException()
 
 
-def object_of(row: Dict, subject_keys: List) -> Dict[str, str]:
-    return {k: v for k, v in row.items() if k not in subject_keys}
-
-
-def has_values(obj: Dict[str, str]) -> bool:
-    return any(
-        v is not None and (not isinstance(v, str) or v.strip() != "")
-        for v in obj.values()
+def has_required_values(row: Dict[str, str], selection_list: SelectionList) -> bool:
+    required_keys = [cl.sql_name for cl in (selection_list.web or []) if cl.required]
+    if not required_keys:
+        return any(v not in (None, "") and str(v).strip() != "" for v in row.values())
+    return all(
+        (val := row.get(k)) not in (None, "") and str(val).strip() != ""
+        for k in required_keys
     )
 
 
@@ -96,9 +95,10 @@ def get_objects(
     id_name: str,
     subject_name: str,
     objects_name: str,
+    fecha: bool = False,
 ) -> Tuple[Optional[Dict[str, str]], List[Dict[str, str]]]:
-    sujeto = None
-    objetos: List[Dict[str, str]] = []
+    subject = None
+    objects: List[Dict[str, str]] = []
 
     if not rows:
         if selection_list.subject:
@@ -108,11 +108,13 @@ def get_objects(
             )
         else:
             raise AjaxException(
-                f"❌ No se encontraron {objects_name}.", causa="Sin resultados"
+                f"❌ No se encontraron {objects_name}"
+                f"{' con la fecha especificada' if fecha else ''}.",
+                causa="Sin resultados",
             )
 
     if selection_list.subject:
-        sujeto = {
+        subject = {
             clause.name: formatted_campo(
                 rows[0].get(clause.sql_name, ""), format_option=clause.format
             )
@@ -122,17 +124,21 @@ def get_objects(
 
     if selection_list.web:
         subject_keys = [cl.sql_name for cl in (selection_list.subject or [])]
-        objetos = [
-            obj for row in rows if has_values(obj := object_of(row, subject_keys))
+        objects = [
+            {k: v for k, v in row.items() if k not in subject_keys}
+            for row in rows
+            if has_required_values(row, selection_list)
         ]
-        if not objetos:
-            logger.exception(f"No se encontraron {objects_name}.")
+        if not objects:
+            logger.info(f"No se encontraron {objects_name}.")
             raise AjaxException(
-                f"❌ No se encontraron {objects_name}.", causa="Sin resultados"
+                f"❌ No se encontraron {objects_name}"
+                f"{' con la fecha especificada' if fecha else ''}.",
+                causa="Sin resultados",
             )
-        logger.info(f"Se encontraron {len(objetos)} {objects_name}.")
+        logger.info(f"Se encontraron {len(objects)} {objects_name}.")
 
-    return sujeto, objetos
+    return subject, objects
 
 
 def parse_form(form: Type[Form], request: HttpRequest) -> Dict[str, Union[str, date]]:
@@ -216,6 +222,7 @@ def parse_queries(
         id_name=id_name,
         subject_name=subject_name,
         objects_name=objects_name,
+        fecha=bool(fecha),
     )
     logger.info(f"Datos de {subject_name}: {pformat(subject)}")
     logger.info(f"Datos de {objects_name}: {pformat(objects)}")
