@@ -32,6 +32,7 @@
         {% endif %}
 
         <!-- Tabla de datos -->
+        {% if tabla %}
         <div class="dato">
             <!-- Subtítulo de la tabla -->
             {% if modal.table_title %}
@@ -63,6 +64,7 @@
                 </table>
             </div>
         </div>
+        {% endif %}
 
         <!-- Botones -->
         {% if modal.pdf_preview.show or modal.excel_preview.show or modal.send_email.show or modal.send_whatsapp.show %}
