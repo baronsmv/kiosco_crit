@@ -10,8 +10,8 @@ from classes.contexts import (
     ContextList,
     HomeSubContext,
     PreviewSubContext,
-    SendSubContext,
-    SendResourceSubContext,
+    SendEmailSubContext,
+    SendExcelSubContext,
 )
 from menus import contexts
 
@@ -38,6 +38,7 @@ citas_paciente = ContextList(
         title="Ficha del Paciente",
         table_title="Citas",
         pdf_preview=PreviewSubContext(show=False),
+        excel_preview=PreviewSubContext(show=False),
     ),
     pdf=PDFContext(
         title="Ficha del Paciente", header="Ficha del Paciente", table_title="Citas"
@@ -45,6 +46,26 @@ citas_paciente = ContextList(
     id_name="carnet",
     subject_name="paciente",
     objects_name="citas",
+)
+
+datos_paciente = ContextList(
+    initial=InitialWebContext(
+        title="Datos del paciente",
+        header="Datos del paciente",
+        id=CarnetSubContext(),
+        home=PacienteHomeSubContext(),
+        date=DateSubContext(show=False),
+    ),
+    modal=ModalContext(
+        title="Datos del paciente",
+        pdf_preview=PreviewSubContext(show=False),
+        excel_preview=PreviewSubContext(show=False),
+        send_email=SendEmailSubContext(excel=SendExcelSubContext(show=False)),
+    ),
+    pdf=PDFContext(title="Datos del paciente", header="Datos del paciente"),
+    id_name="carnet",
+    subject_name="paciente",
+    objects_name="datos",
 )
 
 citas_colaborador = ContextList(
@@ -65,33 +86,13 @@ citas_colaborador = ContextList(
     objects_name="citas",
 )
 
-datos_paciente = ContextList(
-    initial=InitialWebContext(
-        title="Datos del paciente",
-        header="Datos del paciente",
-        id=CarnetSubContext(),
-        home=PacienteHomeSubContext(),
-        date=DateSubContext(show=False),
-    ),
-    modal=ModalContext(
-        title="Datos del paciente",
-        excel_preview=PreviewSubContext(show=False),
-        send_email=SendSubContext(excel=SendResourceSubContext(show=False)),
-        send_whatsapp=SendSubContext(excel=SendResourceSubContext(show=False)),
-    ),
-    pdf=PDFContext(title="Datos del paciente", header="Datos del paciente"),
-    id_name="carnet",
-    subject_name="paciente",
-    objects_name="datos",
-)
-
 espacios_disponibles = ContextList(
     initial=InitialWebContext(
         title="Espacios Disponibles",
         header="Espacios disponibles",
         id=CarnetSubContext(show=False),
-        home=PacienteHomeSubContext(),
         date=DateSubContext(sublabel=None, required=True),
+        home=PacienteHomeSubContext(),
     ),
     modal=ModalContext(title="Espacios Disponibles"),
     pdf=PDFContext(title="Espacios Disponibles", header="Espacios Disponibles"),

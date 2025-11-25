@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional, Tuple
 
@@ -15,13 +15,13 @@ class MenuOptionSubContext:
 class HomeSubContext:
     url_name: str = ""
     label: str = "Volver"
-    show: bool = True
+    show: bool = field(default=True)
 
 
 @dataclass(frozen=True)
 class CarouselSubContext:
     title: str = "Espacios Disponibles"
-    show: bool = False
+    show: bool = field(default=False)
 
 
 @dataclass(frozen=True)
@@ -42,9 +42,9 @@ class IdSubContext:
     placeholder: str
     max_length: int = 50
     pattern: str = r"^[a-zA-Z0-9. \-]+$"
-    show: bool = True
-    required: bool = True
-    preserve: str = False
+    show: bool = field(default=True)
+    required: bool = field(default=True)
+    preserve: str = field(default=False)
 
 
 @dataclass(frozen=True)
@@ -63,10 +63,10 @@ class NombreUsuarioSubContext(IdSubContext):
 class DateSubContext:
     label: str = "Fecha:"
     sublabel: Optional[str] = "(Dejar vacío para mostrar todas)"
-    show: bool = True
-    required: bool = False
+    show: bool = field(default=True)
+    required: bool = field(default=False)
     initial_date: Optional[date] = date.today()
-    preserve: bool = True
+    preserve: bool = field(default=True)
 
 
 @dataclass(frozen=True)
@@ -88,14 +88,26 @@ class InitialWebContext:
 @dataclass(frozen=True)
 class PreviewSubContext:
     button_label: str = "Descargar"
-    show: bool = True
+    show: bool = field(default=True)
 
 
 @dataclass(frozen=True)
 class SendResourceSubContext:
     label: str = "Enviar"
     url_name: str = ""
-    show: bool = True
+    show: bool = field(default=True)
+
+
+@dataclass(frozen=True)
+class SendPDFSubContext(SendResourceSubContext):
+    label: str = "Enviar PDF"
+    url_name: str = "send_email_pdf"
+
+
+@dataclass(frozen=True)
+class SendExcelSubContext(SendResourceSubContext):
+    label: str = "Enviar Excel"
+    url_name: str = "send_email_excel"
 
 
 @dataclass(frozen=True)
@@ -107,13 +119,29 @@ class SendSubContext:
     pattern_text: str = "No válido"
     pattern: Optional[str] = None
     send_label: str = "Enviar"
-    show: bool = True
-    pdf: SendResourceSubContext = SendResourceSubContext(
-        label="Enviar PDF", url_name="send_email_pdf"
-    )
-    excel: SendResourceSubContext = SendResourceSubContext(
-        label="Enviar Excel", url_name="send_email_excel"
-    )
+    show: bool = field(default=True)
+    pdf: SendResourceSubContext = SendPDFSubContext()
+    excel: SendResourceSubContext = SendExcelSubContext()
+
+
+@dataclass(frozen=True)
+class SendEmailSubContext(SendSubContext):
+    title: str = "Envío por E-mail"
+    label: str = "Correo electrónico:"
+    button_label: str = "Enviar por e-mail"
+    placeholder: str = "Ej: ejemplo@correo.com"
+    pattern_text: str = "Debe ser un e-mail válido"
+
+
+@dataclass(frozen=True)
+class SendWhatsAppSubContext(SendSubContext):
+    title: str = "Envío por WhatsApp"
+    label: str = "Número telefónico:"
+    button_label: str = "WhatsApp"
+    placeholder: str = "Ej: 5512345678"
+    pattern: Optional[str] = r"^\d{10}$"
+    pattern_text: str = "Debe tener 10 dígitos numéricos"
+    show: bool = field(default=False)
 
 
 @dataclass(frozen=True)
@@ -123,22 +151,8 @@ class ModalContext:
     table_title: str = ""
     pdf_preview: PreviewSubContext = PreviewSubContext("Vista previa e impresión")
     excel_preview: PreviewSubContext = PreviewSubContext("Descargar Excel")
-    send_email: SendSubContext = SendSubContext(
-        title="Envío por E-mail",
-        label="Correo electrónico:",
-        button_label="Enviar por e-mail",
-        placeholder="Ej: ejemplo@correo.com",
-        pattern_text="Debe ser un e-mail válido",
-    )
-    send_whatsapp: SendSubContext = SendSubContext(
-        title="Envío por WhatsApp",
-        label="Número telefónico:",
-        button_label="WhatsApp",
-        placeholder="Ej: 5512345678",
-        pattern=r"^\d{10}$",
-        pattern_text="Debe tener 10 dígitos numéricos",
-        show=False,
-    )
+    send_email: SendSubContext = SendEmailSubContext()
+    send_whatsapp: SendSubContext = SendWhatsAppSubContext()
 
 
 @dataclass(frozen=True)
