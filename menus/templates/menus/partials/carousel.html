@@ -1,0 +1,10 @@
+{% load static %}
+
+<h3>{{ carousel.title }}</h3>
+<div class="carousel" id="espacios-carousel"></div>
+<div class="carousel-dots" id="carousel-dots"></div>
+
+<script src="{% static 'menus/js/carousel.js' %}"></script>
+<script>
+    startCarousel("{% static 'data/espacios_disponibles.json' %}");
+</script>

@@ -1,0 +1,8 @@
+<div class="menu-options">
+    {% for option_url, option_title, option_description in menu_options %}
+    <a class="menu-card" href="{{ option_url }}">
+        <h2>{{ option_title }}</h2>
+        <p>{{ option_description }}</p>
+    </a>
+    {% endfor %}
+</div>

@@ -10,7 +10,6 @@
 </head>
 <body>
 <div class="container home-menu">
-
     {% if show_home %}
     <a class="home-link" href="{{ home_url }}">{{ home_label }}</a>
     {% endif %}
@@ -23,42 +22,15 @@
 
     {% if carousel.show %}
     <div class="split-container">
-        <!-- Menú a la izquierda -->
         <div class="menu-left">
-            <div class="menu-options">
-                {% for option_url, option_title, option_description in menu_options %}
-                <a class="menu-card" href="{{ option_url }}">
-                    <h2>{{ option_title }}</h2>
-                    <p>{{ option_description }}</p>
-                </a>
-                {% endfor %}
-            </div>
+            {% include 'menus/partials/menu_options.html' %}
         </div>
-
-        <!-- Carrusel a la derecha -->
         <div class="carousel-right">
-            <h3>{{ carousel.title }}</h3>
-            <div class="carousel" id="espacios-carousel"></div>
-            <div class="carousel-dots" id="carousel-dots"></div>
+            {% include 'menus/partials/carousel.html' %}
         </div>
     </div>
-
-    <script src="{% static 'menus/js/carousel.js' %}"></script>
-    <script>
-        // Cargar desde el JSON estático generado por el contenedor
-        startCarousel("{% static 'data/espacios_disponibles.json' %}");
-    </script>
-
     {% else %}
-    <!-- Menú normal si no hay carrusel -->
-    <div class="menu-options">
-        {% for option_url, option_title, option_description in menu_options %}
-        <a class="menu-card" href="{{ option_url }}">
-            <h2>{{ option_title }}</h2>
-            <p>{{ option_description }}</p>
-        </a>
-        {% endfor %}
-    </div>
+    {% include 'menus/partials/menu_options.html' %}
     {% endif %}
 </div>
 </body>
