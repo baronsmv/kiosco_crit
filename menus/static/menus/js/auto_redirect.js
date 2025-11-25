@@ -1,3 +1,5 @@
+console.log("Module auto_redirect.js loaded.")
+
 function redirect_to(url, minutes_after = 5, countdownSeconds = 30) {
     let inactivityTimer;
     let countdownTimer;
