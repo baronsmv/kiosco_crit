@@ -1,8 +1,8 @@
 from classes.selections import SelectionList
 from queries.sql import select
 
-paciente = (select.nombre_paciente,)
-colaborador = (select.nombre_colaborador,)
+paciente = (select.nombre_paciente, select.no_carnet)
+colaborador = (select.nombre_colaborador, select.nombre_usuario)
 
 citas_paciente = SelectionList(
     subject=paciente,

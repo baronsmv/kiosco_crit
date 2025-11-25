@@ -20,6 +20,12 @@ no_carnet = SelectClause(
     sql_expression="cp.NO_CARNET",
     required=True,
 )
+nombre_usuario = SelectClause(
+    name="Nombre de usuario",
+    sql_name="nombre_usuario",
+    sql_expression="cu.CL_LOGIN",
+    required=True,
+)
 nombre_servicio = SelectClause(
     name="Servicio",
     sql_name="nombre_servicio",
