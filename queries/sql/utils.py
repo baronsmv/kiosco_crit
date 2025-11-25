@@ -1,5 +1,4 @@
-from datetime import date
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Optional
 
 from classes.selections import SelectionList
 from utils.logger import get_logger
@@ -27,40 +26,3 @@ def sql_selection(selection: SelectionList, sep: str = f",\n{' ' * 12}") -> str:
     return sep.join(
         f"{select.sql_expression} AS {select.sql_name}" for select in selection.sql
     )
-
-
-def parse_query(
-    query: str,
-    params: Dict[str, Union[str, date]],
-    *,
-    filters: Optional[Dict] = None,
-    order_by: Optional[str] = None,
-    fecha_query: str = " AND CAST(kc.FE_CITA AS DATE) = %s",
-) -> Tuple[str, Tuple[str, ...]]:
-    id = params.get("id")
-    fecha = params.get("fecha")
-
-    logger.info(f"Generando consulta con parámetros: {params.items()}")
-    logger.debug(f"ID: {id}, fecha: {fecha}")
-    params = tuple(filter(None, (id, fecha)))
-
-    if fecha:
-        query += fecha_query
-        logger.debug("Agregado filtro adicional por fecha exacta.")
-
-    if filters:
-        for k, v in filters.items():
-            if fecha:
-                valores = v.get("con_fecha")
-            else:
-                valores = v.get("sin_fecha")
-            if valores:
-                query += f" AND {k} IN ('" + "', '".join(valores) + "')"
-
-    if order_by:
-        query += f" ORDER BY {order_by}"
-
-    logger.debug(f"Query final generado: {query}")
-    logger.debug(f"Parámetros: {params}")
-
-    return query, params

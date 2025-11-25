@@ -79,43 +79,59 @@ def get_rows(
         raise AjaxException()
 
 
+def object_of(row: Dict, subject_keys: List) -> Dict[str, str]:
+    return {k: v for k, v in row.items() if k not in subject_keys}
+
+
+def has_values(obj: Dict[str, str]) -> bool:
+    return any(
+        v is not None and (not isinstance(v, str) or v.strip() != "")
+        for v in obj.values()
+    )
+
+
 def get_objects(
     rows: List[Dict],
     selection_list: SelectionList,
     id_name: str,
     subject_name: str,
     objects_name: str,
-) -> Tuple[Dict[str, str], List[Dict[str, str]]]:
+) -> Tuple[Optional[Dict[str, str]], List[Dict[str, str]]]:
     sujeto = None
-    objetos = []
+    objetos: List[Dict[str, str]] = []
 
-    if selection_list.subject:
-        if not rows:
+    if not rows:
+        if selection_list.subject:
             raise AjaxException(
                 f"❌ No se encontró ningún {subject_name} con ese {id_name}.",
                 causa="Sin resultados",
             )
+        else:
+            raise AjaxException(
+                f"❌ No se encontraron {objects_name}.", causa="Sin resultados"
+            )
+
+    if selection_list.subject:
         sujeto = {
             clause.name: formatted_campo(
                 rows[0].get(clause.sql_name, ""), format_option=clause.format
             )
             for clause in selection_list.subject
         }
+        logger.info(f"Se encontraron datos de {subject_name}.")
 
     if selection_list.web:
         subject_keys = [cl.sql_name for cl in (selection_list.subject or [])]
         objetos = [
-            {k: v for k, v in row.items() if k not in subject_keys}
-            for row in rows
-            if any(row.get(k) is not None for k in row if k not in subject_keys)
+            obj for row in rows if has_values(obj := object_of(row, subject_keys))
         ]
         if not objetos:
-            logger.info(f"Se encontró {subject_name}, pero sin {objects_name}.")
-
-    if sujeto:
-        logger.info(f"Se encontraron datos de {subject_name}.")
-    if objetos:
+            logger.exception(f"No se encontraron {objects_name}.")
+            raise AjaxException(
+                f"❌ No se encontraron {objects_name}.", causa="Sin resultados"
+            )
         logger.info(f"Se encontraron {len(objetos)} {objects_name}.")
+
     return sujeto, objetos
 
 
