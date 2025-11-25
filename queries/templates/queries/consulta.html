@@ -85,5 +85,17 @@
 </script>
 <script defer src="{% static 'queries/js/consulta.js' %}"></script>
 
+{% if redirect.active %}
+<div id="redirection-message">
+    <p>Redirigiendo en <span id="countdown">{{ redirect.countdown_seconds }}</span> segundos…</p>
+    <button id="stay-btn">Seguir aquí</button>
+</div>
+
+<script defer src="{% static 'menus/js/redirect.js' %}"></script>
+<script>
+    redirect_to("{{ redirect.url }}", {{ redirect.after_minutes }}, {{ redirect.countdown_seconds }});
+</script>
+{% endif %}
+
 </body>
 </html>

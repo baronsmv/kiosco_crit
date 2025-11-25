@@ -165,6 +165,14 @@ class PDFContext:
 
 
 @dataclass(frozen=True)
+class RedirectContext:
+    url: str = "/"
+    active: bool = field(default=True)
+    after_minutes: int = 5
+    countdown_seconds: int = 30
+
+
+@dataclass(frozen=True)
 class ContextList:
     initial: InitialWebContext
     modal: ModalContext
@@ -172,3 +180,4 @@ class ContextList:
     id_name: str = ""
     subject_name: str = ""
     objects_name: str = ""
+    redirect: RedirectContext = RedirectContext(active=False)

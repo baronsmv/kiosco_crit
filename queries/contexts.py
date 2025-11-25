@@ -12,6 +12,7 @@ from classes.contexts import (
     PreviewSubContext,
     SendEmailSubContext,
     SendExcelSubContext,
+    RedirectContext,
 )
 from menus import contexts
 
@@ -46,6 +47,7 @@ citas_paciente = ContextList(
     id_name="carnet",
     subject_name="paciente",
     objects_name="citas",
+    redirect=RedirectContext("/paciente/"),
 )
 
 datos_paciente = ContextList(
@@ -66,6 +68,7 @@ datos_paciente = ContextList(
     id_name="carnet",
     subject_name="paciente",
     objects_name="datos",
+    redirect=RedirectContext("/paciente/"),
 )
 
 citas_colaborador = ContextList(

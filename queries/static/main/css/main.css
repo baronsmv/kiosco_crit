@@ -152,7 +152,8 @@ button[style] {
 }
 
 /* Mensaje de 'Procesando...' */
-#processing-message {
+#processing-message,
+#redirection-message {
     visibility: hidden;
     width: auto;
     max-width: 90vw;
@@ -187,7 +188,8 @@ button[style] {
 }
 
 /* Fade in/out control class */
-#processing-message.visible {
+#processing-message.visible,
+#redirection-message.visible {
     visibility: visible;
     opacity: 1;
     pointer-events: auto;

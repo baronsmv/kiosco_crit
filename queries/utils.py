@@ -256,6 +256,7 @@ def initial_context(context_list: ContextList) -> Dict:
     context = {
         "initial": asdict(context_list.initial),
         "home_url": reverse_lazy(context_list.initial.home.url_name),
+        "redirect": asdict(context_list.redirect),
     }
     logger.debug(f"Initial context: {context}")
     return context
