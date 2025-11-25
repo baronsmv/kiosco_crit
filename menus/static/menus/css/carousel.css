@@ -68,6 +68,11 @@
     opacity: 0;
 }
 
+.carousel-item.exit-right {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
 .fade-out {
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -114,11 +119,14 @@
     justify-content: center;
     gap: 0.5rem;
     margin-top: 1rem;
+    flex-wrap: wrap;
 }
 
 .carousel-dots .dot {
-    width: 12px;
-    height: 12px;
+    cursor: pointer;
+    flex: 0 0 auto;
+    width: min(2vw, 12px);
+    height: min(2vw, 12px);
     background-color: rgba(255, 255, 255, 0.5);
     border-radius: 50%;
     transition: background-color 0.3s ease, transform 0.3s ease;
