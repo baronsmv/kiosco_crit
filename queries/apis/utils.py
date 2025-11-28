@@ -7,27 +7,27 @@ from classes.contexts import ContextList
 from classes.models import BaseModel
 from classes.selections import SelectionList
 from ..models import Consulta
-from ..utils import parse_queries
+from ..utils import parse_query
 
 
 def api_query_view(
     request: HttpRequest,
-    context_list: ContextList,
+    query: Callable,
     selection_list: SelectionList,
-    data_query: Optional[Callable] = None,
+    context_list: ContextList,
+    url_params: Dict[str, Union[str, date]],
     *,
-    url_params: Optional[Dict[str, Union[str, date]]] = None,
     model: Optional[Type[BaseModel]] = Consulta,
 ) -> JsonResponse:
     if not request.method == "GET":
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
-    payload = parse_queries(
+    payload = parse_query(
         request=request,
         form_data=url_params,
         context_list=context_list,
         selection_list=selection_list,
-        data_query=data_query,
+        query=query,
         model=model,
         save_context=False,
     )

@@ -1,4 +1,6 @@
+import hashlib
 import inspect
+import json
 from dataclasses import asdict
 from datetime import date, datetime
 from pprint import pformat
@@ -6,6 +8,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import requests
 from django.conf import settings
+from django.core.cache import cache
 from django.db import connections, OperationalError
 from django.forms import Form
 from django.http import HttpRequest
@@ -39,20 +42,13 @@ def evaluate_query(query: Callable, params: Dict) -> Tuple[str, Tuple[str, ...]]
     return query(**{k: v for k, v in params.items() if k in sig.parameters})
 
 
-from django.core.cache import cache
-import hashlib
-import json
-
-
 def get_rows(
-    query_func: Callable,
-    query_params: Dict[str, Union[str, date]],
+    query: Callable,
+    params: Dict[str, Union[str, date]],
     db_name: str = "crit",
     cache_timeout: int = 300,
 ):
-    key_raw = (
-        f"{query_func.__name__}:{json.dumps(query_params, sort_keys=True, default=str)}"
-    )
+    key_raw = f"{query.__name__}:{json.dumps(params, sort_keys=True, default=str)}"
     cache_key = hashlib.sha256(key_raw.encode()).hexdigest()
 
     # Si está en caché
@@ -61,12 +57,14 @@ def get_rows(
         logger.debug(f"Cache hit for {cache_key}")
         return cached
 
-    query, params = evaluate_query(query_func, query_params)
-    logger.debug(f"Ejecutando consulta: '{query}', con parámetros: '{params}'.")
+    generated_query, generated_params = evaluate_query(query, params)
+    logger.debug(
+        f"Ejecutando consulta: '{generated_query}', con parámetros: '{generated_params}'."
+    )
 
     try:
         with connections[db_name].cursor() as cursor:
-            cursor.execute(query, params)
+            cursor.execute(generated_query, generated_params)
             columnas = tuple(col[0] for col in cursor.description)
             rows = [dict(zip(columnas, row)) for row in cursor.fetchall()]
             cache.set(cache_key, rows, timeout=cache_timeout)  # Guardar en cache
@@ -192,12 +190,12 @@ def get_media_resources(
     }
 
 
-def parse_queries(
+def parse_query(
     request: HttpRequest,
-    form_data: Dict[str, Union[str, date]],
-    context_list: ContextList,
+    query: Callable,
     selection_list: SelectionList,
-    data_query: Optional[Callable] = None,
+    context_list: ContextList,
+    form_data: Dict[str, Union[str, date]],
     *,
     model: Optional[Type[BaseModel]] = Consulta,
     api: bool = False,
@@ -215,8 +213,8 @@ def parse_queries(
 
     subject, objects = get_objects(
         rows=get_rows(
-            query_func=data_query,
-            query_params=form_data,
+            query=query,
+            params=form_data,
         ),
         selection_list=selection_list,
         id_name=id_name,
@@ -271,10 +269,10 @@ def modal_context(context_list: ContextList, ajax_context: Dict) -> Dict:
 @ajax_handler
 def query_view(
     request: HttpRequest,
-    context_list: ContextList,
+    query: Callable,
     selection_list: SelectionList,
+    context_list: ContextList,
     form: Type[Form],
-    data_query: Callable,
     *,
     model: Optional[Type[BaseModel]] = Consulta,
     testing: bool = False,
@@ -313,12 +311,12 @@ def query_view(
         )
 
     if not testing and request.method == "POST":
-        ajax_context = parse_queries(
+        ajax_context = parse_query(
             request=request,
             form_data=parse_form(form=form, request=request),
             context_list=context_list,
             selection_list=selection_list,
-            data_query=data_query,
+            query=query,
             model=model,
         )
         logger.debug(f"Datos de contexto procesados:\n{ajax_context}")

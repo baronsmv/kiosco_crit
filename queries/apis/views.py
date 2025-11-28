@@ -13,9 +13,9 @@ def api_citas_paciente(
 ) -> JsonResponse:
     return api_query_view(
         request=request,
-        context_list=contexts.citas_paciente,
+        query=queries.citas_paciente,
         selection_list=selections.citas_paciente,
-        data_query=queries.citas_paciente,
+        context_list=contexts.citas_paciente,
         url_params={"id": id, "fecha": fecha},
     )
 
@@ -23,9 +23,9 @@ def api_citas_paciente(
 def api_datos_paciente(request: HttpRequest, id: str) -> JsonResponse:
     return api_query_view(
         request=request,
-        context_list=contexts.datos_paciente,
+        query=queries.datos_paciente,
         selection_list=selections.datos_paciente,
-        data_query=queries.datos_paciente,
+        context_list=contexts.datos_paciente,
         url_params={"id": id},
     )
 
@@ -35,9 +35,9 @@ def api_citas_colaborador(
 ) -> JsonResponse:
     return api_query_view(
         request=request,
-        context_list=contexts.citas_colaborador,
+        query=queries.citas_colaborador,
         selection_list=selections.citas_colaborador,
-        data_query=queries.citas_colaborador,
+        context_list=contexts.citas_colaborador,
         url_params={"id": id, "fecha": fecha},
     )
 
@@ -47,8 +47,8 @@ def api_espacios_disponibles(
 ) -> JsonResponse:
     return api_query_view(
         request=request,
-        context_list=contexts.espacios_disponibles,
+        query=queries.espacios_disponibles,
         selection_list=selections.espacios_disponibles,
-        data_query=queries.espacios_disponibles,
+        context_list=contexts.espacios_disponibles,
         url_params={"fecha": fecha},
     )

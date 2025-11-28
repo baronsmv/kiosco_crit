@@ -11,38 +11,38 @@ logger = get_logger(__name__)
 def citas_paciente(request: HttpRequest) -> HttpResponse:
     return query_view(
         request=request,
-        context_list=contexts.citas_paciente,
+        query=queries.citas_paciente,
         selection_list=selections.citas_paciente,
+        context_list=contexts.citas_paciente,
         form=forms.BuscarIdFechaForm,
-        data_query=queries.citas_paciente,
     )
 
 
 def datos_paciente(request: HttpRequest) -> HttpResponse:
     return query_view(
         request=request,
-        context_list=contexts.datos_paciente,
+        query=queries.datos_paciente,
         selection_list=selections.datos_paciente,
+        context_list=contexts.datos_paciente,
         form=forms.BuscarIdForm,
-        data_query=queries.datos_paciente,
     )
 
 
 def citas_colaborador(request: HttpRequest) -> HttpResponse:
     return query_view(
         request=request,
-        context_list=contexts.citas_colaborador,
+        query=queries.citas_colaborador,
         selection_list=selections.citas_colaborador,
+        context_list=contexts.citas_colaborador,
         form=forms.BuscarIdFechaForm,
-        data_query=queries.citas_colaborador,
     )
 
 
 def espacios_disponibles(request: HttpRequest) -> HttpResponse:
     return query_view(
         request=request,
-        context_list=contexts.espacios_disponibles,
+        query=queries.espacios_disponibles,
         selection_list=selections.espacios_disponibles,
+        context_list=contexts.espacios_disponibles,
         form=forms.BuscarFechaForm,
-        data_query=queries.espacios_disponibles,
     )

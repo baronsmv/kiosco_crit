@@ -177,7 +177,7 @@ class ContextList:
     initial: InitialWebContext
     modal: ModalContext
     pdf: PDFContext
+    redirect: RedirectContext = RedirectContext(active=False)
     id_name: str = ""
     subject_name: str = ""
     objects_name: str = ""
-    redirect: RedirectContext = RedirectContext(active=False)
