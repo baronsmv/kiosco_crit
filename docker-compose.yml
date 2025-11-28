@@ -24,7 +24,7 @@ services:
 
   redis:
     image: redis:7
-    container_name: redis_cache
+    container_name: redis_cache_kiosco
     ports:
       - "6379:6379"
     networks:
@@ -111,8 +111,9 @@ services:
     build:
       context: ./docs
     volumes:
-      - ./docs:/app
-    command: [ "true" ]
+      - .:/app
+    container_name: docs_builder_kiosco
+    command: sphinx-build -b html /app/docs/source /app/docs/build/html
 
 volumes:
   static_volume:

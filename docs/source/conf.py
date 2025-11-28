@@ -15,6 +15,7 @@ author = "TI Hidalgo"
 
 extensions = [
     "myst_parser",
+    "sphinx_rtd_theme",
 ]
 
 templates_path = ["_templates"]
@@ -25,12 +26,10 @@ language = "es"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "bizstyle"
+html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
 source_suffix = {
     ".md": "markdown",
 }
 master_doc = "index"
-
-myst_heading_anchors = 3
