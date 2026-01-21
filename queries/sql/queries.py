@@ -114,14 +114,6 @@ def datos_paciente(id: str) -> Tuple[str, Tuple]:
             cp.NO_CARNET = %s
             AND ksd.FG_CANCELADO = 0
             AND ksd.MN_TOTAL > ksd.MN_PAGADO
-            AND (
-                cp.CL_ESTATUS = 'A' 
-                OR (
-                    cp.CL_ESTATUS = 'E' 
-                    AND cp.CL_FORMA_SEGUIMIENTO IS NOT NULL 
-                    AND cp.FL_TIPO_SEGUIMIENTO IS NOT NULL
-                )
-            )
             AND kpc.FG_EXTERNO = 0
             AND (cp.FG_EXTERNO IS NULL OR cp.FG_EXTERNO = 0)
         GROUP BY
