@@ -7,17 +7,11 @@ until curl -sf http://django:8000/; do
   sleep 5
 done
 
-# Initial fetch
-/app/scripts/carousel/fetch_espacios.sh
-
 # Loop forever, fetching data every hour between 06-16
 while true; do
   HOUR=$(date +%H)
-
-  if [ "$HOUR" -ge 6 ] && [ "$HOUR" -lt 17 ]; then
-    sleep 3600
+  if [ "$HOUR" -ge 6 ] && [ "$HOUR" -le 16 ]; then
     /app/scripts/carousel/fetch_espacios.sh
-  else
-    sleep 900
   fi
+  sleep 3600
 done
