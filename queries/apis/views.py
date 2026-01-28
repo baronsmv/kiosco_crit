@@ -2,6 +2,7 @@ from datetime import date
 from typing import Optional
 
 from django.http import HttpRequest, JsonResponse
+from django.utils.dateparse import parse_date
 
 from .utils import api_query_view
 from .. import contexts
@@ -42,9 +43,8 @@ def api_citas_colaborador(
     )
 
 
-def api_espacios_disponibles(
-    request: HttpRequest, fecha: date = date.today()
-) -> JsonResponse:
+def api_espacios_disponibles(request: HttpRequest) -> JsonResponse:
+    fecha = parse_date(request.GET.get("fecha")) or date.today()
     return api_query_view(
         request=request,
         query=queries.espacios_disponibles,
