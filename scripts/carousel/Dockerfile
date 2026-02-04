@@ -5,7 +5,8 @@ RUN apk add --no-cache \
     jq \
     bash \
     busybox-suid \
-    tzdata
+    tzdata \
+    dos2unix
 
 WORKDIR /app
 
@@ -16,8 +17,8 @@ COPY fetch_espacios.sh /app/scripts/carousel/fetch_espacios.sh
 COPY crontab /etc/crontabs/root
 
 RUN chmod 600 /etc/crontabs/root \
+ && dos2unix /app/scripts/carousel/*.sh \
  && chmod +x /app/scripts/carousel/*.sh \
- && sed -i 's/\r$//' /app/scripts/carousel/*.sh \
  && cp /usr/share/zoneinfo/America/Mexico_City /etc/localtime
 
 CMD ["/app/scripts/carousel/run_carousel.sh"]
