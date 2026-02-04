@@ -23,6 +23,7 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("menus.urls")),
+    path("", include("viewers.urls")),
     path("", include("queries.apis.urls")),
     path("", include("queries.urls")),
     path("", include("previews.urls")),
