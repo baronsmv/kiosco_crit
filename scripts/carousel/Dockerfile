@@ -1,24 +1,21 @@
-FROM alpine:3.19
+FROM debian:bookworm-slim
 
-RUN apk add --no-cache \
-    curl \
-    jq \
-    bash \
-    busybox-suid \
-    tzdata \
-    dos2unix
+RUN apt-get update && apt-get install -y \
+    curl jq bash cron tzdata \
+ && rm -rf /var/lib/apt/lists/*
+
+# Set timezone
+ENV TZ=America/Mexico_City
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
 
 WORKDIR /app
 
-RUN mkdir -p /app/scripts/carousel
+# Copy only the scripts that exist inside the build context
+COPY . /app/scripts/
+RUN chmod +x /app/scripts/*.sh
 
-COPY run_carousel.sh /app/scripts/carousel/run_carousel.sh
-COPY fetch_espacios.sh /app/scripts/carousel/fetch_espacios.sh
-COPY crontab /etc/crontabs/root
+# Copy crontab from the context (relative to carousel folder)
+COPY crontab /etc/cron.d/carousel
+RUN chmod 644 /etc/cron.d/carousel && crontab /etc/cron.d/carousel
 
-RUN chmod 600 /etc/crontabs/root \
- && dos2unix /app/scripts/carousel/*.sh \
- && chmod +x /app/scripts/carousel/*.sh \
- && cp /usr/share/zoneinfo/America/Mexico_City /etc/localtime
-
-CMD ["/app/scripts/carousel/run_carousel.sh"]
+CMD ["/app/scripts/run_carousel.sh"]

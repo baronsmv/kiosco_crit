@@ -1,2 +1,2 @@
-# Fetch espacios disponibles every hour during working hours
-0 6-15 * * 1-5 /app/scripts/carousel/fetch_espacios.sh >> /proc/1/fd/1 2>&1
+# Run every hour from 6 to 15, Monday-Friday
+0 6-15 * * 1-5 /app/scripts/fetch_espacios.sh >> /proc/1/fd/1 2>&1
