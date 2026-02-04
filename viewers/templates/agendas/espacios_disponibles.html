@@ -1,10 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Espacios disponibles</title>
+    {% load static %}
+    <link href="{% static 'main/css/main.css' %}" rel="stylesheet"/>
+    <link href="{% static 'agendas/css/espacios_disponibles.css' %}" rel="stylesheet"/>
 </head>
 <body>
+<div class="container agenda-container">
+    <h3>Espacios disponibles</h3>
+    <table class="agenda-table" id="agenda-table">
+        <thead>
+        <tr>
+            <th>Hora</th>
+            <th>Espacios</th>
+        </tr>
+        </thead>
+        <tbody id="agenda-body"></tbody>
+    </table>
+</div>
+
+<script src="{% static 'viewers/js/utils.js' %}"></script>
+<script src="{% static 'agendas/js/espacios_disponibles.js' %}"></script>
+<script>
+    startAgenda("{% static 'data/espacios_disponibles.json' %}");
+</script>
 
 </body>
 </html>

@@ -1,75 +1,73 @@
-function getMaxColumns(byHour) {
-    return Math.max(
-        1,
-        ...Object.values(byHour).map(list => list.length)
-    );
-}
+function buildAgendaRow(hour, appointments, columnas) {
+    const tr = document.createElement("tr");
 
-function buildAgenda(items) {
-    const container = document.getElementById("agenda-container");
-    if (!container) return;
+    // Hour cell
+    const hourCell = document.createElement("td");
+    hourCell.textContent = `${hour}:00`;
+    tr.appendChild(hourCell);
 
-    const byHour = groupByHour(items);
-    const maxCols = getMaxColumns(byHour);
+    // Appointments cell
+    const apptCell = document.createElement("td");
+    apptCell.className = "agenda-slot";
 
-    const table = document.createElement("table");
-    table.className = "agenda-table";
+    if (!appointments.length) {
+        apptCell.innerHTML = "<span class='no-appt'>—</span>";
+    } else {
+        appointments.forEach(row => {
+            const servicio = row[columnas.indexOf("Servicio")] || "—";
+            const colaborador = row[columnas.indexOf("Colaborador")] || "—";
+            const duracion = row[columnas.indexOf("Duración")] || "—";
+            const disponibles = row[columnas.indexOf("Disponibles")] || "—";
 
-    // Header
-    const thead = document.createElement("thead");
-    const headRow = document.createElement("tr");
-
-    headRow.innerHTML = `<th>Hora</th>`;
-    for (let i = 1; i <= maxCols; i++) {
-        headRow.innerHTML += `<th>Espacio ${i}</th>`;
+            const card = document.createElement("div");
+            card.className = "agenda-card";
+            card.innerHTML = `
+                <h4>${servicio}</h4>
+                <p><strong>Colaborador:</strong> ${colaborador}</p>
+                <p><strong>Disponibles:</strong> ${disponibles}</p>
+                <p><strong>Duración:</strong> ${duracion}</p>
+            `;
+            apptCell.appendChild(card);
+        });
     }
 
-    thead.appendChild(headRow);
-    table.appendChild(thead);
+    tr.appendChild(apptCell);
+    return tr;
+}
 
-    // Body
-    const tbody = document.createElement("tbody");
+async function loadAgendaData(jsonUrl) {
+    const tbody = document.getElementById("agenda-body");
+    if (!tbody) return;
 
-    for (let hour = 7; hour <= 15; hour++) {
-        const row = document.createElement("tr");
+    try {
+        const response = await fetch(jsonUrl + `?t=${Date.now()}`);
+        const data = await response.json();
+        const items = data.tabla || [];
+        const columnas = data.tabla_columnas || [];
 
-        row.innerHTML = `<td class="hora-cell">${hour}:00</td>`;
+        const now = new Date();
+        const futuros = items.filter(row => {
+            const fechaHora = parseFechaHora(row[columnas.indexOf("Fecha y hora")]);
+            return fechaHora && fechaHora.toDateString() === now.toDateString();
+        });
 
-        const slots = byHour[hour] || [];
+        // Clear table
+        tbody.innerHTML = "";
 
-        for (let i = 0; i < maxCols; i++) {
-            const cell = document.createElement("td");
-
-            if (slots[i]) {
-                cell.appendChild(buildAgendaCard(slots[i]));
-            } else {
-                cell.innerHTML = `<div class="agenda-empty">—</div>`;
-            }
-
-            row.appendChild(cell);
+        // Build rows from 7 to 15
+        for (let hour = 7; hour <= 15; hour++) {
+            const appointments = futuros.filter(row => {
+                const fechaHora = parseFechaHora(row[columnas.indexOf("Fecha y hora")]);
+                return fechaHora && fechaHora.getHours() === hour;
+            });
+            tbody.appendChild(buildAgendaRow(hour, appointments, columnas));
         }
-
-        tbody.appendChild(row);
+    } catch (err) {
+        console.error("Error cargando agenda:", err);
     }
-
-    table.appendChild(tbody);
-    container.innerHTML = "";
-    container.appendChild(table);
 }
 
-function buildAgendaCard(item) {
-    const div = document.createElement("div");
-    div.className = "espacio-card agenda-card";
-
-    const hora = item._date.toTimeString().slice(0, 5);
-
-    div.innerHTML = `
-        <h4 class="servicio">${item.nombre_servicio}</h4>
-        <p><strong>Hora:</strong> ${hora}</p>
-        <p><strong>Colaborador:</strong> ${item.nombre_colaborador}</p>
-        <p><strong>Disponibles:</strong> ${item.espacios_disponibles}</p>
-        <p><strong>Duración:</strong> ${item.duracion_servicio}</p>
-    `;
-
-    return div;
+function startAgenda(jsonUrl) {
+    loadAgendaData(jsonUrl);
+    setInterval(() => loadAgendaData(jsonUrl), 300000); // refresh every 5 min
 }
