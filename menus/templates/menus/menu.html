@@ -6,7 +6,7 @@
     <title>{{ title }}</title>
     {% load static %}
     <link href="{% static 'main/css/main.css' %}" rel="stylesheet"/>
-    <link href="{% static 'menus/css/carousel.css' %}" rel="stylesheet"/>
+    <link href="{% static 'viewers/css/carousel.css' %}" rel="stylesheet"/>
 </head>
 <body>
 <div class="container home-menu">
@@ -26,7 +26,7 @@
             {% include 'menus/partials/menu_options.html' %}
         </div>
         <div class="carousel-right">
-            {% include 'menus/partials/carousel.html' %}
+            {% include 'viewers/partials/carousel.html' %}
         </div>
     </div>
     {% else %}

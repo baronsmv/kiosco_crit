@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "viewers.apps.ViewersConfig",
     "menus.apps.MenusConfig",
     "queries.apps.QueriesConfig",
     "previews.apps.PreviewsConfig",
