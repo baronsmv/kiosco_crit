@@ -1,8 +1,13 @@
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y \
-    curl jq bash cron tzdata \
+    curl \
+    jq \
+    bash \
+    cron \
+    tzdata \
  && rm -rf /var/lib/apt/lists/*
+
 
 # Set timezone
 ENV TZ=America/Mexico_City
