@@ -1,0 +1,38 @@
+.agenda-container {
+    overflow-x: auto;
+}
+
+.agenda-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.agenda-table th,
+.agenda-table td {
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    vertical-align: top;
+}
+
+.agenda-table th {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+}
+
+.hora-cell {
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.agenda-card {
+    font-size: 0.9rem;
+}
+
+.agenda-empty {
+    text-align: center;
+    opacity: 0.4;
+    font-size: 1.2rem;
+}
