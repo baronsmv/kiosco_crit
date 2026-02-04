@@ -1,4 +1,5 @@
 #!/bin/sh
+exec >> /proc/self/fd/1 2>&1
 set -e
 
 echo "[INFO] Waiting for Django..."
