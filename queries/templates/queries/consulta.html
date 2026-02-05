@@ -9,6 +9,7 @@
 </head>
 <body>
 
+{% include 'sendings/partials/modal_qr.html' %}
 {% include 'sendings/partials/modal_enviar_email.html' %}
 {% include 'sendings/partials/modal_enviar_whatsapp.html' %}
 
@@ -84,6 +85,7 @@
     };
 </script>
 <script defer src="{% static 'queries/js/consulta.js' %}"></script>
+<script defer src="{% static 'sendings/js/qr.js' %}"></script>
 
 {% if redirect.active %}
 <script defer src="{% static 'menus/js/auto_redirect.js' %}"></script>

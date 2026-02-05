@@ -67,7 +67,8 @@
         {% endif %}
 
         <!-- Botones -->
-        {% if modal.pdf_preview.show or modal.excel_preview.show or modal.send_email.show or modal.send_whatsapp.show %}
+        {% if modal.pdf_preview.show or modal.excel_preview.show or modal.qr_pdf.show or modal.qr_excel.show or
+        modal.send_email.show or modal.send_whatsapp.show %}
         <div class="botones-agrupados">
             {% if modal.pdf_preview.show %}
             <button
@@ -78,6 +79,7 @@
                 {{ modal.pdf_preview.button_label }}
             </button>
             {% endif %}
+
             {% if modal.excel_preview.show %}
             <button
                     class="btn btn-outline-primary"
@@ -87,6 +89,27 @@
                 {{ modal.excel_preview.button_label }}
             </button>
             {% endif %}
+
+            {% if modal.qr_pdf.show %}
+            <button
+                    class="btn btn-outline-primary"
+                    onclick="abrirQR('pdf')"
+                    type="button"
+            >
+                {{ modal.qr_pdf.button_label }}
+            </button>
+            {% endif %}
+
+            {% if modal.qr_excel.show %}
+            <button
+                    class="btn btn-outline-primary"
+                    onclick="abrirQR('excel')"
+                    type="button"
+            >
+                {{ modal.qr_excel.button_label }}
+            </button>
+            {% endif %}
+
             {% if modal.send_email.show %}
             <button
                     class="btn btn-outline-secondary"
@@ -96,6 +119,7 @@
                 {{ modal.send_email.button_label }}
             </button>
             {% endif %}
+
             {% if modal.send_whatsapp.show %}
             <button
                     class="btn btn-outline-secondary"

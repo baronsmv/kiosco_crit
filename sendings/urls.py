@@ -15,6 +15,11 @@ urlpatterns = [
         name="admin_whatsapp",
     ),
     path(
+        route="qr/",
+        view=views.qr,
+        name="get_qr",
+    ),
+    path(
         route="send/whatsapp/",
         view=views.whatsapp,
         name="send_whatsapp",
