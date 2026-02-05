@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 from typing import Dict, Type, Optional
 
 import requests
@@ -14,11 +15,32 @@ from utils import generate, get
 from utils.decorators import ajax_handler
 from utils.logger import get_logger
 from utils.render import ajax_response
+from . import qr_drive
 from .models import EnvioEmail, EnvioWhatsapp
 
 logger = get_logger(__name__)
 
 base_url = settings.WHATSAPP_API_BASE_URL
+
+
+@ajax_handler
+def qr_view(
+    request: HttpRequest, file_url: str
+) -> HttpResponse | JsonResponse:
+    qr_url = str(Path(file_url).with_suffix("_qr.png"))
+
+    try:
+        url = qr_drive.upload_file(file_url)
+        qr_drive.generate_qr(url, qr_url)
+        logger.info(f"QR generado en: {qr_url} con URL: {url}")
+    except Exception:
+        logger.exception("Error al generar QR.")
+        raise AjaxException("No se pudo generar QR.")
+
+    return ajax_response(
+        request,
+        context={"qr_url": qr_url},
+    )
 
 
 @ajax_handler
@@ -42,7 +64,9 @@ def email_view(
     nombre_sujeto = previous_context.get("nombre_sujeto", "")
     nombre_objetos = previous_context.get("nombre_objetos", "")
     fecha_especificada = previous_context.get("fecha")
-    tipo = get.model_type(objects_name=nombre_objetos, subject_name=nombre_sujeto)
+    tipo = get.model_type(
+        objects_name=nombre_objetos, subject_name=nombre_sujeto
+    )
     mensaje = "\n".join((subject, body))
 
     try:
@@ -112,7 +136,9 @@ def whatsapp_pdf_view(  # Requiere actualización y pruebas
     nombre_sujeto = previous_context.get("subject_name")
     nombre_objetos = previous_context.get("objects_name", "")
     fecha_especificada = previous_context.get("fecha", None)
-    tipo = get.model_type(objects_name=nombre_objetos, subject_name=nombre_sujeto)
+    tipo = get.model_type(
+        objects_name=nombre_objetos, subject_name=nombre_sujeto
+    )
 
     logger.debug(
         f"enviar_pdf_whatsapp called with method {request.method} and {nombre_id} {id}"
@@ -126,13 +152,17 @@ def whatsapp_pdf_view(  # Requiere actualización y pruebas
     logger.debug(f"Numero recibido: {numero}")
     if not numero:
         logger.error("Número de WhatsApp requerido no proporcionado")
-        return JsonResponse({"error": "Número de WhatsApp requerido"}, status=400)
+        return JsonResponse(
+            {"error": "Número de WhatsApp requerido"}, status=400
+        )
 
     filename = generate.pdf(previous_context, color=True)
     mensaje = f"""Datos del {nombre_sujeto}:
 Nombre: {sujeto['Nombre']}
 {nombre_id.title()}: {sujeto[nombre_id.title()]}"""
-    payload = get.whatsapp_payload(number=numero, mensaje=mensaje, filename=filename)
+    payload = get.whatsapp_payload(
+        number=numero, mensaje=mensaje, filename=filename
+    )
 
     try:
         response = requests.post(f"{base_url}/send-media", json=payload)
@@ -161,7 +191,9 @@ Nombre: {sujeto['Nombre']}
 
         if estado == "Enviado":
             logger.info("Mensaje enviado correctamente")
-            return JsonResponse({"status": "enviado", "detalles": response_data})
+            return JsonResponse(
+                {"status": "enviado", "detalles": response_data}
+            )
         else:
             logger.error(f"Error enviando mensaje: {detalle_error}")
             return JsonResponse(
@@ -169,7 +201,9 @@ Nombre: {sujeto['Nombre']}
             )
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error de conexión con microservicio: {str(e)}", exc_info=True)
+        logger.error(
+            f"Error de conexión con microservicio: {str(e)}", exc_info=True
+        )
 
         if model:
             model.objects.create(
@@ -185,5 +219,6 @@ Nombre: {sujeto['Nombre']}
             )
 
         return JsonResponse(
-            {"error": f"Error de conexión con microservicio: {str(e)}"}, status=500
+            {"error": f"Error de conexión con microservicio: {str(e)}"},
+            status=500,
         )

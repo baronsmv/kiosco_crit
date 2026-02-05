@@ -8,35 +8,57 @@ from django.views.decorators.csrf import csrf_exempt
 
 from utils import generate
 from utils.logger import get_logger
-from .utils import whatsapp_pdf_view, email_view
+from .utils import qr_view, email_view, whatsapp_pdf_view
 
 logger = get_logger(__name__)
 
 base_url = settings.WHATSAPP_API_BASE_URL
 
 
+def qr_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
+    previous_context = request.session.get("context_data", {})
+    file_url = generate.pdf(previous_context, color=True)
+
+    return qr_view(request, file_url)
+
+
+def qr_excel(request: HttpRequest) -> HttpResponse | JsonResponse:
+    previous_context = request.session.get("context_data", {})
+    file_url = generate.excel(previous_context)
+
+    return qr_view(request, file_url)
+
+
+def qr(request: HttpRequest) -> HttpResponse | JsonResponse:
+    format_type = request.POST.get("format")
+    logger.info(
+        f"Subiendo archivo de tipo '{format_type}' a Drive y obteniendo QR."
+    )
+
+    if format_type == "pdf":
+        return qr_pdf(request)
+    else:
+        return qr_excel(request)
+
+
 def email_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
     previous_context = request.session.get("context_data", {})
+    file_url = generate.pdf(previous_context, color=True)
 
     subject = "Datos solicitados, CRIT Hidalgo"
     body = "Adjuntamos el archivo solicitado en formato PDF."
 
-    filename = generate.pdf(previous_context, color=True)
-    filepath = f"media/pdf/{filename}"
-
-    return email_view(request, filepath, subject, body)
+    return email_view(request, file_url, subject, body)
 
 
 def email_excel(request: HttpRequest) -> HttpResponse | JsonResponse:
     previous_context = request.session.get("context_data", {})
+    file_url = generate.excel(previous_context)
 
     subject = "Datos solicitados, CRIT Hidalgo"
     body = "Adjuntamos el archivo solicitado en formato Excel."
 
-    filename = generate.excel(previous_context)
-    filepath = f"media/excel/{filename}"
-
-    return email_view(request, filepath, subject, body)
+    return email_view(request, file_url, subject, body)
 
 
 def email(request: HttpRequest) -> HttpResponse | JsonResponse:

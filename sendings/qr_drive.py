@@ -47,7 +47,10 @@ def authenticate_drive() -> Resource:
     return build("drive", "v3", credentials=creds)
 
 
-def upload_file(service: Resource, file_path: str) -> str:
+SERVICE = authenticate_drive()
+
+
+def upload_file(file_path: str, service: Resource = SERVICE) -> str:
     """
     Sube un archivo a Google Drive y genera un enlace compartido.
 
