@@ -92,6 +92,12 @@ class PreviewSubContext:
 
 
 @dataclass(frozen=True)
+class QRSubContext:
+    button_label: str = "Código QR"
+    show: bool = field(default=True)
+
+
+@dataclass(frozen=True)
 class SendResourceSubContext:
     label: str = "Enviar"
     url_name: str = ""
@@ -149,10 +155,14 @@ class ModalContext:
     title: str
     data_title: str = ""
     table_title: str = ""
-    pdf_preview: PreviewSubContext = PreviewSubContext("Vista previa e impresión")
+    pdf_preview: PreviewSubContext = PreviewSubContext(
+        "Vista previa e impresión"
+    )
     excel_preview: PreviewSubContext = PreviewSubContext("Descargar Excel")
     send_email: SendSubContext = SendEmailSubContext()
     send_whatsapp: SendSubContext = SendWhatsAppSubContext()
+    qr_pdf: QRSubContext = QRSubContext()
+    qr_excel: QRSubContext = QRSubContext("Código QR (Excel)", show=False)
 
 
 @dataclass(frozen=True)
