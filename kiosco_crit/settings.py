@@ -16,6 +16,11 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Paths of Google Drive credentials and token
+CREDENTIALS_DIR = BASE_DIR / "credentials"
+GOOGLE_DRIVE_CREDENTIALS = CREDENTIALS_DIR / "credentials.json"
+GOOGLE_DRIVE_TOKEN = CREDENTIALS_DIR / "token.json"
+
 # URL a la API de WhatsApp (en Node.Js)
 WHATSAPP_API_BASE_URL = "http://node_whatsapp_kiosco:3000"
 
@@ -23,7 +28,9 @@ WHATSAPP_API_BASE_URL = "http://node_whatsapp_kiosco:3000"
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-0mg97kt1=e%3v*^7!u4bnh$elwdy+!8b)mbwe@)+$kpr0gm-r@"
+SECRET_KEY = (
+    "django-insecure-0mg97kt1=e%3v*^7!u4bnh$elwdy+!8b)mbwe@)+$kpr0gm-r@"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False") == "True"
