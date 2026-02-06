@@ -44,19 +44,22 @@ def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple]:
 
 def citas_colaborador(id: str, fecha: Optional[date]) -> Tuple[str, Tuple]:
     logger.info(f"Construyendo query de citas por colaborador ID: {id}, fecha: {fecha}")
+
     fecha_filter = "AND CAST(kc.FE_CITA AS DATE) = %s" if fecha else ""
+    status_filter = "AND kpc.CL_ESTATUS_CITA NOT IN ('C')"
 
     query = f"""
         SELECT
             {sql_selection(selections.citas_colaborador)}
         FROM SCRITS2.C_USUARIO AS cu
         LEFT JOIN SCRITS2.K_CITA AS kc
-            ON cu.FL_USUARIO = kc.FL_USUARIO {fecha_filter}
-        LEFT JOIN SCRITS2.C_SERVICIO AS cs
-            ON kc.FL_SERVICIO = cs.FL_SERVICIO
+            ON cu.FL_USUARIO = kc.FL_USUARIO
+            {fecha_filter}
         LEFT JOIN SCRITS2.K_PACIENTE_CITA AS kpc
             ON kc.FL_CITA = kpc.FL_CITA
-            AND kpc.CL_ESTATUS_CITA NOT IN ('C')
+            {status_filter}
+        LEFT JOIN SCRITS2.C_SERVICIO AS cs
+            ON kc.FL_SERVICIO = cs.FL_SERVICIO
         LEFT JOIN SCRITS2.C_PACIENTE AS cp
             ON kpc.FL_PACIENTE = cp.FL_PACIENTE
         LEFT JOIN SCRITS2.C_CLINICA AS cc
