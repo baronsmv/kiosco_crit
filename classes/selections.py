@@ -26,7 +26,12 @@ class Join:
         )
 
     def with_extra(self, extra: str) -> str:
-        return f"{self}\n    {extra}" if extra_on else str(self)
+        return f"{self}\n    {extra}" if extra else str(self)
+
+    def inner(self):
+        return Join(
+            left=self.left, right=self.right, on=self.on, join_type="INNER"
+        )
 
 
 @dataclass(frozen=True)
@@ -34,9 +39,9 @@ class SelectClause:
     name: str
     sql_name: str
     sql_expression: str
+    table: Optional[Table] = None
     format: Optional[str] = None
     required: bool = field(default=False)
-    from_table: Table
 
 
 Selection = Tuple[SelectClause, ...]
