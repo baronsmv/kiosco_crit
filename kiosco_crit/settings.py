@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
-from datetime import timedelta
 from pathlib import Path
 
 from celery.schedules import crontab
@@ -145,11 +144,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "America/Mexico_City"
 
 USE_I18N = True
-
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -191,6 +188,9 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_BACKEND = "redis://redis:6379/0"
 
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = True
+
 CELERY_BEAT_SCHEDULE = {
     "fetch-espacios": {
         "task": "queries.tasks.fetch_espacios",
@@ -202,8 +202,11 @@ CELERY_BEAT_SCHEDULE = {
     },
     "clean-old": {
         "task": "previews.tasks.clean_old",
-        "schedule": timedelta(
-            seconds=int(os.getenv("PDF_CLEAN_INTERVAL_SECONDS", 7200))
-        ),
+        "schedule": crontab(minute=0, hour=15, day_of_week="mon"),
+    },
+    "clean-old-drive": {
+        "task": "sendings.tasks.clean_old_drive",
+        "schedule": crontab(minute=0, hour=15, day_of_week="wed"),
+        "args": (30,),
     },
 }
