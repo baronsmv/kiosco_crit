@@ -3,6 +3,9 @@
 <h3>{{ carousel.title }}</h3>
 <div class="carousel" id="espacios-carousel"></div>
 <div class="carousel-dots" id="carousel-dots"></div>
+{% if carousel.bottom_text %}
+<p>{{ carousel.bottom_text|linebreaksbr }}</p>
+{% endif %}
 
 <script src="{% static 'viewers/js/utils.js' %}"></script>
 <script src="{% static 'carousel/js/carousel.js' %}"></script>

@@ -21,6 +21,10 @@ class HomeSubContext:
 @dataclass(frozen=True)
 class CarouselSubContext:
     title: str = "Espacios Disponibles"
+    bottom_text: str = (
+        "¿Te interesa alguna de las citas disponibles?\n"
+        "Para agendarla, acércate a la recepción de tu clínica."
+    )
     show: bool = field(default=False)
 
 
