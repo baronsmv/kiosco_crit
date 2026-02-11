@@ -71,6 +71,9 @@ async function loadCarouselData(jsonUrl) {
         const items = data.tabla || [];
         const columnas = data.tabla_columnas || [];
 
+        const bottomText = document.getElementById('bottom-text');
+        const carouselRight = document.getElementById('carousel-right');
+
         const now = new Date();
         const futuros = items.filter(row => {
             const fechaHora = parseFechaHora(row[columnas.indexOf("Fecha y hora")]);
@@ -83,6 +86,13 @@ async function loadCarouselData(jsonUrl) {
             carouselContainer.innerHTML = "<p>No hay espacios disponibles para este día.</p>";
             slides = [];
             dotsContainer.innerHTML = "";
+            if (bottomText) {
+                bottomText.remove();
+            }
+            if (carouselRight) {
+                carouselRight.style.minHeight = "auto";
+            }
+
             return;
         }
 
