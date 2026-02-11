@@ -99,3 +99,25 @@ espacios_disponibles = ContextList(
     pdf=PDFContext(title="Espacios Disponibles", header="Espacios Disponibles"),
     objects_name="espacios disponibles",
 )
+
+prescripciones = ContextList(
+    initial=InitialWebContext(
+        title="Prescripciones del Paciente",
+        header="Prescripciones del Paciente",
+        id=CarnetSubContext(),
+        home=PacienteHomeSubContext(),
+        date=DateSubContext(show=False),
+    ),
+    modal=ModalContext(
+        title="Prescripciones del Paciente",
+        pdf_preview=PreviewSubContext(show=False),
+        excel_preview=PreviewSubContext(show=False),
+        send_email=SendEmailSubContext(excel=SendExcelSubContext(show=False)),
+    ),
+    pdf=PDFContext(
+        title="Prescripciones del Paciente", header="Prescripciones del Paciente"
+    ),
+    id_name="carnet",
+    subject_name="paciente",
+    objects_name="prescripciones",
+)

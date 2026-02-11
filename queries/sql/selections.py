@@ -53,3 +53,5 @@ espacios_disponibles = SelectionList(
         select.duracion_servicio,
     ),
 )
+
+prescripciones = SelectionList()

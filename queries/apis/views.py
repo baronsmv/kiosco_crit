@@ -9,7 +9,7 @@ from ..sql import queries, selections
 
 
 def api_citas_paciente(
-    request: HttpRequest, id: str, fecha: Optional[date] = None
+    request: Optional[HttpRequest], id: str, fecha: Optional[date] = None
 ) -> JsonResponse:
     return api_query_view(
         request=request,
@@ -20,7 +20,7 @@ def api_citas_paciente(
     )
 
 
-def api_datos_paciente(request: HttpRequest, id: str) -> JsonResponse:
+def api_datos_paciente(request: Optional[HttpRequest], id: str) -> JsonResponse:
     return api_query_view(
         request=request,
         query=queries.datos_paciente,
@@ -31,7 +31,7 @@ def api_datos_paciente(request: HttpRequest, id: str) -> JsonResponse:
 
 
 def api_citas_colaborador(
-    request: HttpRequest, id: str, fecha: Optional[date] = None
+    request: Optional[HttpRequest], id: str, fecha: Optional[date] = None
 ) -> JsonResponse:
     return api_query_view(
         request=request,
@@ -43,7 +43,7 @@ def api_citas_colaborador(
 
 
 def api_espacios_disponibles(
-    request: Optional[HttpRequest] = None,
+    request: Optional[HttpRequest],
 ) -> Union[JsonResponse, Dict]:
     fecha = date.today()
     return api_query_view(
@@ -52,4 +52,14 @@ def api_espacios_disponibles(
         selection_list=selections.espacios_disponibles,
         context_list=contexts.espacios_disponibles,
         url_params={"fecha": fecha},
+    )
+
+
+def api_prescripciones(request: Optional[HttpRequest], id: str) -> JsonResponse:
+    return api_query_view(
+        request=request,
+        query=queries.prescripciones,
+        selection_list=selections.prescripciones,
+        context_list=contexts.prescripciones,
+        url_params={"id": id},
     )

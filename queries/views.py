@@ -46,3 +46,13 @@ def espacios_disponibles(request: HttpRequest) -> HttpResponse:
         context_list=contexts.espacios_disponibles,
         form=forms.BuscarFechaForm,
     )
+
+
+def prescripciones(request: HttpRequest) -> HttpResponse:
+    return query_view(
+        request=request,
+        query=queries.prescripciones,
+        selection_list=selections.prescripciones,
+        context_list=contexts.prescripciones,
+        form=forms.BuscarIdForm,
+    )
