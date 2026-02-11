@@ -69,4 +69,8 @@ whatsapp_node
 !whatsapp_node/index.js
 !whatsapp_node/package.json
 
+# Configuración del servidor
 config.yml
+
+# Credenciales de Google Drive
+credentials/

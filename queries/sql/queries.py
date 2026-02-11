@@ -10,9 +10,7 @@ logger = get_logger(__name__)
 
 
 def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple]:
-    logger.info(
-        f"Construyendo query de citas por carnet: {id}, fecha: {fecha}"
-    )
+    logger.info(f"Construyendo query de citas por carnet: {id}, fecha: {fecha}")
 
     id_filter = "WHERE cp.NO_CARNET = %s" if id else ""
     fecha_filter = "AND CAST(kc.FE_CITA AS DATE) = %s" if fecha else ""
@@ -40,12 +38,8 @@ def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple]:
     return query, params
 
 
-def citas_colaborador(
-    id: Optional[str], fecha: Optional[date]
-) -> Tuple[str, Tuple]:
-    logger.info(
-        f"Construyendo query de citas por colaborador ID: {id}, fecha: {fecha}"
-    )
+def citas_colaborador(id: Optional[str], fecha: Optional[date]) -> Tuple[str, Tuple]:
+    logger.info(f"Construyendo query de citas por colaborador ID: {id}, fecha: {fecha}")
 
     id_filter = "WHERE cu.CL_LOGIN = %s" if id else ""
     fecha_filter = "AND CAST(kc.FE_CITA AS DATE) = %s" if fecha else ""
@@ -70,9 +64,7 @@ def citas_colaborador(
 
 
 def espacios_disponibles(fecha: date) -> Tuple[str, Tuple]:
-    logger.info(
-        f"Construyendo query de espacios disponibles por fecha: {fecha}"
-    )
+    logger.info(f"Construyendo query de espacios disponibles por fecha: {fecha}")
 
     fecha_filter = "AND CAST(kc.FE_CITA AS DATE) = %s"
     order_by = "ORDER BY kc.FE_CITA ASC"
@@ -81,7 +73,7 @@ def espacios_disponibles(fecha: date) -> Tuple[str, Tuple]:
         SELECT
             {sql_selection(selections.espacios_disponibles)}
         FROM {tables.cu}
-        {joins.kc_cu.with_extra(fecha_filter)}
+        {joins.cu_kc.with_extra(fecha_filter)}
         {joins.kc_cs.inner()}
         WHERE
             kc.NO_DISPONIBLES > 0

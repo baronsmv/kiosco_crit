@@ -39,7 +39,7 @@ def pdf(context: Dict, color: bool = False, subdir: str = "pdf") -> str:
 
     validate.output_file(output_path)
     logger.debug("PDF generado correctamente")
-    return f"{settings.MEDIA_URL.strip("/")}/{subdir}/{filename}"
+    return f"{settings.MEDIA_URL.strip('/')}/{subdir}/{filename}"
 
 
 def excel(context: Dict, subdir: str = "excel") -> str:
@@ -51,9 +51,7 @@ def excel(context: Dict, subdir: str = "excel") -> str:
         schema=context["tabla_columnas_excel"],
     )
     logger.debug(f"DataFrame generado:\n{df.head()}")
-    filename = get.filename(
-        context, ext="xlsx", buffer=df.write_csv().encode()
-    )
+    filename = get.filename(context, ext="xlsx", buffer=df.write_csv().encode())
     output_path = get.output_path(dir=subdir, filename=filename)
     logger.debug(f"Generando Excel en: {output_path}")
 
@@ -65,4 +63,4 @@ def excel(context: Dict, subdir: str = "excel") -> str:
 
     validate.output_file(output_path)
     logger.debug("Excel generado correctamente")
-    return f"{settings.MEDIA_URL.strip("/")}/{subdir}/{filename}"
+    return f"{settings.MEDIA_URL.strip('/')}/{subdir}/{filename}"
