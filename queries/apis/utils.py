@@ -11,15 +11,15 @@ from ..utils import parse_query
 
 
 def api_query_view(
-    request: HttpRequest,
+    request: Optional[HttpRequest],
     query: Callable,
     selection_list: SelectionList,
     context_list: ContextList,
     url_params: Dict[str, Union[str, date]],
     *,
     model: Optional[Type[BaseModel]] = Consulta,
-) -> JsonResponse:
-    if not request.method == "GET":
+) -> Union[JsonResponse, Dict]:
+    if request and not request.method == "GET":
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
     payload = parse_query(
@@ -31,4 +31,4 @@ def api_query_view(
         model=model,
         save_context=False,
     )
-    return JsonResponse(payload, safe=False)
+    return JsonResponse(payload, safe=False) if request else payload

@@ -191,7 +191,7 @@ def get_media_resources(
 
 
 def parse_query(
-    request: HttpRequest,
+    request: Optional[HttpRequest],
     query: Callable,
     selection_list: SelectionList,
     context_list: ContextList,
@@ -208,7 +208,7 @@ def parse_query(
     subject_name = context_list.subject_name
     objects_name = context_list.objects_name
 
-    client_ip = get.client_ip(request)
+    client_ip = get.client_ip(request) if request else "127.0.0.1"
     query_type = get.model_type(objects_name=objects_name, subject_name=subject_name)
 
     subject, objects = get_objects(
@@ -242,7 +242,7 @@ def parse_query(
             estado="Exitoso",
         )
 
-    if save_context:
+    if save_context and request:
         request.session["context_data"] = get_media_resources(
             subject, objects, form_data, context_list, selection_list
         )

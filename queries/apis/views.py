@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Optional
+from typing import Dict, Optional, Union
 
 from django.http import HttpRequest, JsonResponse
 
@@ -42,7 +42,9 @@ def api_citas_colaborador(
     )
 
 
-def api_espacios_disponibles(request: HttpRequest) -> JsonResponse:
+def api_espacios_disponibles(
+    request: Optional[HttpRequest] = None,
+) -> Union[JsonResponse, Dict]:
     fecha = date.today()
     return api_query_view(
         request=request,

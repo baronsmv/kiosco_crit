@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
+
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,9 +31,7 @@ WHATSAPP_API_BASE_URL = "http://node_whatsapp_kiosco:3000"
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    "django-insecure-0mg97kt1=e%3v*^7!u4bnh$elwdy+!8b)mbwe@)+$kpr0gm-r@"
-)
+SECRET_KEY = "django-insecure-0mg97kt1=e%3v*^7!u4bnh$elwdy+!8b)mbwe@)+$kpr0gm-r@"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False") == "True"
@@ -181,4 +182,28 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     }
+}
+
+# Celery
+
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+
+CELERY_BEAT_SCHEDULE = {
+    "fetch-espacios": {
+        "task": "queries.tasks.fetch_espacios",
+        "schedule": crontab(
+            minute=0,
+            hour="6-15",
+            day_of_week="1-5",
+        ),
+    },
+    "clean-old": {
+        "task": "previews.tasks.clean_old",
+        "schedule": timedelta(
+            seconds=int(os.getenv("PDF_CLEAN_INTERVAL_SECONDS", 7200))
+        ),
+    },
 }

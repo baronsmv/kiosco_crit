@@ -155,13 +155,11 @@ class ModalContext:
     title: str
     data_title: str = ""
     table_title: str = ""
-    pdf_preview: PreviewSubContext = PreviewSubContext(
-        "Vista previa e impresión"
-    )
+    pdf_preview: PreviewSubContext = PreviewSubContext("Vista previa e impresión")
     excel_preview: PreviewSubContext = PreviewSubContext("Descargar Excel")
     send_email: SendSubContext = SendEmailSubContext()
     send_whatsapp: SendSubContext = SendWhatsAppSubContext()
-    qr_pdf: QRSubContext = QRSubContext()
+    qr_pdf: QRSubContext = QRSubContext(show=False)
     qr_excel: QRSubContext = QRSubContext("Código QR (Excel)", show=False)
 
 

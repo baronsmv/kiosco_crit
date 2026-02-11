@@ -80,32 +80,32 @@ services:
       timeout: 5s
       retries: 5
 
-  cleaner:
-    image: alpine
-    container_name: output_cleaner_kiosco
-    volumes:
-      - ./media:/media
-      - ./scripts:/scripts
+  celery_worker:
+    build: .
+    container_name: celery_worker_kiosco
+    command: celery -A kiosco_crit worker --loglevel=info
+    depends_on:
+      - redis
+      - db
     env_file:
       - .env
-    command: [ "/scripts/clean_output.sh" ]
-    networks:
-      - app_net
-    restart: unless-stopped
-
-  carousel:
-    build: ./scripts/carousel
-    container_name: carousel_kiosco
     volumes:
       - static_volume:/app/static
-    working_dir: /app
-    env_file:
-      - .env
-    depends_on:
-      - django
+      - ./media:/app/media
     networks:
       - app_net
-    restart: unless-stopped
+
+  celery_beat:
+    build: .
+    container_name: celery_beat_kiosco
+    command: celery -A kiosco_crit beat --loglevel=info
+    depends_on:
+      - redis
+      - db
+    env_file:
+      - .env
+    networks:
+      - app_net
 
   docs_builder:
     build:
