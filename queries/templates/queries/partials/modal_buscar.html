@@ -67,7 +67,7 @@
         {% endif %}
 
         <!-- Botones -->
-        {% if modal.pdf_preview.show or modal.excel_preview.show or modal.send_email.show or modal.send_whatsapp.show %}
+        {% if modal.show_buttons %}
         <div class="botones-agrupados">
             {% if modal.pdf_preview.show %}
             <button

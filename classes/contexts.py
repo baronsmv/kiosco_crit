@@ -161,6 +161,18 @@ class ModalContext:
     send_whatsapp: SendSubContext = SendWhatsAppSubContext()
     qr_pdf: QRSubContext = QRSubContext(show=False)
     qr_excel: QRSubContext = QRSubContext("Código QR (Excel)", show=False)
+    show_buttons: bool = field(default=False)
+
+    def __post_init__(self):
+        buttons = (
+            self.pdf_preview.show,
+            self.excel_preview.show,
+            self.send_email.show,
+            self.send_whatsapp.show,
+            self.qr_pdf.show,
+            self.qr_excel.show,
+        )
+        object.__setattr__(self, "show_buttons", any(buttons))
 
 
 @dataclass(frozen=True)

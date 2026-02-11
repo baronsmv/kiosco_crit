@@ -7,14 +7,8 @@ from django.conf import settings
 
 
 @shared_task
-def clean_old():
-    """
-    Deletes PDF and Excel files older than PDF_CLEAN_MINUTES
-    inside /media/pdf and /media/excel
-    """
-
+def clean_old() -> str:
     media_root = Path(settings.MEDIA_ROOT)
-
     folders = os.getenv("CLEAN_FOLDERS", "pdf,excel").split(",")
     minutes = int(os.getenv("PDF_CLEAN_MINUTES", 120))
     cutoff_time = datetime.now() - timedelta(minutes=minutes)
