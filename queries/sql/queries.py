@@ -9,7 +9,7 @@ from .utils import sql_selection
 logger = get_logger(__name__)
 
 
-def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple]:
+def citas_paciente(id: Optional[str], fecha: Optional[date]) -> Tuple[str, Tuple]:
     logger.info(f"Construyendo query de citas por carnet: {id}, fecha: {fecha}")
 
     id_filter = "WHERE cp.NO_CARNET = %s" if id else ""
@@ -34,7 +34,7 @@ def citas_paciente(id: str, fecha: Optional[date]) -> Tuple[str, Tuple]:
         {id_filter}
         {order_by}
     """
-    params = tuple(filter(None, (fecha, id)))
+    params = tuple(filter(None, (id, fecha)))
     return query, params
 
 
@@ -59,7 +59,7 @@ def citas_colaborador(id: Optional[str], fecha: Optional[date]) -> Tuple[str, Tu
         {id_filter}
         {order_by}
     """
-    params = tuple(filter(None, (fecha, id)))
+    params = tuple(filter(None, (id, fecha)))
     return query, params
 
 
@@ -123,7 +123,7 @@ def datos_paciente(id: Optional[str]) -> Tuple[str, Tuple]:
     return query, params
 
 
-def prescripciones(id: str) -> Tuple[str, Tuple]:
+def prescripciones(id: Optional[str]) -> Tuple[str, Tuple]:
     logger.info(f"Construyendo query de prescripciones por carnet: {id}")
 
     id_filter = "WHERE cp.NO_CARNET = %s" if id else ""

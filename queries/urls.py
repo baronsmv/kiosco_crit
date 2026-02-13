@@ -5,14 +5,19 @@ from . import views
 
 urlpatterns = [
     path(
-        route="paciente/datos/",
-        view=views.datos_paciente,
-        name=contexts.datos_paciente.url_name,
-    ),
-    path(
         route="paciente/citas/",
         view=views.citas_paciente,
         name=contexts.citas_paciente.url_name,
+    ),
+    path(
+        route="paciente/prescripciones/",
+        view=views.prescripciones_paciente,
+        name=contexts.prescripciones_paciente.url_name,
+    ),
+    path(
+        route="paciente/datos/",
+        view=views.datos_paciente,
+        name=contexts.datos_paciente.url_name,
     ),
     path(
         route="espacios/disponibles/",

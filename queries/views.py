@@ -18,6 +18,16 @@ def citas_paciente(request: HttpRequest) -> HttpResponse:
     )
 
 
+def prescripciones_paciente(request: HttpRequest) -> HttpResponse:
+    return query_view(
+        request=request,
+        query=queries.prescripciones,
+        selection_list=selections.prescripciones,
+        context_list=contexts.prescripciones,
+        form=forms.BuscarIdForm,
+    )
+
+
 def datos_paciente(request: HttpRequest) -> HttpResponse:
     return query_view(
         request=request,
@@ -45,14 +55,4 @@ def espacios_disponibles(request: HttpRequest) -> HttpResponse:
         selection_list=selections.espacios_disponibles,
         context_list=contexts.espacios_disponibles,
         form=forms.BuscarFechaForm,
-    )
-
-
-def prescripciones(request: HttpRequest) -> HttpResponse:
-    return query_view(
-        request=request,
-        query=queries.prescripciones,
-        selection_list=selections.prescripciones,
-        context_list=contexts.prescripciones,
-        form=forms.BuscarIdForm,
     )

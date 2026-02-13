@@ -23,6 +23,11 @@ citas_paciente = MenuOptionSubContext(
     description="Busca citas con el carnet de un paciente.",
     url_name="citas_paciente",
 )
+prescripciones_paciente = MenuOptionSubContext(
+    title="⚕ Prescripciones pendientes",
+    description="Muestra las prescripciones pendientes de un paciente.",
+    url_name="prescripciones_paciente",
+)
 datos_paciente = MenuOptionSubContext(
     title="📝 Datos del Paciente",
     description="Muestra los datos de un paciente.",
@@ -34,7 +39,7 @@ citas_colaborador = MenuOptionSubContext(
     url_name="citas_colaborador",
 )
 espacios_disponibles = MenuOptionSubContext(
-    title="Espacios Disponibles",
+    title="📅 Espacios Disponibles",
     description="Muestra los espacios disponibles para agendar cita.",
     url_name="espacios_disponibles",
 )
