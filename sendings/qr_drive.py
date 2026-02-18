@@ -75,9 +75,35 @@ def get_or_create_folder(folder_name: str, service: Resource) -> str:
 
 
 def upload_file(file_path: str, folder_name: str) -> str:
+    """
+    Sube un archivo a Google Drive dentro de una carpeta específica,
+    o devuelve el enlace si ya existe.
+
+    Args:
+        file_path (str): Ruta local del archivo.
+        folder_name (str): Nombre de la carpeta en Drive.
+
+    Returns:
+        str: URL compartida del archivo en Drive.
+    """
     service = authenticate_drive()
     file_name = os.path.basename(file_path)
     folder_id = get_or_create_folder(folder_name, service)
+
+    # Buscar archivo existente con el mismo nombre en la carpeta
+    query = f"'{folder_id}' in parents and name = '{file_name}' and trashed = false"
+    response = service.files().list(q=query, fields="files(id, name)").execute()
+    files = response.get("files", [])
+
+    if files:
+        # Ya existe: devolver URL
+        file_id = files[0]["id"]
+        url = f"https://drive.google.com/file/d/{file_id}/view?usp=sharing"
+        logger.info(f"Archivo ya existente: {file_name} en carpeta {folder_name}")
+        logger.info(f"Enlace: {url}")
+        return url
+
+    # Si no existe, subirlo
     media = MediaFileUpload(file_path, resumable=True)
     meta = {
         "name": file_name,
@@ -88,16 +114,15 @@ def upload_file(file_path: str, folder_name: str) -> str:
     )
     file_id = resultado.get("id")
 
+    # Hacerlo público
     service.permissions().create(
         fileId=file_id,
         body={"type": "anyone", "role": "reader"},
     ).execute()
 
     url = f"https://drive.google.com/file/d/{file_id}/view?usp=sharing"
-
     logger.info(f"Subido: {file_name} a carpeta {folder_name}")
     logger.info(f"Enlace: {url}")
-
     return url
 
 
