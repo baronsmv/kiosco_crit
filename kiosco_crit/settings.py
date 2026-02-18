@@ -200,8 +200,12 @@ CELERY_BEAT_SCHEDULE = {
             day_of_week="1-5",
         ),
     },
-    "clean-old": {
+    "clean-old-local": {
         "task": "previews.tasks.clean_old",
-        "schedule": crontab(minute=0, hour=15, day_of_week="wed"),
+        "schedule": crontab(minute=0, hour=14, day_of_week="wed"),
+    },
+    "clean-old-drive": {
+        "task": "sendings.tasks.clean_old_drive",
+        "schedule": crontab(minute=0, hour=14, day_of_week="wed"),
     },
 }

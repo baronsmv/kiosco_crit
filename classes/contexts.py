@@ -97,7 +97,7 @@ class PreviewSubContext:
 
 @dataclass(frozen=True)
 class QRSubContext:
-    button_label: str = "Código QR"
+    button_label: str = "Ver QR"
     show: bool = field(default=True)
 
 
@@ -164,7 +164,7 @@ class ModalContext:
     send_email: SendSubContext = SendEmailSubContext()
     send_whatsapp: SendSubContext = SendWhatsAppSubContext()
     qr_pdf: QRSubContext = QRSubContext()
-    qr_excel: QRSubContext = QRSubContext("Código QR (Excel)", show=False)
+    qr_excel: QRSubContext = QRSubContext("Ver QR (Excel)", show=False)
     show_buttons: bool = field(default=False)
 
     def __post_init__(self):
