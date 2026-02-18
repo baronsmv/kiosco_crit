@@ -163,7 +163,7 @@ class ModalContext:
     excel_preview: PreviewSubContext = PreviewSubContext("Descargar Excel")
     send_email: SendSubContext = SendEmailSubContext()
     send_whatsapp: SendSubContext = SendWhatsAppSubContext()
-    qr_pdf: QRSubContext = QRSubContext(show=False)
+    qr_pdf: QRSubContext = QRSubContext()
     qr_excel: QRSubContext = QRSubContext("Código QR (Excel)", show=False)
     show_buttons: bool = field(default=False)
 

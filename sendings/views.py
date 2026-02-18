@@ -15,25 +15,23 @@ logger = get_logger(__name__)
 base_url = settings.WHATSAPP_API_BASE_URL
 
 
-def qr_pdf(request: HttpRequest) -> HttpResponse | JsonResponse:
+def qr_pdf(request: HttpRequest) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
     file_url = generate.pdf(previous_context, color=True)
 
     return qr_view(request, file_url)
 
 
-def qr_excel(request: HttpRequest) -> HttpResponse | JsonResponse:
+def qr_excel(request: HttpRequest) -> JsonResponse:
     previous_context = request.session.get("context_data", {})
     file_url = generate.excel(previous_context)
 
     return qr_view(request, file_url)
 
 
-def qr(request: HttpRequest) -> HttpResponse | JsonResponse:
+def qr(request: HttpRequest) -> JsonResponse:
     format_type = request.POST.get("format")
-    logger.info(
-        f"Subiendo archivo de tipo '{format_type}' a Drive y obteniendo QR."
-    )
+    logger.info(f"Subiendo archivo de tipo '{format_type}' a Drive y obteniendo QR.")
 
     if format_type == "pdf":
         return qr_pdf(request)

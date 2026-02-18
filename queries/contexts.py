@@ -12,7 +12,6 @@ from classes.contexts import (
     PreviewSubContext,
     SendEmailSubContext,
     SendExcelSubContext,
-    QRSubContext,
 )
 from menus import contexts
 
@@ -80,7 +79,6 @@ citas_colaborador = ContextList(
     modal=ModalContext(
         title="Agenda del Colaborador",
         table_title="Citas",
-        qr_pdf=QRSubContext(show=True),
     ),
     pdf=PDFContext(
         title="Agenda del Colaborador",

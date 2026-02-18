@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import qrcode
 from django.conf import settings
@@ -100,13 +101,13 @@ def upload_file(file_path: str, folder_name: str) -> str:
     return url
 
 
-def generate_qr(url: str, output_path: str) -> None:
+def generate_qr(url: str, output_path: Path) -> None:
     """
     Genera un código QR para un enlace y lo guarda como imagen.
 
     Args:
         url (str): URL a codificar en el QR.
-        output_path (str): Ruta donde guardar la imagen QR.
+        output_path (Path): Ruta donde guardar la imagen QR.
     """
     qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
     qr.add_data(url)
