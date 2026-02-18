@@ -5,56 +5,46 @@
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     padding: 2.5rem 3rem;
+    min-height: 1200px;
     max-width: 1200px;
     width: 100%;
     animation: fadeInUp 0.6s ease forwards;
 }
 
-/* Container similar to carousel-right */
+/* Contenedor de la agenda */
 .agenda-container {
-    flex: 1.2;
     display: flex;
     flex-direction: column;
-    min-height: 600px;
-    background: linear-gradient(145deg, #6a0dad, #8a2be2);
-    border-radius: 16px;
-    padding: 1.5rem;
-    color: #fff;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-    animation: fadeInUp 0.6s ease forwards;
+    min-height: 1200px;
 }
 
+/* Calendario */
 #agenda-calendar {
-    min-height: 700px; /* enough vertical space */
+    flex: 1;
+    min-height: 0;
 }
 
-/* FullCalendar base overrides */
+/* FullCalendar overrides */
 .fc {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     backdrop-filter: blur(6px);
-    padding: 1rem;
+    padding: 0.5rem;
     color: #333;
 }
 
-/* Header toolbar */
-.fc-toolbar {
-    margin-bottom: 1rem;
-    color: #fff;
+/* Hide day headers and all-day row */
+.fc-col-header,
+.fc-timegrid-all-day {
+    display: none;
 }
 
-.fc-toolbar-title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #ffd700;
-}
-
-/* Time grid slots */
+/* Time slot borders */
 .fc-timegrid-slot {
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Event cards */
+/* Events styling */
 .fc-event {
     background: #fff !important;
     border: none !important;
@@ -73,7 +63,6 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Event title */
 .fc-event-title {
     font-size: 1rem;
     font-weight: 600;
@@ -105,14 +94,36 @@
     color: #333 !important;
 }
 
-/* Responsive */
+/* Colors */
+.fc-timegrid-slot {
+    border-color: #b09fdc;
+    background-color: #ede7f6;
+}
+
+.fc-timegrid-slot-lane {
+    background-color: #d3c0f0;
+}
+
+.fc-timegrid-slot:nth-child(even) .fc-timegrid-slot-lane {
+    background-color: #c5b0e8;
+}
+
+.fc-event {
+    background: #6a0dad !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0.5rem 0.75rem !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+}
+
+.fc-event-title {
+    color: #fff;
+}
+
 @media (max-width: 860px) {
     .agenda-container {
-        margin-top: 1rem;
         min-height: 400px;
-    }
-
-    .fc-toolbar-title {
-        font-size: 1.2rem;
     }
 }

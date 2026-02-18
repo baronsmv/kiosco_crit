@@ -25,7 +25,12 @@ async function loadAgendaCalendar(jsonUrl) {
         initialView: "timeGridDay",
         slotMinTime: "07:00:00",
         slotMaxTime: "15:00:00",
-        events: events
+        events: events,
+        headerToolbar: false,
+        allDaySlot: false,
+        height: 'parent',
+        nowIndicator: false,
+        expandRows: true
     });
     calendar.render();
 }
