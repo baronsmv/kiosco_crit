@@ -98,6 +98,7 @@ class PreviewSubContext:
 @dataclass(frozen=True)
 class QRSubContext:
     button_label: str = "Ver QR"
+    bottom_text: str = "Escanea este código para descargar a tu celular."
     show: bool = field(default=True)
 
 
@@ -163,7 +164,7 @@ class ModalContext:
     excel_preview: PreviewSubContext = PreviewSubContext("Descargar Excel")
     send_email: SendSubContext = SendEmailSubContext()
     send_whatsapp: SendSubContext = SendWhatsAppSubContext()
-    qr_pdf: QRSubContext = QRSubContext()
+    qr_pdf: QRSubContext = QRSubContext("Descargar a tu celular")
     qr_excel: QRSubContext = QRSubContext("Ver QR (Excel)", show=False)
     show_buttons: bool = field(default=False)
 

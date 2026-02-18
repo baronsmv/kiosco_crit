@@ -7,7 +7,6 @@ function abrirQR(format) {
     const qrImage = document.createElement("img");
     qrImage.className = "qr-image";
     qrImage.style.display = "none";
-    container.appendChild(qrImage);
 
     fetch(QR_URL, {
         method: "POST",
@@ -20,12 +19,18 @@ function abrirQR(format) {
     })
         .then(response => response.json())
         .then(data => {
+            container.innerHTML = "";
+
+            const qrImage = document.createElement("img");
+            qrImage.className = "qr-image";
             qrImage.src = data.qr_url;
             qrImage.style.display = "block";
+            container.appendChild(qrImage);
 
-            // Remove the loading text
-            const p = container.querySelector("p");
-            if (p) p.remove();
+            // Get the bottom text from the data attribute
+            const bottomText = document.createElement("p");
+            bottomText.textContent = document.getElementById("modal-qr").dataset.bottomText;
+            container.appendChild(bottomText);
         })
         .catch(() => {
             container.innerHTML = "<p>Error al generar el QR.</p>";

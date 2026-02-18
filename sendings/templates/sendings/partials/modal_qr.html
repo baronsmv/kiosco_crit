@@ -3,15 +3,14 @@
         aria-labelledby="modal-envios-title"
         aria-modal="true"
         class="modal"
+        data-bottom-text="{{ modal.qr_pdf.bottom_text }}"
         id="modal-qr"
         role="dialog"
         tabindex="-1"
 >
     <div class="modal-content">
         <button class="close-btn" onclick="cerrarModal('modal-qr')">×</button>
-        <div id="qr-container">
-            <img alt="Código QR" class="qr-image" src="" style="display:none;"/>
-        </div>
+        <div id="qr-container"></div>
     </div>
 </div>
 
