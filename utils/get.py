@@ -1,5 +1,6 @@
 import hashlib
 import os
+from pathlib import Path
 from typing import Dict, Optional, Tuple, List, Any
 
 from django.conf import settings
@@ -77,3 +78,8 @@ def output_path(dir: str, filename: str) -> str:
     output_dir = os.path.join(settings.MEDIA_ROOT, dir)
     os.makedirs(output_dir, exist_ok=True)
     return os.path.join(output_dir, filename)
+
+
+def path_as_str(filepath: Path) -> str:
+    relative_path = Path(filepath).relative_to(settings.MEDIA_ROOT)
+    return settings.MEDIA_URL + str(relative_path).replace("\\", "/")

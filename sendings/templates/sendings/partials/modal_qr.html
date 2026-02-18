@@ -10,11 +10,12 @@
     <div class="modal-content">
         <button class="close-btn" onclick="cerrarModal('modal-qr')">×</button>
         <div id="qr-container">
-            <img
-                    alt="Código QR"
-                    class="qr-image"
-                    src="{{ qr_url }}"
-            />
+            <p>Generando QR…</p>
+            <img alt="Código QR" class="qr-image" src="" style="display:none;"/>
         </div>
     </div>
 </div>
+
+<script>
+    const QR_URL = "{% url 'get_qr' %}";
+</script>

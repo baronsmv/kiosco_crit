@@ -1,4 +1,5 @@
-from typing import Dict
+from pathlib import Path
+from typing import Dict, Union
 
 import polars as pl
 from django.conf import settings
@@ -12,7 +13,9 @@ from .logger import get_logger
 logger = get_logger(__name__)
 
 
-def pdf(context: Dict, color: bool = False, subdir: str = "pdf") -> str:
+def pdf(
+    context: Dict, color: bool = False, subdir: str = "pdf", as_str: bool = False
+) -> Union[str, Path]:
     validate.context(context)
 
     css_path = finders.find(f"previews/css/pdf{'-color' if color else ''}.css")
@@ -39,10 +42,14 @@ def pdf(context: Dict, color: bool = False, subdir: str = "pdf") -> str:
 
     validate.output_file(output_path)
     logger.debug("PDF generado correctamente")
-    return f"{settings.MEDIA_URL.strip('/')}/{subdir}/{filename}"
+    filepath = Path(settings.MEDIA_ROOT) / subdir / filename
+
+    return get.path_as_str(filepath) if as_str else filepath
 
 
-def excel(context: Dict, subdir: str = "excel") -> str:
+def excel(
+    context: Dict, subdir: str = "excel", as_str: bool = False
+) -> Union[str, Path]:
     validate.context(context)
 
     df = pl.DataFrame(
@@ -63,4 +70,6 @@ def excel(context: Dict, subdir: str = "excel") -> str:
 
     validate.output_file(output_path)
     logger.debug("Excel generado correctamente")
-    return f"{settings.MEDIA_URL.strip('/')}/{subdir}/{filename}"
+    filepath = Path(settings.MEDIA_ROOT) / subdir / filename
+
+    return get.path_as_str(filepath) if as_str else filepath

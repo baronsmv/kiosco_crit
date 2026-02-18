@@ -68,6 +68,20 @@ function activarListenersModal(modal) {
     });
 }
 
+function getCSRFToken() {
+    const name = "csrftoken=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookies = decodedCookie.split(";");
+
+    for (let c of cookies) {
+        c = c.trim();
+        if (c.startsWith(name)) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return null;
+}
+
 function activarEnvioAjax(element) {
     const forms = element.querySelectorAll("form[data-ajax='true']");
     if (!forms.length) return;
@@ -88,7 +102,7 @@ function activarEnvioAjax(element) {
             if (e.submitter && e.submitter.name) {
                 formData.append(e.submitter.name, e.submitter.value);
             }
-            
+
             const csrfToken = form.querySelector("[name='csrfmiddlewaretoken']")?.value;
 
             try {
@@ -117,7 +131,7 @@ function activarEnvioAjax(element) {
 
                     activarListenersModal(nuevoModal);
                     activarEnvioAjax(nuevoModal);
-                    activarEnvioWhatsApp(nuevoModal);
+                    // activarEnvioWhatsApp(nuevoModal);
                     toggleMensajeProcesando(false);
                     return;
                 }

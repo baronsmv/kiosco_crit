@@ -25,19 +25,19 @@ base_url = settings.WHATSAPP_API_BASE_URL
 
 @ajax_handler
 def qr_view(request: HttpRequest, file_url: str) -> HttpResponse | JsonResponse:
-    qr_url = str(Path(file_url).with_suffix("_qr.png"))
+    qr_path = str(Path(file_url).with_suffix("")) + "_qr.png"
 
     try:
         url = qr_drive.upload_file(file_url, "kiosco")
-        qr_drive.generate_qr(url, qr_url)
-        logger.info(f"QR generado en: {qr_url} con URL: {url}")
+        qr_drive.generate_qr(url, qr_path)
+        logger.info(f"QR generado en: {qr_path} con URL: {url}")
     except Exception:
         logger.exception("Error al generar QR.")
         raise AjaxException("No se pudo generar QR.")
 
     return ajax_response(
         request,
-        context={"qr_url": qr_url},
+        context={"qr_url": qr_path},
     )
 
 

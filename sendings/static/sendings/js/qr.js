@@ -2,9 +2,11 @@ function abrirQR(format) {
     abrirModal("modal-qr");
 
     const container = document.getElementById("qr-container");
-    container.innerHTML = "<p>Generando QR…</p>";
+    const qrImage = container.querySelector(".qr-image");
+    qrImage.style.display = "none";
+    container.querySelector("p")?.remove();
 
-    fetch("/qr/", {
+    fetch(QR_URL, {
         method: "POST",
         headers: {
             "X-Requested-With": "XMLHttpRequest",
@@ -13,10 +15,10 @@ function abrirQR(format) {
         },
         body: new URLSearchParams({format}),
     })
-        .then(response => response.text())
-        .then(html => {
-            // Your ajax_response already returns rendered HTML
-            container.innerHTML = html;
+        .then(response => response.json())
+        .then(data => {
+            qrImage.src = data.qr_url;
+            qrImage.style.display = "block";
         })
         .catch(() => {
             container.innerHTML = "<p>Error al generar el QR.</p>";
