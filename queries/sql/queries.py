@@ -34,7 +34,7 @@ def citas_paciente(id: Optional[str], fecha: Optional[date]) -> Tuple[str, Tuple
         {id_filter}
         {order_by}
     """
-    params = tuple(filter(None, (id, fecha)))
+    params = tuple(filter(None, (fecha, id)))
     return query, params
 
 
@@ -59,7 +59,7 @@ def citas_colaborador(id: Optional[str], fecha: Optional[date]) -> Tuple[str, Tu
         {id_filter}
         {order_by}
     """
-    params = tuple(filter(None, (id, fecha)))
+    params = tuple(filter(None, (fecha, id)))
     return query, params
 
 

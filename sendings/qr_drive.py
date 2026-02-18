@@ -19,12 +19,6 @@ token_path = settings.GOOGLE_DRIVE_TOKEN
 
 
 def authenticate_drive() -> Resource:
-    """
-    Autentica con Google Drive usando OAuth 2.0.
-
-    Returns:
-        googleapiclient.discovery.Resource: Cliente autenticado de la API de Google Drive.
-    """
     creds = None
 
     if token_path.exists():
@@ -35,9 +29,7 @@ def authenticate_drive() -> Resource:
             creds.refresh(Request())
             logger.info("Access token renovado automáticamente")
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                str(cred_path), SCOPES
-            )
+            flow = InstalledAppFlow.from_client_secrets_file(str(cred_path), SCOPES)
             creds = flow.run_local_server(port=0)
 
         with open(token_path, "w") as f:
@@ -47,37 +39,64 @@ def authenticate_drive() -> Resource:
     return build("drive", "v3", credentials=creds)
 
 
-SERVICE = authenticate_drive()
+def get_or_create_folder(folder_name: str, service: Resource) -> str:
+    query = (
+        f"name = '{folder_name}' "
+        "and mimeType = 'application/vnd.google-apps.folder' "
+        "and trashed = false"
+    )
 
-
-def upload_file(file_path: str, service: Resource = SERVICE) -> str:
-    """
-    Sube un archivo a Google Drive y genera un enlace compartido.
-
-    Args:
-        service (Resource): Cliente autenticado de Google Drive.
-        file_path (str): Ruta del archivo local.
-
-    Returns:
-        str: URL del archivo subido en Google Drive.
-    """
-    file_name = os.path.basename(file_path)
-    media = MediaFileUpload(file_path, resumable=True)
-    meta = {"name": file_name}
-    resultado = (
+    response = (
         service.files()
-        .create(body=meta, media_body=media, fields="id")
+        .list(
+            q=query,
+            spaces="drive",
+            fields="files(id, name)",
+        )
         .execute()
+    )
+
+    folders = response.get("files", [])
+
+    if folders:
+        return folders[0]["id"]
+
+    # Crear carpeta si no existe
+    file_metadata = {
+        "name": folder_name,
+        "mimeType": "application/vnd.google-apps.folder",
+    }
+
+    folder = service.files().create(body=file_metadata, fields="id").execute()
+
+    logger.info(f"Carpeta creada: {folder_name}")
+    return folder["id"]
+
+
+def upload_file(file_path: str, folder_name: str) -> str:
+    service = authenticate_drive()
+    file_name = os.path.basename(file_path)
+    folder_id = get_or_create_folder(folder_name, service)
+    media = MediaFileUpload(file_path, resumable=True)
+    meta = {
+        "name": file_name,
+        "parents": [folder_id],
+    }
+    resultado = (
+        service.files().create(body=meta, media_body=media, fields="id").execute()
     )
     file_id = resultado.get("id")
 
     service.permissions().create(
-        fileId=file_id, body={"type": "anyone", "role": "reader"}
+        fileId=file_id,
+        body={"type": "anyone", "role": "reader"},
     ).execute()
 
     url = f"https://drive.google.com/file/d/{file_id}/view?usp=sharing"
-    logger.info(f"Subido: {file_name}")
+
+    logger.info(f"Subido: {file_name} a carpeta {folder_name}")
     logger.info(f"Enlace: {url}")
+
     return url
 
 
