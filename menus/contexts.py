@@ -38,10 +38,21 @@ citas_colaborador = MenuOptionSubContext(
     description="Busca citas de un colaborador.",
     url_name="citas_colaborador",
 )
+
 espacios_disponibles = MenuOptionSubContext(
     title="📅 Espacios Disponibles",
     description="Muestra los espacios disponibles para agendar cita.",
     url_name="espacios_disponibles",
+)
+agenda_espacios_disponibles = MenuOptionSubContext(
+    title="📅 Espacios Disponibles",
+    description="Muestra los espacios disponibles para agendar cita.",
+    url_name="agenda_espacios_disponibles",
+)
+tabla_espacios_disponibles = MenuOptionSubContext(
+    title="📅 Espacios Disponibles",
+    description="Muestra los espacios disponibles para agendar cita.",
+    url_name="tabla_espacios_disponibles",
 )
 
 # Menús
@@ -56,7 +67,7 @@ paciente = MenuContext(
     title="Kiosco de Información",
     header="Información para Pacientes",
     url_name=menu_paciente.url_name,
-    options=(citas_paciente, datos_paciente),
+    options=(citas_paciente, datos_paciente, tabla_espacios_disponibles),
     carousel=CarouselSubContext(show=True),
     home=HomeSubContext(inicio.url_name, show=False),
 )

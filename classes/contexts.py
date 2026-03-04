@@ -206,3 +206,10 @@ class ContextList:
     id_name: str = ""
     subject_name: str = ""
     objects_name: str = ""
+
+
+@dataclass(frozen=True)
+class ViewerContext:
+    title: str
+    header: str
+    home: HomeSubContext = HomeSubContext("home")
