@@ -1,0 +1,31 @@
+/* Scope everything to this specific page */
+body.tabla-espacios-disponibles .container {
+    max-width: 1000px;
+    width: 95vw;
+    min-height: 85vh;
+}
+
+/* Remove scrolling */
+body.tabla-espacios-disponibles .tabla-scrollable {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* Tighten rows slightly to fit ~20 */
+body.tabla-espacios-disponibles .tabla-scrollable th,
+body.tabla-espacios-disponibles .tabla-scrollable td {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+/* Optional: zebra striping for readability */
+body.tabla-espacios-disponibles .tabla-scrollable tbody tr:nth-child(even) {
+    background-color: #f7f4fc;
+}
+
+/* Slightly smaller header so table fits more rows */
+body.tabla-espacios-disponibles h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}

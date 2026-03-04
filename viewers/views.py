@@ -4,3 +4,7 @@ from django.shortcuts import render
 
 def agenda_espacios_disponibles(request: HttpRequest) -> HttpResponse:
     return render(request, "agendas/espacios_disponibles.html")
+
+
+def tabla_espacios_disponibles(request: HttpRequest) -> HttpResponse:
+    return render(request, "tablas/espacios_disponibles.html")
